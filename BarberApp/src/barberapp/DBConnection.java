@@ -375,6 +375,21 @@ public class DBConnection {
         }
     }
     
+    public void removeAvailability(int id, String date, String time) {
+        try {
+            String query = "DELETE FROM Barber_Availability WHERE Account_ID=" + id + ", Available_Date='" + date +"', Available_Time='" + time + "';";
+            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            Statement stmt = conn.createStatement();
+            
+            stmt.executeQuery(query);
+            
+            stmt.close();
+            conn.close();
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+    }
+    
     private HashMap<Integer, String> getEmails() {
         // initialise a hashmap to store emails
         HashMap<Integer, String> emails = new HashMap<>();
