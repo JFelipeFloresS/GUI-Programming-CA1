@@ -356,6 +356,25 @@ public class DBConnection {
         }
     }
     
+    public void addAvailability(int id, String date, String time) {
+        try {
+            String query = "INSERT INTO Barber_Availability(Account_ID, Available_Date, Available_Time) VALUES(?, ?, ?)";
+            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            PreparedStatement stmt = conn.prepareStatement(query);
+            
+            stmt.setInt(1, id);
+            stmt.setString(2, date);
+            stmt.setString(3, time);
+            
+            stmt.execute();
+            
+            stmt.close();
+            conn.close();
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+    }
+    
     private HashMap<Integer, String> getEmails() {
         // initialise a hashmap to store emails
         HashMap<Integer, String> emails = new HashMap<>();
