@@ -5,6 +5,7 @@
  */
 package barberapp;
 
+import com.github.lgooddatepicker.components.DatePicker;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -29,7 +30,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
-import org.jdatepicker.JDatePicker;
 
 /**
  *
@@ -60,8 +60,10 @@ public class View extends JFrame {
     public final Dimension leftPanelDimension = new Dimension((int)windowWidth / 4, windowHeight);
     public final Dimension rightPanelDimension = new Dimension((int)3 * windowWidth / 4, windowHeight);
     public final Dimension paddingY1 = new Dimension(windowWidth, (int)windowHeight / 10);
+    public final Dimension paddingY2 = new Dimension(windowWidth, (int)windowHeight / 8);
     public final Dimension paddingY3 = new Dimension(windowWidth, (int)windowHeight / 6);
     public final Dimension paddingY4 = new Dimension(windowWidth, (int)windowHeight / 4);
+    public final Dimension paddingY5 = new Dimension(windowWidth, (int)windowHeight / 3);
     public final Dimension paddingX1 = new Dimension((int)windowWidth / 10, windowHeight);
     public final Dimension paddingX2 = new Dimension((int)windowWidth / 8, windowHeight);
     public final Dimension paddingX3 = new Dimension((int)windowWidth / 6, windowHeight);
@@ -85,7 +87,7 @@ public class View extends JFrame {
     private JTextField review = null;
     private JComboBox allLocationsBox = null;
     private int stars = -1;
-    private JDatePicker date = null;
+    private DatePicker date = null;
     private Time time = null;
     private JLabel error = null;
     
@@ -108,7 +110,7 @@ public class View extends JFrame {
         this.setTitle("Find A Barber");
         
         //initialise main panel
-        this.add(new initialPage());
+        this.add(new availabilityPage());
         
         //finalise JFrame
         getContentPane().setFont(bodyFont);
@@ -974,8 +976,12 @@ public class View extends JFrame {
             logout.setActionCommand("log out");
             logout.setPreferredSize(regularButtonDimension);
             
+            JButton setAvailability = new JButton("<html>SET MY<br />AVAILABILITY</html>");
+            setAvailability.setActionCommand("go to set availability");
+            setAvailability.setPreferredSize(regularButtonDimension);
             
-            rightPanel.add(logout, BorderLayout.NORTH);
+            rightPanel.add(setAvailability, BorderLayout.NORTH);
+            rightPanel.add(logout, BorderLayout.SOUTH);
             
             mainPanel.add(leftBlank, BorderLayout.WEST);
             mainPanel.add(centerPanel, BorderLayout.CENTER);
@@ -984,6 +990,63 @@ public class View extends JFrame {
             this.add(new loggedLeftPanel(), BorderLayout.WEST);
             this.add(mainPanel, BorderLayout.CENTER);
             
+            
+            standardiseChildren(this, true, false, true);
+        }
+    }
+    
+    public class availabilityPage extends JPanel {
+        public availabilityPage() {
+            this.setLayout(new BorderLayout());
+            
+            JPanel mainPanel = new JPanel();
+            mainPanel.setPreferredSize(rightPanelDimension);
+            mainPanel.setBackground(orange);
+            mainPanel.setLayout(new BorderLayout());
+            
+            // ** 3 main panels **
+            //*left panel - calendar*
+            JPanel leftPanel = new JPanel();
+            leftPanel.setPreferredSize(paddingX5);
+            leftPanel.setBackground(orange);
+            
+            JPanel mainCalendar = new JPanel();
+            mainCalendar.setPreferredSize(new Dimension((int)(windowWidth / 3.5), (int)(windowHeight / 1.1)));
+            mainCalendar.setBorder(border(Color.BLACK, 2));
+            mainCalendar.setBackground(textFieldColour);
+            
+            leftPanel.add(mainCalendar);
+            
+            JPanel p2 = new JPanel();
+            p2.setPreferredSize(new Dimension((int)(windowWidth / 4), (int)(windowHeight / 8)));
+            
+            JLabel pickLabel = new JLabel("PICK DATE:");
+            
+            date = new DatePicker();
+            
+            JButton selectDate = new JButton("PICK DATE");
+            selectDate.setActionCommand("select date " + date.getComponentDateTextField().getSelectedText());
+            
+            p2.add(pickLabel);
+            mainCalendar.add(p2);
+            mainCalendar.add(date);
+            mainCalendar.add(selectDate);
+            
+            //*middle panel - times*
+            JPanel midPanel = new JPanel();
+            midPanel.setBackground(orange);
+            
+            //*right panel - log out*
+            JPanel rightPanel = new JPanel();
+            rightPanel.setPreferredSize(paddingX2);
+            rightPanel.setBackground(orange);
+            
+            mainPanel.add(leftPanel, BorderLayout.WEST);
+            mainPanel.add(midPanel, BorderLayout.CENTER);
+            mainPanel.add(rightPanel, BorderLayout.EAST);
+            
+            this.add(new loggedLeftPanel(), BorderLayout.WEST);
+            this.add(mainPanel, BorderLayout.CENTER);
             
             standardiseChildren(this, true, false, true);
         }

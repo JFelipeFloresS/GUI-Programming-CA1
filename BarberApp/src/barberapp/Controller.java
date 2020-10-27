@@ -176,6 +176,9 @@ public class Controller implements ActionListener{
             case "search barber location":
                 System.out.println("Show all barbers in " + this.view.getAllLocationsBox().getSelectedItem());
                 break;
+            case "go to set availability":
+                changeScreen(this.view.new availabilityPage());
+                break;
             default:
                 System.out.println(e.getActionCommand());
                 break;

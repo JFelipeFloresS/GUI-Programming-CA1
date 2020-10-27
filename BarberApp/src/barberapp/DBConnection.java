@@ -41,6 +41,7 @@ public class DBConnection {
         // initialise variables
         this.controller = controller;
         initialise();
+        logIn("josefelipefloress@gmail.com");
     }
     
     private void initialise() {
