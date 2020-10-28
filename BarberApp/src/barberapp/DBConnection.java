@@ -43,7 +43,6 @@ public class DBConnection {
         // initialise variables
         this.controller = controller;
         initialise();
-        logIn("josefelipefloress@gmail.com");
     }
     
     private void initialise() {
@@ -404,15 +403,16 @@ public class DBConnection {
         HashMap<String, String> available = new HashMap<>();
         
         try {
+            System.out.println("Date to check: " + dateToCheck);
             String query = "SELECT Available_Date, Available_Time FROM Barber_Availability WHERE Account_ID=" + barber;
             if (dateToCheck != null) {
                 query += " AND Available_Date='" + dateToCheck + "'";
             }
             query += " ORDER BY Available_Time, Available_Date;";
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            Statement stmt = conn.createStatement();
+            PreparedStatement stmt = conn.prepareStatement(query);
             
-            ResultSet rs = stmt.executeQuery(query);
+            ResultSet rs = stmt.executeQuery();
             while(rs.next()) {
                 String date = rs.getString("Available_Date");
                 String time = rs.getString("Available_Time");

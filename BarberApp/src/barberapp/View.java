@@ -93,11 +93,14 @@ public class View extends JFrame {
     private JComboBox allLocationsBox = null;
     private JCheckBox[] availableCheckBox = null;
     private int stars = -1;
+    private boolean[] isAvailable = null;
     private JComboBox[] date = null;
     private JLabel pickedDate = null;
     private JButton selectDate = null;
     private JScrollPane allTimesSP = null;
+    private JPanel allTimes = null;
     private JButton enterAvailability = null;
+    private JPanel mainTime = null;
     private Time time = null;
     private JLabel error = null;
     
@@ -120,7 +123,7 @@ public class View extends JFrame {
         this.setTitle("Find A Barber");
         
         //initialise main panel
-        this.add(new availabilityPage());
+        this.add(new initialPage());
         
         //finalise JFrame
         getContentPane().setFont(bodyFont);
@@ -1081,69 +1084,12 @@ public class View extends JFrame {
             JPanel midPanel = new JPanel();
             midPanel.setBackground(white);
             
-            JPanel mainTime = new JPanel();
+            mainTime = new JPanel();
             mainTime.setBackground(textFieldColour);
             mainTime.setBorder(border(Color.BLACK, 2));
             mainTime.setPreferredSize(new Dimension((int)(windowWidth / 3.8), (int)(windowHeight / 1.1)));
             
             midPanel.add(mainTime);
-            
-            pickedDate = new JLabel();
-            mainTime.add(pickedDate);
-            
-            JPanel allTimes = new JPanel();
-            allTimes.setLayout(new GridLayout(48, 1));
-            
-            int h = 0;
-            boolean isHalf = false;
-            String m = ":00";
-            String currentTime;
-            availableCheckBox = new JCheckBox[48];
-            boolean[] isAvailable = controller.checkBarberAvailability(controller.getSessionID(), pickedDate.getText());
-            for (int i = 0; i < 48; i++) {
-                JPanel singleTime = new JPanel();
-                singleTime.setBorder(border(Color.BLACK, 1));
-                singleTime.setPreferredSize(new Dimension((int)(windowWidth / 4.5), (int)(windowHeight / 10)));
-                singleTime.setLayout(new BorderLayout());
-                
-                currentTime = String.valueOf(h) + m;
-                JLabel thisTime = new JLabel(currentTime);
-                JPanel availabilityPanel = new JPanel();
-                availableCheckBox[i] = new JCheckBox();
-                availableCheckBox[i].setName(h+m);
-                if (isAvailable[i]) {
-                    availableCheckBox[i].setSelected(true);
-                }
-                
-                if (isHalf) {
-                    h++;
-                    m = ":00";
-                } else {
-                    m = ":30";
-                }
-                isHalf = !isHalf;
-                
-                
-                availabilityPanel.add(new JLabel("Available"));
-                availabilityPanel.add(availableCheckBox[i]);
-                
-                singleTime.add(thisTime, BorderLayout.CENTER);
-                singleTime.add(availabilityPanel, BorderLayout.EAST);
-                
-                allTimes.add(singleTime);
-            }
-            
-            allTimesSP = new JScrollPane(allTimes);
-            allTimesSP.setPreferredSize(new Dimension((int)(windowWidth / 3.9), (int)(windowHeight / 1.4)));
-            allTimesSP.setVisible(false);
-            
-            mainTime.add(allTimesSP);
-            
-            enterAvailability = new JButton("ENTER AVAILABILITY");
-            enterAvailability.setActionCommand("enter barber availability");
-            enterAvailability.setVisible(false);
-            
-            mainTime.add(enterAvailability);
             
             //*right panel - log out*
             JPanel rightPanel = new JPanel();
@@ -1282,9 +1228,69 @@ public class View extends JFrame {
     }
     
     public void setPickedDate() {
+        if (allTimesSP != null) {
+            allTimesSP.removeAll();
+        }
+        if (mainTime != null) {
+            mainTime.removeAll();
+        }
+        
+        pickedDate = new JLabel();
+        mainTime.add(pickedDate);
+
+        allTimes = new JPanel();
+        allTimes.setLayout(new GridLayout(48, 1));
         pickedDate.setText(date[0].getSelectedItem() + "/" + date[1].getSelectedItem() + "/" + date[2].getSelectedItem());
-        allTimesSP.setVisible(true);
-        enterAvailability.setVisible(true);
+        isAvailable = controller.checkBarberAvailability(controller.getSessionID(), getpickedDate());
+        
+        int h = 0;
+        boolean isHalf = false;
+        String m = ":00";
+        String currentTime;
+        availableCheckBox = new JCheckBox[48];
+
+        for (int i = 0; i < 48; i++) {
+                JPanel singleTime = new JPanel();
+                singleTime.setBorder(border(Color.BLACK, 1));
+                singleTime.setPreferredSize(new Dimension((int)(windowWidth / 4.5), (int)(windowHeight / 10)));
+                singleTime.setLayout(new BorderLayout());
+                
+                currentTime = String.valueOf(h) + m;
+                JLabel thisTime = new JLabel(currentTime);
+                JPanel availabilityPanel = new JPanel();
+                availableCheckBox[i] = new JCheckBox();
+                availableCheckBox[i].setName(h+m);
+                if (isAvailable[i]) {
+                    availableCheckBox[i].setSelected(true);
+                }
+                
+                if (isHalf) {
+                    h++;
+                    m = ":00";
+                } else {
+                    m = ":30";
+                }
+                isHalf = !isHalf;
+                
+                
+                availabilityPanel.add(new JLabel("Available"));
+                availabilityPanel.add(availableCheckBox[i]);
+                
+                singleTime.add(thisTime, BorderLayout.CENTER);
+                singleTime.add(availabilityPanel, BorderLayout.EAST);
+                
+                allTimes.add(singleTime);
+            }
+        
+            allTimesSP = new JScrollPane(allTimes);
+            allTimesSP.setPreferredSize(new Dimension((int)(windowWidth / 3.9), (int)(windowHeight / 1.4)));
+            mainTime.add(allTimesSP);
+            
+            
+            enterAvailability = new JButton("ENTER AVAILABILITY");
+            enterAvailability.setActionCommand("enter barber availability");
+            
+            mainTime.add(enterAvailability);
     }
     
     public void setError(String e) {
