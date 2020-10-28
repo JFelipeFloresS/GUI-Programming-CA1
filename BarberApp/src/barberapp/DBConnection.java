@@ -4,11 +4,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -60,6 +62,10 @@ public class DBConnection {
     
     public String getType() {
         return this.type;
+    }
+    
+    public int getID() {
+        return this.id;
     }
     
     public String[] getLocations() {
@@ -364,8 +370,8 @@ public class DBConnection {
             PreparedStatement stmt = conn.prepareStatement(query);
             
             stmt.setInt(1, id);
-            stmt.setString(2, date);
-            stmt.setString(3, time);
+            stmt.setDate(2, Date.valueOf(date));
+            stmt.setTime(3, Time.valueOf(time + ":00"));
             
             stmt.execute();
             
@@ -378,17 +384,50 @@ public class DBConnection {
     
     public void removeAvailability(int id, String date, String time) {
         try {
-            String query = "DELETE FROM Barber_Availability WHERE Account_ID=" + id + ", Available_Date='" + date +"', Available_Time='" + time + "';";
+            String query = "DELETE FROM Barber_Availability WHERE Account_ID=?, Available_Date=?, Available_Time=?;";
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            Statement stmt = conn.createStatement();
-            
-            stmt.executeQuery(query);
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, id);
+            stmt.setDate(2, Date.valueOf(date));
+            stmt.setTime(3, Time.valueOf(time+":00"));
+            stmt.execute();
             
             stmt.close();
             conn.close();
         } catch (SQLException se) {
             handleExceptions(se);
         }
+    }
+    
+    // *************NOT WORKING*******
+    public HashMap<String, String> getAvailability(int barber, String dateToCheck) {
+        HashMap<String, String> available = new HashMap<>();
+        
+        try {
+            String query = "SELECT Available_Date, Available_Time FROM Barber_Availability WHERE Account_ID=" + barber;
+            if (dateToCheck != null) {
+                query += " AND Available_Date='" + dateToCheck + "'";
+            }
+            query += " ORDER BY Available_Time, Available_Date;";
+            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            Statement stmt = conn.createStatement();
+            
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()) {
+                String date = rs.getString("Available_Date");
+                String time = rs.getString("Available_Time");
+                System.out.println("get availability: " + date + " " + time);
+                available.put(date, time);
+            }
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+        
+        return available;
     }
     
     private HashMap<Integer, String> getEmails() {

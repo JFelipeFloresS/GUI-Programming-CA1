@@ -16,11 +16,15 @@ import java.awt.GridLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.sql.Time;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -71,7 +75,8 @@ public class View extends JFrame {
     public final Dimension paddingX5 = new Dimension((int)windowWidth / 3, windowHeight);
     
     // colours
-    private final Color orange = new Color(255, 128, 0);
+    private final Color white = new Color(250, 250, 250);
+    private final Color blue = new Color(133, 133, 233);
     private final Color textFieldColour = new Color(233, 233, 233);
     
     // fields
@@ -86,8 +91,13 @@ public class View extends JFrame {
     private JTextField barberName = null;
     private JTextField review = null;
     private JComboBox allLocationsBox = null;
+    private JCheckBox[] availableCheckBox = null;
     private int stars = -1;
-    private DatePicker date = null;
+    private JComboBox[] date = null;
+    private JLabel pickedDate = null;
+    private JButton selectDate = null;
+    private JScrollPane allTimesSP = null;
+    private JButton enterAvailability = null;
     private Time time = null;
     private JLabel error = null;
     
@@ -128,7 +138,7 @@ public class View extends JFrame {
             // **top panel**
             JPanel topPanel = new JPanel();
             topPanel.setPreferredSize(topPanelDimension);
-            topPanel.setBackground(Color.BLACK);
+            topPanel.setBackground(blue);
             
             // page title
             JLabel panelTitle = new JLabel("FIND A BARBER");
@@ -141,27 +151,27 @@ public class View extends JFrame {
             // **main panel**
             JPanel mainPanel = new JPanel();
             mainPanel.setPreferredSize(bottomPanelDimension);
-            mainPanel.setBackground(orange);
+            mainPanel.setBackground(white);
             mainPanel.setLayout(new BorderLayout(0, 10));
             
             // blank panel
             JPanel blankPanel = new JPanel();
             blankPanel.setPreferredSize(paddingY3);
-            blankPanel.setBackground(orange);
+            blankPanel.setBackground(white);
             error = new JLabel();
             blankPanel.add(error);
             
             // center panel
             JPanel centerPanel = new JPanel();
-            centerPanel.setBackground(orange);
+            centerPanel.setBackground(white);
             centerPanel.setLayout(new BorderLayout());
             
             // padding
             JPanel leftBlank = new JPanel();
-            leftBlank.setBackground(orange);
+            leftBlank.setBackground(white);
             leftBlank.setPreferredSize(paddingX4);
             JPanel rightBlank = new JPanel();
-            rightBlank.setBackground(orange);
+            rightBlank.setBackground(white);
             rightBlank.setPreferredSize(paddingX4);
             
             // log in panel
@@ -228,7 +238,7 @@ public class View extends JFrame {
             
             // create account button panel
             JPanel createAccountPanel = new JPanel();
-            createAccountPanel.setBackground(orange);
+            createAccountPanel.setBackground(white);
             createAccountPanel.setPreferredSize(paddingY4);
             
             // line break code retrieved from https://stackoverflow.com/questions/13503280/new-line-n-is-not-working-in-jbutton-settextfnord-nfoo/13503281
@@ -256,13 +266,13 @@ public class View extends JFrame {
     public class accountCreateLeftPanel extends JPanel {
         public accountCreateLeftPanel() {
             this.setPreferredSize(leftPanelDimension);
-            this.setBackground(Color.BLACK);
+            this.setBackground(blue);
             this.setLayout(new BorderLayout());
             
             // **top panel**
             JPanel logoPanel = new JPanel();
             logoPanel.setPreferredSize(new Dimension((int)(windowWidth / 4), (int)(windowHeight / 3)));
-            logoPanel.setBackground(Color.black);
+            logoPanel.setBackground(blue);
             
             // white panel
             JPanel whitePanel = new JPanel();
@@ -291,12 +301,12 @@ public class View extends JFrame {
             
             // **bottom panel**
             JPanel bottomPanel = new JPanel();
-            bottomPanel.setBackground(Color.black);
+            bottomPanel.setBackground(blue);
             bottomPanel.setPreferredSize(new Dimension((int)(windowWidth / 4), (int)(2 * windowHeight / 3)));
             bottomPanel.setLayout(new BorderLayout());
             
             JPanel cacc = new JPanel();
-            cacc.setBackground(Color.black);
+            cacc.setBackground(blue);
             cacc.setPreferredSize(new Dimension((int)windowWidth / 5, (int)windowHeight / 3));
             
             JLabel create = new JLabel("CREATE");
@@ -324,25 +334,25 @@ public class View extends JFrame {
             // **main panel**
             JPanel mainPanel = new JPanel();
             mainPanel.setPreferredSize(rightPanelDimension);
-            mainPanel.setBackground(orange);
+            mainPanel.setBackground(white);
             mainPanel.setLayout(new BorderLayout());
             
             // padding
             JPanel leftBlank = new JPanel();
             leftBlank.setPreferredSize(paddingX2);
-            leftBlank.setBackground(orange);
+            leftBlank.setBackground(white);
             
             // center panel
             JPanel centerPanel = new JPanel();
-            centerPanel.setBackground(orange);
+            centerPanel.setBackground(white);
             centerPanel.setLayout(new BorderLayout());
             
             JPanel p1 = new JPanel();
             p1.setPreferredSize(paddingY3);
-            p1.setBackground(orange);
+            p1.setBackground(white);
             
             JPanel buttonsPanel = new JPanel();
-            buttonsPanel.setBackground(orange);
+            buttonsPanel.setBackground(white);
             buttonsPanel.setLayout(new BorderLayout());
             
             JButton createCustomer = new JButton("I'M LOOKING FOR A BARBER");
@@ -350,7 +360,7 @@ public class View extends JFrame {
             createCustomer.setPreferredSize(new Dimension((int)windowWidth / 5, (int)windowHeight / 8));
             
             JPanel p3 = new JPanel();
-            p3.setBackground(orange);
+            p3.setBackground(white);
             
             JButton createBarber = new JButton("I'M A BARBER");
             createBarber.setActionCommand("go to create barber");
@@ -362,7 +372,7 @@ public class View extends JFrame {
             
             JPanel p2 = new JPanel();
             p2.setPreferredSize(paddingY3);
-            p2.setBackground(orange);
+            p2.setBackground(white);
             
             centerPanel.add(p1, BorderLayout.NORTH);
             centerPanel.add(buttonsPanel, BorderLayout.CENTER);
@@ -371,7 +381,7 @@ public class View extends JFrame {
             // padding/back button
             JPanel rightPanel = new JPanel();
             rightPanel.setPreferredSize(paddingX2);
-            rightPanel.setBackground(orange);
+            rightPanel.setBackground(white);
             
             JButton back = new JButton("BACK");
             back.setActionCommand("back to initial page");
@@ -397,17 +407,17 @@ public class View extends JFrame {
             // **main panel**
             JPanel mainPanel = new JPanel();
             mainPanel.setPreferredSize(rightPanelDimension);
-            mainPanel.setBackground(orange);
+            mainPanel.setBackground(white);
             mainPanel.setLayout(new BorderLayout());
             
             // padding
             JPanel leftBlank = new JPanel();
             leftBlank.setPreferredSize(paddingX2);
-            leftBlank.setBackground(orange);
+            leftBlank.setBackground(white);
             
             // center panel
             JPanel centerPanel = new JPanel();
-            centerPanel.setBackground(orange);
+            centerPanel.setBackground(white);
             centerPanel.setLayout(new BorderLayout());
             
             error = new JLabel("");
@@ -415,13 +425,13 @@ public class View extends JFrame {
             JPanel p1 = new JPanel();
             p1.setLayout(new BorderLayout());
             p1.setPreferredSize(paddingY3);
-            p1.setBackground(orange);
+            p1.setBackground(white);
             p1.setForeground(Color.WHITE);
             p1.add(new JLabel("I'M A BARBER"), BorderLayout.PAGE_START);
             p1.add(error, BorderLayout.CENTER);
             
             JPanel infoPanel = new JPanel();
-            infoPanel.setBackground(orange);
+            infoPanel.setBackground(white);
             infoPanel.setLayout(new GridLayout(18,2));
             
             firstName = new JTextField(20);
@@ -437,11 +447,11 @@ public class View extends JFrame {
             JButton create = new JButton("CREATE ACCOUNT");
             create.setActionCommand("create barber");
             JPanel bPadding1 = new JPanel();
-            bPadding1.setBackground(orange);
+            bPadding1.setBackground(white);
             JPanel bPadding2 = new JPanel();
-            bPadding2.setBackground(orange);
+            bPadding2.setBackground(white);
             JPanel bPadding3 = new JPanel();
-            bPadding3.setBackground(orange);
+            bPadding3.setBackground(white);
             
             infoPanel.add(new JLabel("Email: "));
             infoPanel.add(emailAddress);
@@ -467,7 +477,7 @@ public class View extends JFrame {
             
             JPanel p2 = new JPanel();
             p2.setPreferredSize(paddingY3);
-            p2.setBackground(orange);
+            p2.setBackground(white);
             
             centerPanel.add(p1, BorderLayout.NORTH);
             centerPanel.add(infoPanel, BorderLayout.CENTER);
@@ -476,7 +486,7 @@ public class View extends JFrame {
             // padding/back button
             JPanel rightPanel = new JPanel();
             rightPanel.setPreferredSize(paddingX2);
-            rightPanel.setBackground(orange);
+            rightPanel.setBackground(white);
             
             JButton back = new JButton("BACK");
             back.setActionCommand("create new account");
@@ -503,17 +513,17 @@ public class View extends JFrame {
             // **main panel**
             JPanel mainPanel = new JPanel();
             mainPanel.setPreferredSize(rightPanelDimension);
-            mainPanel.setBackground(orange);
+            mainPanel.setBackground(white);
             mainPanel.setLayout(new BorderLayout());
             
             // padding
             JPanel leftBlank = new JPanel();
             leftBlank.setPreferredSize(paddingX2);
-            leftBlank.setBackground(orange);
+            leftBlank.setBackground(white);
             
             // center panel
             JPanel centerPanel = new JPanel();
-            centerPanel.setBackground(orange);
+            centerPanel.setBackground(white);
             centerPanel.setLayout(new BorderLayout());
             
             error = new JLabel("");
@@ -521,13 +531,13 @@ public class View extends JFrame {
             JPanel p1 = new JPanel();
             p1.setLayout(new BorderLayout());
             p1.setPreferredSize(paddingY3);
-            p1.setBackground(orange);
+            p1.setBackground(white);
             p1.setForeground(Color.WHITE);
             p1.add(new JLabel("I'M LOOKING FOR A BARBER"), BorderLayout.PAGE_START);
             p1.add(error, BorderLayout.CENTER);
             
             JPanel infoPanel = new JPanel();
-            infoPanel.setBackground(orange);
+            infoPanel.setBackground(white);
             infoPanel.setLayout(new GridLayout(18,2));
             
             firstName = new JTextField(20);
@@ -542,11 +552,11 @@ public class View extends JFrame {
             JButton create = new JButton("CREATE ACCOUNT");
             create.setActionCommand("create customer");
             JPanel bPadding1 = new JPanel();
-            bPadding1.setBackground(orange);
+            bPadding1.setBackground(white);
             JPanel bPadding2 = new JPanel();
-            bPadding2.setBackground(orange);
+            bPadding2.setBackground(white);
             JPanel bPadding3 = new JPanel();
-            bPadding3.setBackground(orange);
+            bPadding3.setBackground(white);
             
             infoPanel.add(new JLabel("Email: "));
             infoPanel.add(emailAddress);
@@ -566,7 +576,7 @@ public class View extends JFrame {
             
             JPanel p2 = new JPanel();
             p2.setPreferredSize(paddingY3);
-            p2.setBackground(orange);
+            p2.setBackground(white);
             
             centerPanel.add(p1, BorderLayout.NORTH);
             centerPanel.add(infoPanel, BorderLayout.CENTER);
@@ -575,7 +585,7 @@ public class View extends JFrame {
             // padding/back button
             JPanel rightPanel = new JPanel();
             rightPanel.setPreferredSize(paddingX2);
-            rightPanel.setBackground(orange);
+            rightPanel.setBackground(white);
             
             JButton back = new JButton("BACK");
             back.setActionCommand("create new account");
@@ -598,13 +608,13 @@ public class View extends JFrame {
     public class loggedLeftPanel extends JPanel {
         public loggedLeftPanel() {
             this.setPreferredSize(leftPanelDimension);
-            this.setBackground(Color.BLACK);
+            this.setBackground(blue);
             this.setLayout(new BorderLayout());
             
             // **top panel**
             JPanel logoPanel = new JPanel();
             logoPanel.setPreferredSize(new Dimension((int)(windowWidth / 4), (int)(windowHeight / 3)));
-            logoPanel.setBackground(Color.black);
+            logoPanel.setBackground(blue);
             
             // white panel
             JPanel whitePanel = new JPanel();
@@ -633,12 +643,12 @@ public class View extends JFrame {
             
             // **bottom panel**
             JPanel bottomPanel = new JPanel();
-            bottomPanel.setBackground(Color.black);
+            bottomPanel.setBackground(blue);
             bottomPanel.setPreferredSize(new Dimension((int)(windowWidth / 4), (int)(2 * windowHeight / 3)));
             bottomPanel.setLayout(new BorderLayout());
             
             JPanel cacc = new JPanel();
-            cacc.setBackground(Color.black);
+            cacc.setBackground(blue);
             cacc.setPreferredSize(new Dimension((int)windowWidth / 5, (int)windowHeight / 3));
             
             JLabel create = new JLabel("WELCOME");
@@ -664,17 +674,17 @@ public class View extends JFrame {
             // **main panel**
             JPanel mainPanel = new JPanel();
             mainPanel.setPreferredSize(rightPanelDimension);
-            mainPanel.setBackground(orange);
+            mainPanel.setBackground(white);
             mainPanel.setLayout(new BorderLayout());
             
             // padding
             JPanel leftBlank = new JPanel();
             leftBlank.setPreferredSize(paddingX1);
-            leftBlank.setBackground(orange);
+            leftBlank.setBackground(white);
             
             // center panel
             JPanel centerPanel = new JPanel();
-            centerPanel.setBackground(orange);
+            centerPanel.setBackground(white);
             centerPanel.setLayout(new BorderLayout());
             
             error = new JLabel();
@@ -682,12 +692,12 @@ public class View extends JFrame {
             JPanel p1 = new JPanel();
             p1.setLayout(new BorderLayout());
             p1.setPreferredSize(paddingY1);
-            p1.setBackground(orange);
+            p1.setBackground(white);
             p1.setForeground(Color.WHITE);
             p1.add(error, BorderLayout.PAGE_START);
             
             JPanel infoPanel = new JPanel();
-            infoPanel.setBackground(orange);
+            infoPanel.setBackground(white);
             infoPanel.setLayout(new BorderLayout());
             
             // *** search panel ***
@@ -758,6 +768,7 @@ public class View extends JFrame {
             JPanel centerNext = new JPanel();
             centerNext.setPreferredSize(paddingX5);
             centerNext.setLayout(new BorderLayout());
+            JButton cancelBooking = new JButton("<html>CANCEL<br />BOOKING</html>");
             try {
                 HashMap<String, String> nextBooking = controller.getNextCustomerBooking();
                 centerNext.add(new JLabel("Date: " + nextBooking.get("date") + " | Barber: " + nextBooking.get("name")), BorderLayout.NORTH);
@@ -766,6 +777,7 @@ public class View extends JFrame {
                 centerNext.add(new JLabel(nextBooking.get("address")), BorderLayout.SOUTH);
             } catch (Exception e) {
                 centerNext.add(new JLabel("NO UPCOMING BOOKINGS FOUND"));
+                cancelBooking.setVisible(false);
             }
             
             leftNextBooking.add(topNext, BorderLayout.NORTH);
@@ -778,7 +790,6 @@ public class View extends JFrame {
             JButton viewBookings = new JButton("<html>VIEW<br /> BOOKINGS</html>");
             viewBookings.setActionCommand("view customer bookings");
             
-            JButton cancelBooking = new JButton("<html>CANCEL<br />BOOKING</html>");
             cancelBooking.setActionCommand("customer booking cancel");
             
             rightNextBooking.add(viewBookings, BorderLayout.NORTH);
@@ -793,7 +804,7 @@ public class View extends JFrame {
             
             JPanel p2 = new JPanel();
             p2.setPreferredSize(paddingY3);
-            p2.setBackground(orange);
+            p2.setBackground(white);
             
             JButton review = new JButton("<html>REVIEW AN<br /> APPOINTMENT</html>");
             review.setActionCommand("go to review");
@@ -807,7 +818,7 @@ public class View extends JFrame {
             // padding/back button
             JPanel rightPanel = new JPanel();
             rightPanel.setPreferredSize(paddingX3);
-            rightPanel.setBackground(orange);
+            rightPanel.setBackground(white);
             rightPanel.setLayout(new BorderLayout());
             
             JButton logout = new JButton("LOG OUT");
@@ -838,17 +849,17 @@ public class View extends JFrame {
             // **main panel**
             JPanel mainPanel = new JPanel();
             mainPanel.setPreferredSize(rightPanelDimension);
-            mainPanel.setBackground(orange);
+            mainPanel.setBackground(white);
             mainPanel.setLayout(new BorderLayout());
             
             // padding
             JPanel leftBlank = new JPanel();
             leftBlank.setPreferredSize(paddingX1);
-            leftBlank.setBackground(orange);
+            leftBlank.setBackground(white);
             
             // center panel
             JPanel centerPanel = new JPanel();
-            centerPanel.setBackground(orange);
+            centerPanel.setBackground(white);
             centerPanel.setLayout(new BorderLayout());
             
             error = new JLabel();
@@ -856,7 +867,7 @@ public class View extends JFrame {
             JPanel p1 = new JPanel();
             p1.setLayout(new BorderLayout());
             p1.setPreferredSize(paddingY1);
-            p1.setBackground(orange);
+            p1.setBackground(white);
             p1.setForeground(Color.WHITE);
             p1.add(error, BorderLayout.PAGE_START);
             
@@ -960,7 +971,7 @@ public class View extends JFrame {
             
             JPanel p2 = new JPanel();
             p2.setPreferredSize(paddingY3);
-            p2.setBackground(orange);
+            p2.setBackground(white);
             
             centerPanel.add(p1, BorderLayout.NORTH);
             centerPanel.add(infoPanel, BorderLayout.CENTER);
@@ -969,7 +980,7 @@ public class View extends JFrame {
             // padding/back button
             JPanel rightPanel = new JPanel();
             rightPanel.setPreferredSize(paddingX3);
-            rightPanel.setBackground(orange);
+            rightPanel.setBackground(white);
             rightPanel.setLayout(new BorderLayout());
             
             JButton logout = new JButton("LOG OUT");
@@ -1001,14 +1012,14 @@ public class View extends JFrame {
             
             JPanel mainPanel = new JPanel();
             mainPanel.setPreferredSize(rightPanelDimension);
-            mainPanel.setBackground(orange);
+            mainPanel.setBackground(white);
             mainPanel.setLayout(new BorderLayout());
             
             // ** 3 main panels **
             //*left panel - calendar*
             JPanel leftPanel = new JPanel();
             leftPanel.setPreferredSize(paddingX5);
-            leftPanel.setBackground(orange);
+            leftPanel.setBackground(white);
             
             JPanel mainCalendar = new JPanel();
             mainCalendar.setPreferredSize(new Dimension((int)(windowWidth / 3.5), (int)(windowHeight / 1.1)));
@@ -1019,27 +1030,144 @@ public class View extends JFrame {
             
             JPanel p2 = new JPanel();
             p2.setPreferredSize(new Dimension((int)(windowWidth / 4), (int)(windowHeight / 8)));
+            p2.setBackground(textFieldColour);
             
             JLabel pickLabel = new JLabel("PICK DATE:");
             
-            date = new DatePicker();
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDateTime localToday = LocalDateTime.now();
+            String today = dtf.format(localToday);
             
-            JButton selectDate = new JButton("PICK DATE");
-            selectDate.setActionCommand("select date " + date.getComponentDateTextField().getSelectedText());
+            date = new JComboBox[3];
+            String[] days = new String[31];
+            for (int i = 0; i < days.length; i++) {
+                days[i] = String.valueOf(i + 1);
+            }
+            String[] months = new String[12];
+            for (int i = 0; i < months.length; i++) {
+                months[i] = String.valueOf(i + 1);
+            }
+            String[] years = new String[2];
+            years[0] = today.substring(6);
+            years[1] = String.valueOf((Integer.parseInt(today.substring(6))) + 1);
+            
+            date[0] = new JComboBox(days);
+            date[0].setSelectedItem(today.substring(0, 2));
+            
+            date[1] = new JComboBox(months);
+            date[1].setSelectedItem(today.substring(3, 5));
+            
+            date[2] = new JComboBox(years);
+            date[2].setSelectedItem(today.substring(6));
+            
+            
+            JPanel p3 = new JPanel();
+            p3.setPreferredSize(new Dimension((int)(windowWidth / 4), (int)(windowHeight / 8)));
+            p3.setBackground(textFieldColour);
+            
+            // !!!!FIX DATE PICKER TO GET PICKED DATE!!!!!
+            selectDate = new JButton("PICK DATE");
+            selectDate.setActionCommand("select date");
             
             p2.add(pickLabel);
             mainCalendar.add(p2);
-            mainCalendar.add(date);
+            mainCalendar.add(date[0]);
+            mainCalendar.add(date[1]);
+            mainCalendar.add(date[2]);
+            mainCalendar.add(p3);
             mainCalendar.add(selectDate);
             
             //*middle panel - times*
             JPanel midPanel = new JPanel();
-            midPanel.setBackground(orange);
+            midPanel.setBackground(white);
+            
+            JPanel mainTime = new JPanel();
+            mainTime.setBackground(textFieldColour);
+            mainTime.setBorder(border(Color.BLACK, 2));
+            mainTime.setPreferredSize(new Dimension((int)(windowWidth / 3.8), (int)(windowHeight / 1.1)));
+            
+            midPanel.add(mainTime);
+            
+            pickedDate = new JLabel();
+            mainTime.add(pickedDate);
+            
+            JPanel allTimes = new JPanel();
+            allTimes.setLayout(new GridLayout(48, 1));
+            
+            int h = 0;
+            boolean isHalf = false;
+            String m = ":00";
+            String currentTime;
+            availableCheckBox = new JCheckBox[48];
+            boolean[] isAvailable = controller.checkBarberAvailability(controller.getSessionID(), pickedDate.getText());
+            for (int i = 0; i < 48; i++) {
+                JPanel singleTime = new JPanel();
+                singleTime.setBorder(border(Color.BLACK, 1));
+                singleTime.setPreferredSize(new Dimension((int)(windowWidth / 4.5), (int)(windowHeight / 10)));
+                singleTime.setLayout(new BorderLayout());
+                
+                currentTime = String.valueOf(h) + m;
+                JLabel thisTime = new JLabel(currentTime);
+                JPanel availabilityPanel = new JPanel();
+                availableCheckBox[i] = new JCheckBox();
+                availableCheckBox[i].setName(h+m);
+                if (isAvailable[i]) {
+                    availableCheckBox[i].setSelected(true);
+                }
+                
+                if (isHalf) {
+                    h++;
+                    m = ":00";
+                } else {
+                    m = ":30";
+                }
+                isHalf = !isHalf;
+                
+                
+                availabilityPanel.add(new JLabel("Available"));
+                availabilityPanel.add(availableCheckBox[i]);
+                
+                singleTime.add(thisTime, BorderLayout.CENTER);
+                singleTime.add(availabilityPanel, BorderLayout.EAST);
+                
+                allTimes.add(singleTime);
+            }
+            
+            allTimesSP = new JScrollPane(allTimes);
+            allTimesSP.setPreferredSize(new Dimension((int)(windowWidth / 3.9), (int)(windowHeight / 1.4)));
+            allTimesSP.setVisible(false);
+            
+            mainTime.add(allTimesSP);
+            
+            enterAvailability = new JButton("ENTER AVAILABILITY");
+            enterAvailability.setActionCommand("enter barber availability");
+            enterAvailability.setVisible(false);
+            
+            mainTime.add(enterAvailability);
             
             //*right panel - log out*
             JPanel rightPanel = new JPanel();
             rightPanel.setPreferredSize(paddingX2);
-            rightPanel.setBackground(orange);
+            rightPanel.setBackground(white);
+            
+            JPanel p4 = new JPanel();
+            p4.setPreferredSize(paddingY3);
+            p4.setBackground(white);
+            
+            JButton goBack = new JButton("BACK");
+            goBack.setActionCommand("back to main barber");
+            
+            JPanel p5 = new JPanel();
+            p5.setPreferredSize(paddingY3);
+            p5.setBackground(white);
+            
+            JButton logOut = new JButton("LOG OUT");
+            logOut.setActionCommand("log out");
+            
+            rightPanel.add(p4);
+            rightPanel.add(goBack);
+            rightPanel.add(p5);
+            rightPanel.add(logOut);
             
             mainPanel.add(leftPanel, BorderLayout.WEST);
             mainPanel.add(midPanel, BorderLayout.CENTER);
@@ -1064,12 +1192,12 @@ public class View extends JFrame {
                     c.setFont(bodyFont);
                 }
                 if (background) {
-                    c.setBackground(textFieldColour);
+                    c.setBackground(white);
                     ((JButton) c).setBorder(border(Color.black, 2));
                 }
                 if (foreground) {
                     c.setPreferredSize(regularButtonDimension);
-                    c.setForeground(Color.black);
+                    c.setForeground(Color.BLACK);
                 }
                 ((JButton) c).addActionListener(controller);
                 ((JButton) c).setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -1122,6 +1250,15 @@ public class View extends JFrame {
         return location.getText();
     }
     
+    public String getpickedDate() {
+        String full = pickedDate.getText();
+        String y = full.substring(6);
+        String m = full.substring(3, 5);
+        String d = full.substring(0, 2);
+        
+        return y+"-"+m+"-"+d;
+    }
+    
     public String getAddress() {
         return address.getText();
     }
@@ -1132,6 +1269,22 @@ public class View extends JFrame {
     
     public String getBarberName() {
         return barberName.getText();
+    }
+    
+    public boolean[] getAvailableCheckBoxSelection() {
+        boolean[] available = new boolean[availableCheckBox.length];
+        
+        for (int i = 0; i < availableCheckBox.length; i++) {
+            available[i] = availableCheckBox[i].isSelected();
+        }
+        
+        return available;
+    }
+    
+    public void setPickedDate() {
+        pickedDate.setText(date[0].getSelectedItem() + "/" + date[1].getSelectedItem() + "/" + date[2].getSelectedItem());
+        allTimesSP.setVisible(true);
+        enterAvailability.setVisible(true);
     }
     
     public void setError(String e) {

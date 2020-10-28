@@ -27,21 +27,22 @@ public class Controller implements ActionListener{
         if (e.getActionCommand().contains("cancel booking ")) {
             int cancelID = Integer.parseInt(e.getActionCommand().substring(15));
             try {
-                connection.cancelBooking(cancelID);
+                this.connection.cancelBooking(cancelID);
                 this.view.setError("Booking cancelled successfully");
             } catch (Exception except) {
                 this.view.setError("<html>Error:<br />" + except.getMessage() + "</html>");
             }
             return;
         }
+        
         switch(e.getActionCommand()) {
             case "create new account":
                 changeScreen(this.view.new createChoice());
                 break;
             case "log in":
-                if (connection.checkCredentials(this.view.getEmailAddress(), this.view.getPass())) {
-                    connection.logIn(this.view.getEmailAddress());
-                    if (connection.getType().equals("customer")) {
+                if (this.connection.checkCredentials(this.view.getEmailAddress(), this.view.getPass())) {
+                    this.connection.logIn(this.view.getEmailAddress());
+                    if (this.connection.getType().equals("customer")) {
                         changeScreen(this.view.new customerMain());
                     } else {
                         changeScreen(this.view.new barberMain());
@@ -51,7 +52,7 @@ public class Controller implements ActionListener{
                 }
                 break;
             case "log out":
-                connection.logOut();
+                this.connection.logOut();
                 changeScreen(this.view.new initialPage());
                 break;
             case "go to create barber":
@@ -83,7 +84,7 @@ public class Controller implements ActionListener{
                     break;
                 } 
                 this.view.setError("");
-                switch(connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "barber", this.view.getFirstName(), this.view.getLastName(), this.view.getSetLocation(), this.view.getAddress(), this.view.getTown())){
+                switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "barber", this.view.getFirstName(), this.view.getLastName(), this.view.getSetLocation(), this.view.getAddress(), this.view.getTown())){
                     case "done":
                         changeScreen(this.view.new initialPage());
                         this.view.setError("Account created successfully");
@@ -138,7 +139,7 @@ public class Controller implements ActionListener{
                     break;
                 } 
                 this.view.setError("");
-                switch(connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "customer", this.view.getFirstName(), this.view.getLastName(), null, null, null)){
+                switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "customer", this.view.getFirstName(), this.view.getLastName(), null, null, null)){
                     case "done":
                         changeScreen(this.view.new initialPage());
                         this.view.setError("Account created successfully");
@@ -178,6 +179,46 @@ public class Controller implements ActionListener{
                 break;
             case "go to set availability":
                 changeScreen(this.view.new availabilityPage());
+                break;
+            case "select date":
+                this.view.setPickedDate();
+                break;
+            case "enter barber availability":
+                boolean[] availability = this.view.getAvailableCheckBoxSelection();
+                HashMap<String, String> currAvailability = this.connection.getAvailability(this.connection.getID(), this.view.getpickedDate());
+                int h = 0;
+                String m = ":00";
+                boolean isHalf = false;
+                String currTime;
+                for (int i = 0; i < availability.length; i++) {
+                    if (h<10) {
+                        currTime = "0";
+                    } else {
+                        currTime = "";
+                    }
+                    currTime += String.valueOf(h) + m;
+                    
+                    if (currAvailability.containsValue(currTime + ":00")) {
+                        if (!availability[i]) {
+                            this.connection.removeAvailability(this.connection.getID(), this.view.getpickedDate(), currTime);
+                        }
+                    } else {
+                        if (availability[i]) {
+                            this.connection.addAvailability(this.connection.getID(), this.view.getpickedDate(), currTime);
+                        }
+                    }
+                    
+                    if (isHalf) {
+                        m = ":00";
+                        h++;
+                    } else {
+                        m = ":30";
+                    }
+                    isHalf = !isHalf;
+                }
+                break;
+            case "back to main barber":
+                changeScreen(this.view.new barberMain());
                 break;
             default:
                 System.out.println(e.getActionCommand());
@@ -231,4 +272,30 @@ public class Controller implements ActionListener{
         return this.connection.getFirstName();
     }
     
+    public int getSessionID() {
+        return connection.getID();
+    }
+    
+    public boolean[] checkBarberAvailability(int barber, String date) {
+        boolean[] isAvailable = new boolean[48];
+        HashMap<String, String> availability = this.connection.getAvailability(barber, date);
+        
+        int h = 0;
+        String currTime;
+        boolean isHalf = false;
+        String m = ":00";
+        for (int i = 0; i < isAvailable.length; i++) {
+            currTime = String.valueOf(h) + m;
+            isAvailable[i] = availability.containsValue(currTime);
+            
+            isHalf = !isHalf;
+            if (isHalf) {
+                m = ":30";
+            } else {
+                m = ":00";
+                h++;
+            }
+        }
+        return isAvailable;
+    }
 }
