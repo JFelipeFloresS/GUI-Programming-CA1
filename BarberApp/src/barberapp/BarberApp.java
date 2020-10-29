@@ -3,6 +3,10 @@ package barberapp;
 /**
  *
  * @author José Felipe Flores da Silva
+ * 2019405
+ * GUI Programming
+ * CA1
+ * 
  */
 public class BarberApp{
     

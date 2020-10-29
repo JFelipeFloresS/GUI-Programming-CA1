@@ -84,7 +84,7 @@ public class Controller implements ActionListener{
                     break;
                 } 
                 this.view.setError("");
-                switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "barber", this.view.getFirstName(), this.view.getLastName(), this.view.getSetLocation(), this.view.getAddress(), this.view.getTown())){
+                switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "barber", this.view.getFirstName(), this.view.getLastName(), this.view.getPhoneNumber(), this.view.getSetLocation(), this.view.getAddress(), this.view.getTown())){
                     case "done":
                         changeScreen(this.view.new initialPage());
                         this.view.setError("Account created successfully");
@@ -139,7 +139,7 @@ public class Controller implements ActionListener{
                     break;
                 } 
                 this.view.setError("");
-                switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "customer", this.view.getFirstName(), this.view.getLastName(), null, null, null)){
+                switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "customer", this.view.getFirstName(), this.view.getLastName(), this.view.getPhoneNumber(), null, null, null)){
                     case "done":
                         changeScreen(this.view.new initialPage());
                         this.view.setError("Account created successfully");
@@ -184,26 +184,26 @@ public class Controller implements ActionListener{
                 this.view.setPickedDate();
                 break;
             case "enter barber availability":
-                boolean[] availability = this.view.getAvailableCheckBoxSelection();
-                HashMap<String, String> currAvailability = this.connection.getAvailability(this.connection.getID(), this.view.getpickedDate());
+                HashMap<String, Boolean> availability = this.view.getAvailableCheckBoxSelection();
+                ArrayList<String[]> currAvailability = this.connection.getAvailability(this.connection.getID(), this.view.getpickedDate());
                 int h = 0;
                 String m = ":00";
                 boolean isHalf = false;
                 String currTime;
-                for (int i = 0; i < availability.length; i++) {
+                for (int i = 0; i < 48; i++) {
                     if (h<10) {
                         currTime = "0";
                     } else {
                         currTime = "";
                     }
-                    currTime += String.valueOf(h) + m;
+                    currTime += String.valueOf(h) + m + ":00";
                     
-                    if (currAvailability.containsValue(currTime + ":00")) {
-                        if (!availability[i]) {
+                    if (currAvailability.contains(new String[]{this.view.getpickedDate(), currTime})) {
+                        if (!availability.get(currTime)) {
                             this.connection.removeAvailability(this.connection.getID(), this.view.getpickedDate(), currTime);
                         }
                     } else {
-                        if (availability[i]) {
+                        if (availability.get(currTime)) {
                             this.connection.addAvailability(this.connection.getID(), this.view.getpickedDate(), currTime);
                         }
                     }
@@ -278,15 +278,29 @@ public class Controller implements ActionListener{
     
     public boolean[] checkBarberAvailability(int barber, String date) {
         boolean[] isAvailable = new boolean[48];
-        HashMap<String, String> availability = this.connection.getAvailability(barber, date);
+        ArrayList<String[]> availability = this.connection.getAvailability(barber, date);
+        availability.forEach(entry->{
+            System.out.println("CONTROLLER Date:" + entry[0] + "|Time:" + entry[1]);
+        });
         
         int h = 0;
         String currTime;
         boolean isHalf = false;
         String m = ":00";
         for (int i = 0; i < isAvailable.length; i++) {
-            currTime = String.valueOf(h) + m;
-            isAvailable[i] = availability.containsValue(currTime);
+            String addZero = "";
+            if (h<10) {
+                addZero = "0";
+            }
+            currTime = addZero + String.valueOf(h) + m + ":00";
+            String[] dateTime = {date, currTime};
+            boolean isIn = false;
+            for (int j = 0; j < availability.size(); j++) {
+                if (availability.get(j)[0].equals(date) && availability.get(j)[1].equals(currTime)) {
+                    isIn = true;
+                }
+            }
+            isAvailable[i] = isIn;
             
             isHalf = !isHalf;
             if (isHalf) {

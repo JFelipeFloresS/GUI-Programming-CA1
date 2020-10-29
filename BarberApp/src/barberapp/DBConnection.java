@@ -43,6 +43,7 @@ public class DBConnection {
         // initialise variables
         this.controller = controller;
         initialise();
+        logIn("josefelipefloress@gmail.com");
     }
     
     private void initialise() {
@@ -108,7 +109,7 @@ public class DBConnection {
         String[] barber = new String[3];
         
         try {
-            String query = "SELECT First_Name, Address, Town FROM Accounts, Barber_Location WHERE Accounts.Account_ID=" + id + " AND Barber_Location.Account_ID=" + id + ";";
+            String query = "SELECT First_Name, Address, Town, Phone FROM Accounts, Barber_Location WHERE Accounts.Account_ID=" + id + " AND Barber_Location.Account_ID=" + id + ";";
             
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
@@ -119,6 +120,7 @@ public class DBConnection {
                 barber[0] = rs.getString("First_Name");
                 barber[1] = rs.getString("Address");
                 barber[2] = rs.getString("Town");
+                barber[3] = rs.getString("Phone");
             }
         } catch (SQLException se) {
             handleExceptions(se);
@@ -127,11 +129,11 @@ public class DBConnection {
         return barber;
     }
     
-    public String getCustomer(int id){
-        String customer = null;
+    public String[] getCustomer(int id){
+        String[] customer = new String[2];
         
         try {
-            String query = "SELECT First_Name FROM Accounts WHERE Account_ID=" + id + ";";
+            String query = "SELECT First_Name, Phone FROM Accounts WHERE Account_ID=" + id + ";";
             
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             
@@ -139,7 +141,8 @@ public class DBConnection {
             
             ResultSet rs = stmt.executeQuery(query);
             
-            customer = rs.getString("FirstName");
+            customer[0] = rs.getString("FirstName");
+            customer[1] = rs.getString("Phone");
             
             rs.close();
             stmt.close();
@@ -162,7 +165,7 @@ public class DBConnection {
         
         try {
             
-            String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time FROM Bookings WHERE Customer=" + this.id + " AND Booking_Date>=" + dater.format(today) + ";";
+            String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time FROM Bookings WHERE Customer=" + this.id + " AND Booking_Date>=" + dater.format(today) + " ORDER BY Booking_Time, Booking_Date;";
             
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             
@@ -178,18 +181,13 @@ public class DBConnection {
                 booking_info[3] = barber[0]; // barber's name
                 booking_info[4] = barber[1]; // address
                 booking_info[5] = barber[2]; // town
+                booking_info[6] = barber[3]; // phone
                 customerBookings.add(booking_info); // stores barber and date infos into array that is added to an array list
             }
             rs.close();
             stmt.close();
             conn.close();
             
-            /**
-             * Sorting array list of arrays
-             * code retrieved from https://stackoverflow.com/questions/4699807/sort-arraylist-of-array-in-java
-             */
-            customerBookings.sort((Comparator.comparing(a -> a[1])));
-            customerBookings.sort((Comparator.comparing(a -> a[0])));
         } catch (SQLException se) {
             handleExceptions(se);
         }
@@ -201,13 +199,15 @@ public class DBConnection {
         next.put("name", customerBookings.get(0)[3]);
         next.put("address", customerBookings.get(0)[4]);
         next.put("town", customerBookings.get(0)[5]);
+        next.put("phone", customerBookings.get(0)[6]);
         
         return next;
     }
     
     public ArrayList<String[]> getBarberUpcomingBookings() {
         ArrayList<String[]> upcoming = new ArrayList<>();
-        String currCustomer, currDate, currTime;
+        String[] currCustomer;
+        String currDate, currTime, currPhone;
         int currID;
         
         try {
@@ -230,7 +230,8 @@ public class DBConnection {
                 upcoming.get(c)[0] = currDate;
                 upcoming.get(c)[1] = currTime;
                 upcoming.get(c)[2] = String.valueOf(currID);
-                upcoming.get(c)[3] = currCustomer;
+                upcoming.get(c)[3] = currCustomer[0];
+                upcoming.get(c)[4] = currCustomer[1];
                 
                 c++;
             }
@@ -261,9 +262,9 @@ public class DBConnection {
                 String currDate = rs.getString("Booking_Date");
                 String currTime = rs.getString("Booking_Time");
                 String currStatus = rs.getString("Booking_Status");
-                String currCustomer = getCustomer(rs.getInt("Customer"));
+                String[] currCustomer = getCustomer(rs.getInt("Customer"));
                 
-                all.add(new String[]{currID, currDate, currTime, currStatus, currCustomer});
+                all.add(new String[]{currID, currDate, currTime, currStatus, currCustomer[0], currCustomer[1]});
                 
             }
             rs.close();
@@ -292,9 +293,9 @@ public class DBConnection {
                 String currDate = rs.getString("Booking_Date");
                 String currTime = rs.getString("Booking_Time");
                 String currStatus = rs.getString("Booking_Status");
-                String currBarber = getCustomer(rs.getInt("Customer"));
+                String currBarber[] = getCustomer(rs.getInt("Customer"));
                 
-                all.add(new String[]{currID, currDate, currTime, currStatus, currBarber});
+                all.add(new String[]{currID, currDate, currTime, currStatus, currBarber[0], currBarber[1]});
                 
             }
             rs.close();
@@ -364,13 +365,13 @@ public class DBConnection {
     
     public void addAvailability(int id, String date, String time) {
         try {
-            String query = "INSERT INTO Barber_Availability(Account_ID, Available_Date, Available_Time) VALUES(?, ?, ?)";
+            String query = "IF NOT EXISTS(SELECT * FROM Barber_Availability WHERE Account_ID=" + id + " AND Available_Date='" + date + "' AND Available_Time='" + time + "') INSERT INTO Barber_Availability(Account_ID, Available_Date, Available_Time) VALUES(?, ?, ?)";
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             PreparedStatement stmt = conn.prepareStatement(query);
             
             stmt.setInt(1, id);
             stmt.setDate(2, Date.valueOf(date));
-            stmt.setTime(3, Time.valueOf(time + ":00"));
+            stmt.setTime(3, Time.valueOf(time));
             
             stmt.execute();
             
@@ -399,11 +400,10 @@ public class DBConnection {
     }
     
     // *************NOT WORKING*******
-    public HashMap<String, String> getAvailability(int barber, String dateToCheck) {
-        HashMap<String, String> available = new HashMap<>();
+    public ArrayList<String[]> getAvailability(int barber, String dateToCheck) {
+        ArrayList<String[]> available = new ArrayList<>();
         
         try {
-            System.out.println("Date to check: " + dateToCheck);
             String query = "SELECT Available_Date, Available_Time FROM Barber_Availability WHERE Account_ID=" + barber;
             if (dateToCheck != null) {
                 query += " AND Available_Date='" + dateToCheck + "'";
@@ -416,8 +416,8 @@ public class DBConnection {
             while(rs.next()) {
                 String date = rs.getString("Available_Date");
                 String time = rs.getString("Available_Time");
-                System.out.println("get availability: " + date + " " + time);
-                available.put(date, time);
+                String[] dateTime = {date, time};
+                available.add(dateTime);
             }
             rs.close();
             stmt.close();
@@ -550,7 +550,7 @@ public class DBConnection {
         this.id = -1;
     }
         
-    public String createAccount(String email, String pass, String type, String firstName, String lastName, String location, String address, String town) {
+    public String createAccount(String email, String pass, String type, String firstName, String lastName, String phone, String location, String address, String town) {
         // set string success to null
         success = null;
         id = -1;
@@ -570,13 +570,14 @@ public class DBConnection {
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             
             // creates new account inserting email into accounts
-            String accountQ = "INSERT INTO Accounts(Email, First_Name, Last_Name, Pass, Type) VALUES(?, ?, ?, ?, ?);";
+            String accountQ = "INSERT INTO Accounts(Email, First_Name, Last_Name, Pass, Type, Phone) VALUES(?, ?, ?, ?, ?, ?);";
             stmt = conn.prepareStatement(accountQ);
             stmt.setString(1, email);
             stmt.setString(2, firstName);
             stmt.setString(3, lastName);
             stmt.setString(4, pass);
             stmt.setString(5, type);
+            stmt.setString(6, phone);
             
             stmt.execute();
             success = "account created";

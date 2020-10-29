@@ -86,6 +86,7 @@ public class View extends JFrame {
     private JTextField firstName = null;
     private JTextField lastName = null;
     private JTextField location = null;
+    private JTextField phoneNumber = null;
     private JTextField address = null;
     private JTextField town = null;
     private JTextField barberName = null;
@@ -123,7 +124,7 @@ public class View extends JFrame {
         this.setTitle("Find A Barber");
         
         //initialise main panel
-        this.add(new initialPage());
+        this.add(new availabilityPage());
         
         //finalise JFrame
         getContentPane().setFont(bodyFont);
@@ -440,6 +441,7 @@ public class View extends JFrame {
             firstName = new JTextField(20);
             lastName = new JTextField(20);
             emailAddress = new JTextField(20);
+            phoneNumber = new JTextField(20);
             address = new JTextField(20);
             password = new JPasswordField(20);
             password.setEchoChar('•');
@@ -466,6 +468,8 @@ public class View extends JFrame {
             infoPanel.add(firstName);
             infoPanel.add(new JLabel("Last Name: "));
             infoPanel.add(lastName);
+            infoPanel.add(new JLabel("Phone Number: "));
+            infoPanel.add(phoneNumber);
             infoPanel.add(new JLabel("Address: "));
             infoPanel.add(address);
             infoPanel.add(new JLabel("Location (D1, D2...): "));
@@ -549,7 +553,7 @@ public class View extends JFrame {
             address = new JTextField(20);
             password = new JPasswordField(20);
             password.setEchoChar('•');
-            location = new JTextField(20);
+            phoneNumber = new JTextField(20);
             confirmPass = new JPasswordField(20);
             confirmPass.setEchoChar('•');
             JButton create = new JButton("CREATE ACCOUNT");
@@ -571,6 +575,8 @@ public class View extends JFrame {
             infoPanel.add(firstName);
             infoPanel.add(new JLabel("Last Name: "));
             infoPanel.add(lastName);
+            infoPanel.add(new JLabel("Phone Number: "));
+            infoPanel.add(phoneNumber);
             infoPanel.add(bPadding1);
             infoPanel.add(bPadding2);
             infoPanel.add(bPadding3);
@@ -775,7 +781,7 @@ public class View extends JFrame {
             try {
                 HashMap<String, String> nextBooking = controller.getNextCustomerBooking();
                 centerNext.add(new JLabel("Date: " + nextBooking.get("date") + " | Barber: " + nextBooking.get("name")), BorderLayout.NORTH);
-                centerNext.add(new JLabel("Time: " + nextBooking.get("time")), BorderLayout.EAST);
+                centerNext.add(new JLabel("Time: " + nextBooking.get("time") + " | Phone: " + nextBooking.get("phone")), BorderLayout.EAST);
                 centerNext.add(new JLabel("Address: " + nextBooking.get("town")), BorderLayout.WEST);
                 centerNext.add(new JLabel(nextBooking.get("address")), BorderLayout.SOUTH);
             } catch (Exception e) {
@@ -920,7 +926,7 @@ public class View extends JFrame {
                     leftBottom.setLayout(new BorderLayout());
                     leftBottom.setBackground(Color.WHITE);
                     
-                    JLabel cust = new JLabel("Customer: " + upcoming.get(i)[3]);
+                    JLabel cust = new JLabel("Customer: " + upcoming.get(i)[3] + " | Phone: " + upcoming.get(i)[4]);
                     JLabel dt = new JLabel("Date: " + upcoming.get(i)[0]);
 
                     JPanel hrPanel = new JPanel();
@@ -1192,6 +1198,10 @@ public class View extends JFrame {
         return lastName.getText();
     }
     
+    public String getPhoneNumber() {
+        return phoneNumber.getText();
+    }
+    
     public String getSetLocation() {
         return location.getText();
     }
@@ -1217,11 +1227,15 @@ public class View extends JFrame {
         return barberName.getText();
     }
     
-    public boolean[] getAvailableCheckBoxSelection() {
-        boolean[] available = new boolean[availableCheckBox.length];
+    public HashMap<String, Boolean> getAvailableCheckBoxSelection() {
+        HashMap<String, Boolean> available = new HashMap<>();
         
         for (int i = 0; i < availableCheckBox.length; i++) {
-            available[i] = availableCheckBox[i].isSelected();
+            String addZero = "";
+            if (availableCheckBox[i].getName().length() <5) {
+                addZero = "0";
+            }
+            available.put(addZero + availableCheckBox[i].getName() + ":00", availableCheckBox[i].isSelected());
         }
         
         return available;
@@ -1255,11 +1269,16 @@ public class View extends JFrame {
                 singleTime.setPreferredSize(new Dimension((int)(windowWidth / 4.5), (int)(windowHeight / 10)));
                 singleTime.setLayout(new BorderLayout());
                 
-                currentTime = String.valueOf(h) + m;
+                String addZero = "";
+                if (h<10) {
+                    addZero = "0";
+                }
+                currentTime = addZero + String.valueOf(h) + m;
                 JLabel thisTime = new JLabel(currentTime);
                 JPanel availabilityPanel = new JPanel();
                 availableCheckBox[i] = new JCheckBox();
-                availableCheckBox[i].setName(h+m);
+                availableCheckBox[i].setName(currentTime);
+                System.out.println("VIEW isAvailable: " + isAvailable[i]);
                 if (isAvailable[i]) {
                     availableCheckBox[i].setSelected(true);
                 }
@@ -1291,6 +1310,8 @@ public class View extends JFrame {
             enterAvailability.setActionCommand("enter barber availability");
             
             mainTime.add(enterAvailability);
+            
+            standardiseChildren(mainTime, true, false, true);
     }
     
     public void setError(String e) {
