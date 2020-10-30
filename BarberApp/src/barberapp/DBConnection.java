@@ -251,7 +251,7 @@ public class DBConnection {
         ArrayList<String[]> all = new ArrayList<>();
         
         try {
-            String query = "SELECT * FROM Bookings WHERE Barber=" + id + " ORDER BY Booking_Time ASC, Booking_Date DESC;";
+            String query = "SELECT * FROM Bookings WHERE Barber=" + id + " ORDER BY Booking_Date, Booking_Time;";
             
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
@@ -282,7 +282,7 @@ public class DBConnection {
         ArrayList<String[]> all = new ArrayList<>();
         
         try {
-            String query = "SELECT * FROM Bookings WHERE Customer=" + id + " ORDER BY Booking_Time ASC, Booking_Date DESC;";
+            String query = "SELECT * FROM Bookings WHERE Customer=" + id + " ORDER BY Booking_Date, Booking_Time;";
             
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
@@ -365,13 +365,9 @@ public class DBConnection {
     
     public void addAvailability(int id, String date, String time) {
         try {
-            String query = "IF NOT EXISTS(SELECT * FROM Barber_Availability WHERE Account_ID=" + id + " AND Available_Date='" + date + "' AND Available_Time='" + time + "') INSERT INTO Barber_Availability(Account_ID, Available_Date, Available_Time) VALUES(?, ?, ?)";
+            String query = "INSERT INTO Barber_Availability(Account_ID, Available_Date, Available_Time) VALUES(" + id + ", '" + date + "', '" + time + "');";
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             PreparedStatement stmt = conn.prepareStatement(query);
-            
-            stmt.setInt(1, id);
-            stmt.setDate(2, Date.valueOf(date));
-            stmt.setTime(3, Time.valueOf(time));
             
             stmt.execute();
             
@@ -384,13 +380,13 @@ public class DBConnection {
     
     public void removeAvailability(int id, String date, String time) {
         try {
-            String query = "DELETE FROM Barber_Availability WHERE Account_ID=?, Available_Date=?, Available_Time=?;";
+            String query = "DELETE FROM Barber_Availability WHERE Account_ID=" + id + " AND Available_Date='" + date + "' AND Available_Time='" + time + "';";
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setInt(1, id);
-            stmt.setDate(2, Date.valueOf(date));
-            stmt.setTime(3, Time.valueOf(time+":00"));
+            
             stmt.execute();
+            
+            System.out.println("CONN time: " + Time.valueOf(time));
             
             stmt.close();
             conn.close();
@@ -399,7 +395,6 @@ public class DBConnection {
         }
     }
     
-    // *************NOT WORKING*******
     public ArrayList<String[]> getAvailability(int barber, String dateToCheck) {
         ArrayList<String[]> available = new ArrayList<>();
         
@@ -408,7 +403,7 @@ public class DBConnection {
             if (dateToCheck != null) {
                 query += " AND Available_Date='" + dateToCheck + "'";
             }
-            query += " ORDER BY Available_Time, Available_Date;";
+            query += " ORDER BY Available_Date, Available_Time;";
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             PreparedStatement stmt = conn.prepareStatement(query);
             

@@ -1231,11 +1231,7 @@ public class View extends JFrame {
         HashMap<String, Boolean> available = new HashMap<>();
         
         for (int i = 0; i < availableCheckBox.length; i++) {
-            String addZero = "";
-            if (availableCheckBox[i].getName().length() <5) {
-                addZero = "0";
-            }
-            available.put(addZero + availableCheckBox[i].getName() + ":00", availableCheckBox[i].isSelected());
+            available.put(availableCheckBox[i].getName(), availableCheckBox[i].isSelected());
         }
         
         return available;
@@ -1254,7 +1250,17 @@ public class View extends JFrame {
 
         allTimes = new JPanel();
         allTimes.setLayout(new GridLayout(48, 1));
-        pickedDate.setText(date[0].getSelectedItem() + "/" + date[1].getSelectedItem() + "/" + date[2].getSelectedItem());
+        String addZeroToDay = "";
+        if (Integer.parseInt(date[0].getSelectedItem().toString())<10) {
+            addZeroToDay = "0";
+        }
+        String pickedDay = addZeroToDay + date[0].getSelectedItem();
+        String addZeroToMonth = "";
+        if (Integer.parseInt(date[1].getSelectedItem().toString())<10) {
+            addZeroToMonth = "0";
+        }
+        String pickedMonth = addZeroToMonth + date[1].getSelectedItem();
+        pickedDate.setText(pickedDay + "/" + pickedMonth + "/" + date[2].getSelectedItem());
         isAvailable = controller.checkBarberAvailability(controller.getSessionID(), getpickedDate());
         
         int h = 0;
@@ -1273,12 +1279,12 @@ public class View extends JFrame {
                 if (h<10) {
                     addZero = "0";
                 }
-                currentTime = addZero + String.valueOf(h) + m;
+                currentTime = addZero + String.valueOf(h) + m + ":00";
                 JLabel thisTime = new JLabel(currentTime);
                 JPanel availabilityPanel = new JPanel();
                 availableCheckBox[i] = new JCheckBox();
                 availableCheckBox[i].setName(currentTime);
-                System.out.println("VIEW isAvailable: " + isAvailable[i]);
+                
                 if (isAvailable[i]) {
                     availableCheckBox[i].setSelected(true);
                 }

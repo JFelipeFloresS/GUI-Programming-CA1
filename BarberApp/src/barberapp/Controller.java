@@ -184,8 +184,8 @@ public class Controller implements ActionListener{
                 this.view.setPickedDate();
                 break;
             case "enter barber availability":
-                HashMap<String, Boolean> availability = this.view.getAvailableCheckBoxSelection();
                 ArrayList<String[]> currAvailability = this.connection.getAvailability(this.connection.getID(), this.view.getpickedDate());
+                HashMap<String, Boolean> availability = this.view.getAvailableCheckBoxSelection();
                 int h = 0;
                 String m = ":00";
                 boolean isHalf = false;
@@ -197,13 +197,20 @@ public class Controller implements ActionListener{
                         currTime = "";
                     }
                     currTime += String.valueOf(h) + m + ":00";
+                    boolean isInNew = availability.get(currTime);
+                    boolean isInOld = false;
+                    for (int j = 0; j < currAvailability.size(); j++) {
+                        if (currAvailability.get(j)[0].equals(this.view.getpickedDate()) && currAvailability.get(j)[1].equals(currTime)) {
+                            isInOld = true;
+                        }
+                    }
                     
-                    if (currAvailability.contains(new String[]{this.view.getpickedDate(), currTime})) {
-                        if (!availability.get(currTime)) {
+                    if (isInOld) {
+                        if (!isInNew) {
                             this.connection.removeAvailability(this.connection.getID(), this.view.getpickedDate(), currTime);
                         }
                     } else {
-                        if (availability.get(currTime)) {
+                        if (isInNew) {
                             this.connection.addAvailability(this.connection.getID(), this.view.getpickedDate(), currTime);
                         }
                     }
@@ -279,9 +286,6 @@ public class Controller implements ActionListener{
     public boolean[] checkBarberAvailability(int barber, String date) {
         boolean[] isAvailable = new boolean[48];
         ArrayList<String[]> availability = this.connection.getAvailability(barber, date);
-        availability.forEach(entry->{
-            System.out.println("CONTROLLER Date:" + entry[0] + "|Time:" + entry[1]);
-        });
         
         int h = 0;
         String currTime;
