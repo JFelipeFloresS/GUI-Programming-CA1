@@ -24,14 +24,9 @@ public class Controller implements ActionListener{
     
     @Override
     public void actionPerformed(ActionEvent e) {
+        
         if (e.getActionCommand().contains("cancel booking ")) {
-            int cancelID = Integer.parseInt(e.getActionCommand().substring(15));
-            try {
-                this.connection.cancelBooking(cancelID);
-                this.view.setError("Booking cancelled successfully");
-            } catch (Exception except) {
-                this.view.setError("<html>Error:<br />" + except.getMessage() + "</html>");
-            }
+            cancelBooking(Integer.parseInt(e.getActionCommand().substring(15)));
             return;
         }
         
@@ -39,194 +34,72 @@ public class Controller implements ActionListener{
             case "create new account":
                 changeScreen(this.view.new createChoice());
                 break;
+                
             case "log in":
-                if (this.connection.checkCredentials(this.view.getEmailAddress(), this.view.getPass())) {
-                    this.connection.logIn(this.view.getEmailAddress());
-                    if (this.connection.getType().equals("customer")) {
-                        changeScreen(this.view.new customerMain());
-                    } else {
-                        changeScreen(this.view.new barberMain());
-                    }
-                } else {
-                    this.view.setError("<html>Email or password incorrect, please try again!<br />Don't have an account? Create one now!</html>");
-                }
+                logIn();
                 break;
+                
             case "log out":
-                this.connection.logOut();
-                changeScreen(this.view.new initialPage());
+                logOut();
                 break;
+                
             case "go to create barber":
                 changeScreen(this.view.new createBarber());
                 break;
+                
             case "create barber":
-                
-                if (!isValidEmailAddress(this.view.getEmailAddress())) {
-                    this.view.setError("Please insert a valid email address");
-                    break;
-                } else {
-                    this.view.setError("");
-                }
-                if (this.view.getPass().length() < 8) {
-                    this.view.setError("Password too short");
-                    break;
-                } else if (!isValidPassword(this.view.getPass())) {
-                    this.view.setError("<html>Password must contain a digit, <br />a lowercase and an uppercase letter</html>");
-                    break;
-                } else if (!this.view.getPass().equals(this.view.getConfirmPass())) {
-                    this.view.setError("Password and confirmation don't match");
-                    break;
-                }
-                
-                this.view.setError("");
-                
-                if (this.view.getFirstName().length() < 1 || this.view.getLastName().length() < 1 || this.view.getSetLocation().length() < 1 || this.view.getAddress().length() < 1) {
-                    this.view.setError("Please fill in all fields!");
-                    break;
-                } 
-                this.view.setError("");
-                switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "barber", this.view.getFirstName(), this.view.getLastName(), this.view.getPhoneNumber(), this.view.getSetLocation(), this.view.getAddress(), this.view.getTown())){
-                    case "done":
-                        changeScreen(this.view.new initialPage());
-                        this.view.setError("Account created successfully");
-                    case "repeated email":
-                        this.view.setError("<html>An account with this<br /> email address already exists</html>");
-                        break;
-                    case "account created":
-                        this.view.setError("Account created successfully, error adding your address");
-                        break;
-                    default: 
-                        this.view.setError("Unexpected error. Please try again.");
-                        break;
-                }
+                createBarberAccount();
                 break;
+                
             case "go to create customer":
                 changeScreen(this.view.new createCustomer());
                 break;
+                
             case "go to review":
                 System.out.println("show review page");
                 //this.changeScreen(new customerReview(this));
                 break;
+                
             case "view customer bookings":
-                System.out.println("show all bookings");
-                //this.changeScreen(new customerBookings(this));
+                showAllCustomerBookings();
                 break;
+                
             case "customer booking cancel":
                 System.out.println("cancel booking");
                 break;
+                
             case "create customer":
-                
-                if (isValidEmailAddress(this.view.getEmailAddress())) {
-                    this.view.setError("");
-                } else {
-                    this.view.setError("Please insert a valid email address");
-                    break;
-                }
-                if (this.view.getPass().length() < 8) {
-                    this.view.setError("Password too short");
-                    break;
-                } else if (!isValidPassword(this.view.getPass())) {
-                    this.view.setError("<html>Password must contain a digit, <br />a lowercase and an uppercase letter</html>");
-                    break;
-                } else if (!this.view.getPass().equals(this.view.getConfirmPass())) {
-                    this.view.setError("Password and confirmation don't match");
-                    break;
-                }
-                
-                this.view.setError("");
-                
-                if (this.view.getFirstName().length() < 1 || this.view.getLastName().length() < 1) {
-                    this.view.setError("Please fill in all fields!");
-                    break;
-                } 
-                this.view.setError("");
-                switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "customer", this.view.getFirstName(), this.view.getLastName(), this.view.getPhoneNumber(), null, null, null)){
-                    case "done":
-                        changeScreen(this.view.new initialPage());
-                        this.view.setError("Account created successfully");
-                    case "repeated email":
-                        this.view.setError("<html>An account with this<br /> email address already exists</html>");
-                        break;
-                    case "1 = email":
-                        this.view.setError("Error creating password");
-                        break;
-                    case "2 = password":
-                        this.view.setError("Error inserting names to database");
-                        break;
-                    case "3 = name":
-                        this.view.setError("Error setting account type");
-                        break;
-                    case "4 = type":
-                        this.view.setError("Error adding location to the database");
-                        break;
-                    default: 
-                        this.view.setError("Unexpected error. Please try again.");
-                        break;
-                }
-                
+                createCustomerAccount();
                 break;
+                
             case "back to initial page":
                 changeScreen(this.view.new initialPage());
                 break;
+                
             case "search barber name":
-                if (this.view.getBarberName().length() < 1) {
-                    this.view.setError("Please enter a name to search for");
-                } else {
-                    System.out.println("Search for " + this.view.getBarberName());
-                }
+                searchBarberByName();
                 break;
+                
             case "search barber location":
-                System.out.println("Show all barbers in " + this.view.getAllLocationsBox().getSelectedItem());
+                searchBarberByLocation();
                 break;
+                
             case "go to set availability":
                 changeScreen(this.view.new availabilityPage());
                 break;
+                
             case "select date":
                 this.view.setPickedDate();
                 break;
+                
             case "enter barber availability":
-                ArrayList<String[]> currAvailability = this.connection.getAvailability(this.connection.getID(), this.view.getpickedDate());
-                HashMap<String, Boolean> availability = this.view.getAvailableCheckBoxSelection();
-                int h = 0;
-                String m = ":00";
-                boolean isHalf = false;
-                String currTime;
-                for (int i = 0; i < 48; i++) {
-                    if (h<10) {
-                        currTime = "0";
-                    } else {
-                        currTime = "";
-                    }
-                    currTime += String.valueOf(h) + m + ":00";
-                    boolean isInNew = availability.get(currTime);
-                    boolean isInOld = false;
-                    for (int j = 0; j < currAvailability.size(); j++) {
-                        if (currAvailability.get(j)[0].equals(this.view.getpickedDate()) && currAvailability.get(j)[1].equals(currTime)) {
-                            isInOld = true;
-                        }
-                    }
-                    
-                    if (isInOld) {
-                        if (!isInNew) {
-                            this.connection.removeAvailability(this.connection.getID(), this.view.getpickedDate(), currTime);
-                        }
-                    } else {
-                        if (isInNew) {
-                            this.connection.addAvailability(this.connection.getID(), this.view.getpickedDate(), currTime);
-                        }
-                    }
-                    
-                    if (isHalf) {
-                        m = ":00";
-                        h++;
-                    } else {
-                        m = ":30";
-                    }
-                    isHalf = !isHalf;
-                }
+                updateBarberAvailability();
                 break;
+                
             case "back to main barber":
                 changeScreen(this.view.new barberMain());
                 break;
+                
             default:
                 System.out.println(e.getActionCommand());
                 break;
@@ -315,5 +188,176 @@ public class Controller implements ActionListener{
             }
         }
         return isAvailable;
+    }
+    
+    private void updateBarberAvailability() {
+        ArrayList<String[]> currAvailability = this.connection.getAvailability(this.connection.getID(), this.view.getpickedDate());
+        HashMap<String, Boolean> availability = this.view.getAvailableCheckBoxSelection();
+        int h = 0;
+        String m = ":00";
+        boolean isHalf = false;
+        String currTime;
+        for (int i = 0; i < 48; i++) {
+            if (h<10) {
+                currTime = "0";
+            } else {
+                currTime = "";
+            }
+            currTime += String.valueOf(h) + m + ":00";
+            boolean isInNew = availability.get(currTime);
+            boolean isInOld = false;
+            for (int j = 0; j < currAvailability.size(); j++) {
+                if (currAvailability.get(j)[0].equals(this.view.getpickedDate()) && currAvailability.get(j)[1].equals(currTime)) {
+                    isInOld = true;
+                }
+            }
+
+            if (isInOld) {
+                if (!isInNew) {
+                    this.connection.removeAvailability(this.connection.getID(), this.view.getpickedDate(), currTime);
+                }
+            } else {
+                if (isInNew) {
+                    this.connection.addAvailability(this.connection.getID(), this.view.getpickedDate(), currTime);
+                }
+            }
+
+            if (isHalf) {
+                m = ":00";
+                h++;
+            } else {
+                m = ":30";
+            }
+            isHalf = !isHalf;
+        }
+    }
+    
+    private void searchBarberByName() {
+        if (this.view.getBarberName().length() < 1) {
+            this.view.setError("Please enter a name to search for");
+        } else {
+            System.out.println("Search for " + this.view.getBarberName());
+        }
+    }
+    
+    private void searchBarberByLocation() {
+        System.out.println("Show all barbers in " + this.view.getAllLocationsBox().getSelectedItem());
+    }
+    
+    private void showAllCustomerBookings() {
+        System.out.println("show all bookings");
+        //this.changeScreen(new customerBookings(this));
+    }
+    
+    private void createCustomerAccount() {
+        if (isValidEmailAddress(this.view.getEmailAddress())) {
+            this.view.setError("");
+        } else {
+            this.view.setError("Please insert a valid email address");
+            return;
+        }
+        if (this.view.getPass().length() < 8) {
+            this.view.setError("Password too short");
+            return;
+        } else if (!isValidPassword(this.view.getPass())) {
+            this.view.setError("<html>Password must contain a digit, <br />a lowercase and an uppercase letter</html>");
+            return;
+        } else if (!this.view.getPass().equals(this.view.getConfirmPass())) {
+            this.view.setError("Password and confirmation don't match");
+            return;
+        }
+
+        this.view.setError("");
+
+        if (this.view.getFirstName().length() < 1 || this.view.getLastName().length() < 1) {
+            this.view.setError("Please fill in all fields!");
+            return;
+        } 
+        this.view.setError("");
+        switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "customer", this.view.getFirstName(), this.view.getLastName(), this.view.getPhoneNumber(), null, null, null)){
+            case "done":
+                changeScreen(this.view.new initialPage());
+                this.view.setError("Account created successfully");
+            case "repeated email":
+                this.view.setError("<html>An account with this<br /> email address already exists</html>");
+                break;
+            case "account created":
+                this.view.setError("Error adding location to the database");
+                break;
+            default: 
+                this.view.setError("Unexpected error. Please try again.");
+                break;
+        }
+
+    }
+    
+    private void createBarberAccount() {
+        
+        if (!isValidEmailAddress(this.view.getEmailAddress())) {
+            this.view.setError("Please insert a valid email address");
+            return;
+        } else {
+            this.view.setError("");
+        }
+        if (this.view.getPass().length() < 8) {
+            this.view.setError("Password too short");
+            return;
+        } else if (!isValidPassword(this.view.getPass())) {
+            this.view.setError("<html>Password must contain a digit, <br />a lowercase and an uppercase letter</html>");
+            return;
+        } else if (!this.view.getPass().equals(this.view.getConfirmPass())) {
+            this.view.setError("Password and confirmation don't match");
+            return;
+        }
+
+        this.view.setError("");
+
+        if (this.view.getFirstName().length() < 1 || this.view.getLastName().length() < 1 || this.view.getSetLocation().length() < 1 || this.view.getAddress().length() < 1) {
+            this.view.setError("Please fill in all fields!");
+            return;
+        } 
+        this.view.setError("");
+        switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "barber", this.view.getFirstName(), this.view.getLastName(), this.view.getPhoneNumber(), this.view.getSetLocation(), this.view.getAddress(), this.view.getTown())){
+            case "done":
+                changeScreen(this.view.new initialPage());
+                this.view.setError("Account created successfully");
+            case "repeated email":
+                this.view.setError("<html>An account with this<br /> email address already exists</html>");
+                break;
+            case "account created":
+                this.view.setError("Account created successfully, error adding your address");
+                break;
+            default: 
+                this.view.setError("Unexpected error. Please try again.");
+                break;
+        }
+    }
+    
+    private void logIn() {
+        if (this.connection.checkCredentials(this.view.getEmailAddress(), this.view.getPass())) {
+            this.connection.logIn(this.view.getEmailAddress());
+            if (this.connection.getType().equals("customer")) {
+                changeScreen(this.view.new customerMain());
+            } else {
+                changeScreen(this.view.new barberMain());
+            }
+        } else {
+            this.view.setError("<html>Email or password incorrect, please try again!<br />Don't have an account? Create one now!</html>");
+        }
+    }
+    
+    private void logOut() {
+        this.connection.logOut();
+        changeScreen(this.view.new initialPage());
+    }
+    
+    private void cancelBooking(int booking) {
+        try {
+            this.connection.cancelBooking(booking);
+            this.view.setError("Booking cancelled successfully");
+        } catch (Exception except) {
+            this.view.setError("<html>Error:<br />" + except.getMessage() + "</html>");
+        }
+        
     }
 }
