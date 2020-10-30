@@ -102,6 +102,8 @@ public class View extends JFrame {
     private JPanel allTimes = null;
     private JButton enterAvailability = null;
     private JPanel mainTime = null;
+    private JPanel leftFindABarberPanel = null;
+    private JPanel rightFindABarberPanel = null;
     private Time time = null;
     private JLabel error = null;
     
@@ -124,7 +126,7 @@ public class View extends JFrame {
         this.setTitle("Find A Barber");
         
         //initialise main panel
-        this.add(new availabilityPage());
+        this.add(new findABarber());
         
         //finalise JFrame
         getContentPane().setFont(bodyFont);
@@ -780,10 +782,10 @@ public class View extends JFrame {
             JButton cancelBooking = new JButton("<html>CANCEL<br />BOOKING</html>");
             try {
                 HashMap<String, String> nextBooking = controller.getNextCustomerBooking();
-                centerNext.add(new JLabel("Date: " + nextBooking.get("date") + " | Barber: " + nextBooking.get("name")), BorderLayout.NORTH);
-                centerNext.add(new JLabel("Time: " + nextBooking.get("time") + " | Phone: " + nextBooking.get("phone")), BorderLayout.EAST);
-                centerNext.add(new JLabel("Address: " + nextBooking.get("town")), BorderLayout.WEST);
-                centerNext.add(new JLabel(nextBooking.get("address")), BorderLayout.SOUTH);
+                centerNext.add(new JLabel("<html>Date: " + nextBooking.get("date") + "<br />Barber: " + nextBooking.get("name") + "</html>"), BorderLayout.NORTH);
+                centerNext.add(new JLabel("<html>Time: " + nextBooking.get("time") + " | Phone: " + nextBooking.get("phone") + "<br />"
+                        + nextBooking.get("address") + ", " + nextBooking.get("town") + " - " + nextBooking.get("location") + "<br />"
+                                + "Status: " + nextBooking.get("status").toUpperCase() + "</html>"), BorderLayout.CENTER);
             } catch (Exception e) {
                 centerNext.add(new JLabel("NO UPCOMING BOOKINGS FOUND"));
                 cancelBooking.setVisible(false);
@@ -903,14 +905,13 @@ public class View extends JFrame {
             padding1.setPreferredSize(new Dimension(250, 20));
             padding1.setBackground(Color.WHITE);
             
-            multipleBookingsPanel.add(padding1);
             try {
                 ArrayList<String[]> upcoming = controller.getBarberUpcomingBookings();
-                multipleBookingsPanel.setLayout(new GridLayout(upcoming.size() + 2,1));
+                multipleBookingsPanel.setLayout(new GridLayout(upcoming.size() + 1,1));
                 
                 for (int i = 0; i < upcoming.size(); i++) {
                     JPanel booking = new JPanel();
-                    booking.setPreferredSize(new Dimension(250, 100));
+                    booking.setPreferredSize(new Dimension(250, 230));
                     booking.setLayout(new BorderLayout());
                     booking.setBorder(border(Color.BLACK, 1));
                     
@@ -926,16 +927,12 @@ public class View extends JFrame {
                     leftBottom.setLayout(new BorderLayout());
                     leftBottom.setBackground(Color.WHITE);
                     
-                    JLabel cust = new JLabel("Customer: " + upcoming.get(i)[3] + " | Phone: " + upcoming.get(i)[4]);
+                    JLabel cust = new JLabel("<html>Customer: " + upcoming.get(i)[3] + "<br />Phone: " + upcoming.get(i)[4] + "</html>");
                     JLabel dt = new JLabel("Date: " + upcoming.get(i)[0]);
 
                     JPanel hrPanel = new JPanel();
                     hrPanel.setBackground(Color.WHITE);
-                    JLabel hr = new JLabel("Time: " + upcoming.get(i)[1]);
-                    hr.setBorder(border(Color.black, 1));
-                    hr.setPreferredSize(new Dimension(70, 20));
-                    hr.setHorizontalTextPosition(SwingConstants.CENTER);
-                    hrPanel.add(hr, BorderLayout.CENTER);
+                    hrPanel.add(new JLabel("<html>Status: " + upcoming.get(i)[5] + "<br />" + upcoming.get(i)[1] + "</html>"), BorderLayout.CENTER);
                     
                     JLabel num = new JLabel("Booking ID: " + upcoming.get(i)[2]);
                     
@@ -952,18 +949,20 @@ public class View extends JFrame {
                     right.setBackground(Color.WHITE);
                     right.setLayout(new BorderLayout());
                     JButton cancel = new JButton("CANCEL");
-                    cancel.addActionListener(controller);
-                    cancel.setFont(smallFont);
-                    cancel.setBackground(textFieldColour);
                     cancel.setActionCommand("cancel booking " + upcoming.get(i)[2]);
-                    cancel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                    
+                    JButton accept = new JButton("CONFIRM");
+                    accept.setActionCommand("confirm " + upcoming.get(i)[2]);
+                    if (upcoming.get(i)[5].equals("requested")) {
+                        right.add(accept, BorderLayout.NORTH);
+                    }
                     right.add(cancel, BorderLayout.SOUTH);
                     
                     booking.add(left, BorderLayout.CENTER);
                     booking.add(right, BorderLayout.EAST);
                     
                     multipleBookingsPanel.add(booking);
-                    
+                    standardiseChildren(multipleBookingsPanel, true, false, true);
                 }
                 
             } catch (Exception e) {
@@ -972,6 +971,7 @@ public class View extends JFrame {
                 multipleBookingsPanel.add(new JLabel("NO BOOKINGS FOUND"));
             }
             
+            multipleBookingsPanel.add(padding1);
             JScrollPane multiplePane = new JScrollPane(multipleBookingsPanel);
             
             infoPanel.add(topLabelPanel, BorderLayout.PAGE_START);
@@ -1129,6 +1129,103 @@ public class View extends JFrame {
             this.add(mainPanel, BorderLayout.CENTER);
             
             standardiseChildren(this, true, false, true);
+        }
+    }
+    
+    public class findABarber extends JPanel {
+        public findABarber() {
+            this.setLayout(new BorderLayout());
+            
+            JPanel mainPanel = new JPanel();
+            mainPanel.setBackground(white);
+            mainPanel.setLayout(new BorderLayout());
+            
+            // ** top panel **
+            JPanel topPanel = new JPanel();
+            topPanel.setBorder(border(Color.BLACK, 1));
+            topPanel.setPreferredSize(new Dimension(windowWidth, (int)windowHeight / 5));
+            topPanel.setBackground(white);
+            topPanel.setLayout(new BorderLayout());
+            
+            JPanel topTopPanel = new JPanel();
+            topTopPanel.setBackground(white);
+            
+            JLabel topTopLabel = new JLabel("FIND A BARBER");
+            topTopLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+            
+            error = new JLabel();
+            
+            topTopPanel.add(topTopLabel);
+            topTopPanel.add(error);
+            
+            JPanel leftTopPanel = new JPanel();
+            leftTopPanel.setLayout(new BorderLayout());
+            leftTopPanel.setBackground(white);
+            
+            JLabel topLeftLabel = new JLabel("BY NAME");
+            topLeftLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+            
+            JPanel centerLeftPanel = new JPanel();
+            centerLeftPanel.setBackground(white);
+            
+            barberName = new JTextField(10);
+            JButton searchName = new JButton("SEARCH");
+            searchName.setActionCommand("search barber name");
+            
+            centerLeftPanel.add(barberName);
+            centerLeftPanel.add(searchName);
+            
+            leftTopPanel.add(topLeftLabel, BorderLayout.NORTH);
+            leftTopPanel.add(centerLeftPanel, BorderLayout.CENTER);
+            
+            JPanel rightTopPanel = new JPanel();
+            rightTopPanel.setLayout(new BorderLayout());
+            rightTopPanel.setBackground(white);
+            
+            JLabel topRightTopLabel = new JLabel("BY LOCATION");
+            topRightTopLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+            JPanel centerRightTopPanel = new JPanel();
+            centerRightTopPanel.setBackground(white);
+            
+            allLocationsBox = new JComboBox(controller.getLocations());
+            JButton searchLocation = new JButton("SEARCH");
+            searchLocation.setActionCommand("search barber location");
+            
+            centerRightTopPanel.add(allLocationsBox);
+            centerRightTopPanel.add(searchLocation);
+            
+            rightTopPanel.add(topRightTopLabel, BorderLayout.NORTH);
+            rightTopPanel.add(centerRightTopPanel, BorderLayout.CENTER);
+            
+            JButton returnPage = new JButton("BACK");
+            returnPage.setActionCommand("back to main customer");
+            
+            topPanel.add(topTopPanel, BorderLayout.NORTH);
+            topPanel.add(leftTopPanel, BorderLayout.WEST);
+            topPanel.add(rightTopPanel, BorderLayout.CENTER);
+            topPanel.add(returnPage, BorderLayout.EAST);
+            
+            // ** left panel **
+            leftFindABarberPanel = new JPanel();
+            leftFindABarberPanel.setPreferredSize(paddingX5);
+            leftFindABarberPanel.setBackground(white);
+            leftFindABarberPanel.setLayout(new BorderLayout());
+            
+            // ** right panel **
+            rightFindABarberPanel = new JPanel();
+            rightFindABarberPanel.setPreferredSize(paddingX5);
+            rightFindABarberPanel.setBackground(white);
+            rightFindABarberPanel.setLayout(new BorderLayout());
+            
+            mainPanel.add(topPanel, BorderLayout.NORTH);
+            mainPanel.add(leftFindABarberPanel, BorderLayout.WEST);
+            mainPanel.add(rightFindABarberPanel, BorderLayout.CENTER);
+            
+            this.add(new loggedLeftPanel(), BorderLayout.WEST);
+            this.add(mainPanel, BorderLayout.CENTER);
+            
+            standardiseChildren(this, true, false, true);
+            error.setForeground(Color.red);
         }
     }
     
@@ -1318,6 +1415,97 @@ public class View extends JFrame {
             mainTime.add(enterAvailability);
             
             standardiseChildren(mainTime, true, false, true);
+    }
+    
+    public void searchForBarber(String searchBy) {
+        if (leftFindABarberPanel.getComponentCount()>1) {
+            leftFindABarberPanel.removeAll();
+        }
+        leftFindABarberPanel.add(new JLabel("SEARCH RESULT: "), BorderLayout.NORTH);
+        ArrayList<String[]> searchResults;
+        if (searchBy.equals("name")) {
+            searchResults = controller.searchForBarberName();
+        } else {
+            searchResults = controller.searchForBarberLocation();
+        }
+        
+        JPanel allBarbers = new JPanel();
+        allBarbers.setLayout(new GridLayout(searchResults.size() + 1,1));
+        
+        if (searchResults.size()>0) {
+            
+            for (int i = 0; i < searchResults.size(); i++) {
+                JPanel singleBarber = new JPanel();
+                singleBarber.setLayout(new BorderLayout());
+                singleBarber.setBorder(border(Color.BLACK, 1));
+                singleBarber.setBackground(white);
+                singleBarber.setPreferredSize(new Dimension((int)(windowWidth / 3.5), (int)windowHeight / 10));
+                singleBarber.setMaximumSize(new Dimension((int)(windowWidth / 3.5), (int)windowHeight / 10));
+                singleBarber.setMinimumSize(new Dimension((int)(windowWidth / 3.5), (int)windowHeight / 10));
+
+                JPanel leftSingle = new JPanel();
+                leftSingle.setBackground(white);
+                leftSingle.setLayout(new BorderLayout());
+                leftSingle.add(new JLabel("<html>" + searchResults.get(i)[1].toUpperCase() + " " + searchResults.get(i)[2].toUpperCase() + "<br />"
+                        + searchResults.get(i)[4] + "<br />" + searchResults.get(i)[5] + " - " + searchResults.get(i)[6] + "<br />"
+                        + "Phone No: " + searchResults.get(i)[3]
+                        + "</html>"), BorderLayout.CENTER);
+
+                JPanel rightSingle = new JPanel();
+                rightSingle.setBackground(white);
+
+                JButton checkBarber = new JButton("CHECK");
+                checkBarber.setPreferredSize(new Dimension((int) 100,(int) 45));
+                checkBarber.setActionCommand("check availability " + searchResults.get(i)[0]);
+
+                rightSingle.add(checkBarber);
+
+                singleBarber.add(leftSingle, BorderLayout.WEST);
+                singleBarber.add(rightSingle, BorderLayout.CENTER);
+
+                allBarbers.add(singleBarber);
+            }
+        
+            JPanel p1 = new JPanel();
+            p1.setPreferredSize(new Dimension((int)(windowWidth / 3.5), (int)(windowHeight / 10)));
+            p1.setBackground(white);
+
+            allBarbers.add(p1);
+
+            JScrollPane sp = new JScrollPane(allBarbers);
+            leftFindABarberPanel.add(sp, BorderLayout.CENTER);
+        } else {
+            leftFindABarberPanel.add(new JLabel("NO MATCHES FOUND"));
+        }
+        
+        standardiseChildren(leftFindABarberPanel, true, false, true);
+        standardiseChildren(allBarbers, true, false, true);
+    }
+    
+    public void showBarberAvailability(int getB) {
+        ArrayList<String[]> availableList = controller.getbarberAvailability(getB, null);
+        String[] bInfo = controller.getBarber(getB);
+        rightFindABarberPanel.add(new JLabel("<html>AVAILABLE TIMES: <br />" + bInfo[0] + "<br />" + bInfo[1] + ", " + bInfo[2] + "<br />Phone: " + bInfo[4] + "</html>"), BorderLayout.NORTH);
+        
+        JPanel times = new JPanel();
+        times.setBackground(white);
+        times.setLayout(new GridLayout(availableList.size(), 1));
+        
+        for (int i = 0; i < availableList.size(); i++) {
+            JPanel st = new JPanel();
+            st.setBorder(border(Color.BLACK, 1));
+            st.add(new JLabel(availableList.get(i)[0] + " | " + availableList.get(i)[1]));
+            JButton bookB = new JButton("BOOK");
+            bookB.setActionCommand("book " + availableList.get(i)[0] + " " + availableList.get(i)[1] + " " + getB);
+            st.add(bookB);
+            times.add(st);
+        }
+        
+        JScrollPane sp = new JScrollPane(times);
+        rightFindABarberPanel.add(sp);
+        
+        standardiseChildren(rightFindABarberPanel, true, false, true);
+        standardiseChildren(times, true, false, true);
     }
     
     public void setError(String e) {

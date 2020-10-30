@@ -26,7 +26,43 @@ public class Controller implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         
         if (e.getActionCommand().contains("cancel booking ")) {
-            cancelBooking(Integer.parseInt(e.getActionCommand().substring(15)));
+            try {
+                cancelBooking(Integer.parseInt(e.getActionCommand().substring(15)));
+                HashMap<String, String> bookingInfo = this.connection.getBookingInfo(Integer.parseInt(e.getActionCommand().substring(15)));
+                this.connection.addAvailability(Integer.parseInt(bookingInfo.get("barber")), bookingInfo.get("date"), bookingInfo.get("time"));
+                this.view.setError("THE BOOKING WAS CANCELLED");
+            } catch (NumberFormatException exc) {
+                this.view.setError(exc.getMessage());
+            }
+            
+            return;
+        }
+        
+        if (e.getActionCommand().contains("check availability ")) {
+            showBarberAvailability(Integer.parseInt(e.getActionCommand().substring(19)));
+            return;
+        }
+        
+        if (e.getActionCommand().contains("book ")) {
+            String[] bookInfo = e.getActionCommand().split(" ");
+            String bookDate = bookInfo[1];
+            String bookTime = bookInfo[2];
+            int barberID = Integer.parseInt(bookInfo[3]);
+            int customerID = this.connection.getID();
+            if (this.connection.getBookingID(bookDate, bookTime, customerID, barberID) == 0) {
+                this.connection.createBooking(bookDate, bookTime, customerID, barberID);
+                this.connection.removeAvailability(barberID, bookDate, bookTime);
+                this.view.setError("BOOKING REQUESTED SUCCESSFULLY");
+            } else {
+                this.view.setError("YOU HAVE ALREADY REQUESTED THIS BOOKING");
+            }
+            return;
+        }
+        
+        if (e.getActionCommand().contains("confirm ")) {
+            int booking = Integer.parseInt(e.getActionCommand().substring(8));
+            this.connection.confirmBooking(booking);
+            this.view.setError("BOOKING ACCEPTED");
             return;
         }
         
@@ -100,6 +136,10 @@ public class Controller implements ActionListener{
                 changeScreen(this.view.new barberMain());
                 break;
                 
+            case "back to main customer":
+                changeScreen(this.view.new customerMain());
+                break;
+                
             default:
                 System.out.println(e.getActionCommand());
                 break;
@@ -152,6 +192,14 @@ public class Controller implements ActionListener{
         return this.connection.getFirstName();
     }
     
+    public ArrayList<String[]> searchForBarberName() {
+        return this.connection.searchForBarberName(this.view.getBarberName());
+    }
+    
+    public ArrayList<String[]> searchForBarberLocation() {
+        return this.connection.searchForBarberLocation(this.view.getAllLocationsBox().getSelectedItem().toString());
+    }
+    
     public int getSessionID() {
         return connection.getID();
     }
@@ -188,6 +236,14 @@ public class Controller implements ActionListener{
             }
         }
         return isAvailable;
+    }
+    
+    public String[] getBarber(int id) {
+        return this.connection.getBarber(id);
+    }
+    
+    public ArrayList<String[]> getbarberAvailability(int id, String date) {
+        return this.connection.getAvailability(id, date);
     }
     
     private void updateBarberAvailability() {
@@ -236,12 +292,19 @@ public class Controller implements ActionListener{
         if (this.view.getBarberName().length() < 1) {
             this.view.setError("Please enter a name to search for");
         } else {
-            System.out.println("Search for " + this.view.getBarberName());
+            this.view.setError("");
+            changeScreen(this.view.new findABarber());
+            this.view.searchForBarber("name");
         }
     }
     
     private void searchBarberByLocation() {
-        System.out.println("Show all barbers in " + this.view.getAllLocationsBox().getSelectedItem());
+        changeScreen(this.view.new findABarber());
+        this.view.searchForBarber("location");
+    }
+    
+    private void showBarberAvailability(int i) {
+        this.view.showBarberAvailability(i);
     }
     
     private void showAllCustomerBookings() {
