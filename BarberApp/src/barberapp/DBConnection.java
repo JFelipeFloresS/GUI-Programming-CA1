@@ -43,7 +43,7 @@ public class DBConnection {
         // initialise variables
         this.controller = controller;
         initialise();
-        logIn("jimmijoey@gmail.com");
+        logIn("josefelipefloress@gmail.com");
     }
     
     private void initialise() {
@@ -165,7 +165,7 @@ public class DBConnection {
         
         try {
             
-            String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time, Booking_Status FROM Bookings WHERE Customer=" + this.id + " ORDER BY Booking_Date, Booking_Time;";
+            String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time, Booking_Status FROM Bookings WHERE Customer=" + this.id + " AND Booking_Status!='cancelled' ORDER BY Booking_Date, Booking_Time;";
             
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             
@@ -257,7 +257,7 @@ public class DBConnection {
         ArrayList<String[]> all = new ArrayList<>();
         
         try {
-            String query = "SELECT * FROM Bookings WHERE Barber=" + id + " ORDER BY Booking_Date, Booking_Time;";
+            String query = "SELECT * FROM Bookings WHERE Barber=" + id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
             
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
@@ -288,7 +288,7 @@ public class DBConnection {
         ArrayList<String[]> all = new ArrayList<>();
         
         try {
-            String query = "SELECT * FROM Bookings WHERE Customer=" + id + " ORDER BY Booking_Date, Booking_Time;";
+            String query = "SELECT * FROM Bookings WHERE Customer=" + id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
             
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
@@ -299,9 +299,9 @@ public class DBConnection {
                 String currDate = rs.getString("Booking_Date");
                 String currTime = rs.getString("Booking_Time");
                 String currStatus = rs.getString("Booking_Status");
-                String currBarber[] = getCustomer(rs.getInt("Customer"));
+                String currBarber[] = getBarber(rs.getInt("Barber"));
                 
-                all.add(new String[]{currID, currDate, currTime, currStatus, currBarber[0], currBarber[1]});
+                all.add(new String[]{currID, currDate, currTime, currStatus, currBarber[0], currBarber[1], currBarber[2], currBarber[3], currBarber[4], currBarber[5]});
                 
             }
             rs.close();
@@ -519,7 +519,7 @@ public class DBConnection {
         
         // if email input by user is in the database return the account id
         this.getEmails().forEach((Integer i, String em) -> {
-            if (em.equals(user)) {
+            if (em.equalsIgnoreCase(user)) {
                 id = i;
             }
         });
@@ -536,7 +536,7 @@ public class DBConnection {
     public void logIn(String email) {
         this.id = -1;
         getEmails().forEach((i, e) -> {
-            if (e.equals(email)) {
+            if (e.equalsIgnoreCase(email)) {
                 this.id = i;
             }
         });
@@ -633,11 +633,13 @@ public class DBConnection {
         return info;
     }
     
+    // ** NOT WORKING **
     public ArrayList<String[]> searchForBarberName(String search) {
         ArrayList<String[]> results = new ArrayList<>();
         String[] fullName = null;
         String name1 = null;
         String name2 = null;
+        search = search.toLowerCase();
         if (search.contains(" ")) {
             fullName = search.split(" ");
             name1 = fullName[0];
@@ -646,9 +648,9 @@ public class DBConnection {
         try {
             String query;
             if (fullName != null) {
-                query = "SELECT * FROM Accounts WHERE Type='barber' AND (First_Name='" + name1 + "' OR Last_Name='" + name1 + "' OR First_Name='" + name2 + "' OR Last_Name='" + name2 + "')";
+                query = "SELECT * FROM Accounts WHERE Type='barber' AND (lower(First_Name)='" + name1 + "' OR lower(Last_Name)='" + name1 + "' OR lower(First_Name)='" + name2 + "' OR lower(Last_Name)='" + name2 + "')";
             } else {
-                query = "SELECT * FROM Accounts WHERE Type='barber' AND (First_Name='" + search + "' OR Last_Name='" + search + "')";
+                query = "SELECT * FROM Accounts WHERE Type='barber' AND (lower(First_Name)='" + search + "' OR lower(Last_Name)='" + search + "')";
             }
             Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();

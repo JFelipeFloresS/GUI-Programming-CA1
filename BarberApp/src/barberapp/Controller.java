@@ -2,6 +2,7 @@ package barberapp;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -100,6 +101,10 @@ public class Controller implements ActionListener{
                 showAllCustomerBookings();
                 break;
                 
+            case "view barber bookings":
+                showAllBarberBookings();
+                break;
+                
             case "customer booking cancel":
                 System.out.println("cancel booking");
                 break;
@@ -178,6 +183,14 @@ public class Controller implements ActionListener{
     
     public ArrayList<String[]> getBarberUpcomingBookings() {
         return this.connection.getBarberUpcomingBookings();
+    }
+    
+    public ArrayList<String[]> getBarberBookings() {
+        return this.connection.getAllBarberBookings(this.connection.getID());
+    }
+    
+    public ArrayList<String[]> getCustomerBookings() {
+        return this.connection.getAllCustomerBookings(this.connection.getID());
     }
     
     public HashMap<String, String> getNextCustomerBooking() {
@@ -293,7 +306,9 @@ public class Controller implements ActionListener{
             this.view.setError("Please enter a name to search for");
         } else {
             this.view.setError("");
+            String n = this.view.getBarberName();
             changeScreen(this.view.new findABarber());
+            this.view.setBarberName(n);
             this.view.searchForBarber("name");
         }
     }
@@ -308,8 +323,11 @@ public class Controller implements ActionListener{
     }
     
     private void showAllCustomerBookings() {
-        System.out.println("show all bookings");
-        //this.changeScreen(new customerBookings(this));
+        changeScreen(this.view.new customerBookings());
+    }
+    
+    private void showAllBarberBookings() {
+        changeScreen(this.view.new barberBookings());
     }
     
     private void createCustomerAccount() {
