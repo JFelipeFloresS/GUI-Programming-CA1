@@ -60,6 +60,21 @@ public class Controller implements ActionListener{
             return;
         }
         
+        if (e.getActionCommand().startsWith("review ")) {
+            changeScreen(this.view.new submitReview(Integer.parseInt(e.getActionCommand().substring(6))));
+            return;
+        }
+        
+        if (e.getActionCommand().contains("star ")) {
+            this.view.starPressed(Integer.parseInt(e.getActionCommand().substring(5)));
+            return;
+        }
+        
+        if (e.getActionCommand().contains("submit review ")) {
+            submitReview(Integer.parseInt(e.getActionCommand().substring(14)));
+            return;
+        }
+        
         if (e.getActionCommand().contains("confirm ")) {
             int booking = Integer.parseInt(e.getActionCommand().substring(8));
             this.connection.confirmBooking(booking);
@@ -259,6 +274,10 @@ public class Controller implements ActionListener{
         return this.connection.getAvailability(id, date);
     }
     
+    public HashMap<String, String> getBookingInfo(int b) {
+        return this.connection.getBookingInfo(b);
+    }
+    
     private void updateBarberAvailability() {
         ArrayList<String[]> currAvailability = this.connection.getAvailability(this.connection.getID(), this.view.getpickedDate());
         HashMap<String, Boolean> availability = this.view.getAvailableCheckBoxSelection();
@@ -441,4 +460,11 @@ public class Controller implements ActionListener{
         }
         
     }
+    
+    private void submitReview(int booking) {
+        this.connection.addReview(booking, this.view.getReview(), this.view.getStars());
+        changeScreen(this.view.new customerMain());
+        this.view.setError("REVIEW SUBMITTED SUCCESSFULLY");
+    }
+            
 }

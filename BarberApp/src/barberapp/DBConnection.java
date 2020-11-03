@@ -1,27 +1,13 @@
 package barberapp;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.KeySpec;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Time;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 
 /**
  *
@@ -37,13 +23,13 @@ public class DBConnection {
     private int id;
     private String success;
     private String type;
-    private Controller controller;
+    private final Controller controller;
     
     public DBConnection(Controller controller) {
         // initialise variables
         this.controller = controller;
         initialise();
-        logIn("josefelipefloress@gmail.com");
+        logIn("jimmijoey@gmail.com");
     }
     
     private void initialise() {
@@ -70,19 +56,14 @@ public class DBConnection {
     
     public String[] getLocations() {
         ArrayList<String> locations = new ArrayList<>();
-        String[] l = null;
+        String[] l;
         
         String query = "SELECT Location FROM Barber_Location";
         
-        try {
-            // open connection
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            
-            // create statement
-            Statement stmt = conn.createStatement();
-            
-            // execute query
-            ResultSet rs = stmt.executeQuery(query);
+        // open connection
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password); // create statement
+            Statement stmt = conn.createStatement(); // execute query
+            ResultSet rs = stmt.executeQuery(query)){
             
             // put id and email into hashmap
             while (rs.next()) {
@@ -91,16 +72,13 @@ public class DBConnection {
                 }
             }
         
-            rs.close();
             conn.close();
-            stmt.close();
-            l = new String[locations.size()];
-            for (int i = 0; i < l.length; i++) {
-                l[i] = locations.get(i);
-            }
-            
         } catch (SQLException se) {
             handleExceptions(se);
+        }
+        l = new String[locations.size()];
+        for (int i = 0; i < l.length; i++) {
+            l[i] = locations.get(i);
         }
         return l;
     }
@@ -108,11 +86,10 @@ public class DBConnection {
     public String[] getBarber(int id) {
         String[] barber = new String[6];
         
-        try {
-            String query = "SELECT First_Name, Last_Name, Address, Town, Location, Phone FROM Accounts, Barber_Location WHERE Accounts.Account_ID=" + id + " AND Barber_Location.Account_ID=" + id + ";";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            Statement stmt = conn.createStatement();){
             
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            Statement stmt = conn.createStatement();
+            String query = "SELECT First_Name, Last_Name, Address, Town, Location, Phone FROM Accounts, Barber_Location WHERE Accounts.Account_ID=" + id + " AND Barber_Location.Account_ID=" + id + ";";
             
             ResultSet rs = stmt.executeQuery(query);
             
@@ -134,14 +111,10 @@ public class DBConnection {
     public String[] getCustomer(int id){
         String[] customer = new String[2];
         
-        try {
-            String query = "SELECT First_Name, Phone FROM Accounts WHERE Account_ID=" + id + ";";
-            
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            
+        String query = "SELECT First_Name, Phone FROM Accounts WHERE Account_ID=" + id + ";";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
-            
-            ResultSet rs = stmt.executeQuery(query);
+            ResultSet rs = stmt.executeQuery(query);){
             
             while (rs.next()) {
                 customer[0] = rs.getString("First_Name");
@@ -163,15 +136,11 @@ public class DBConnection {
         // hashmap to store customer's bookings
         ArrayList<String[]> customerBookings = new ArrayList<>();
         
-        try {
-            
-            String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time, Booking_Status FROM Bookings WHERE Customer=" + this.id + " AND Booking_Status!='cancelled' ORDER BY Booking_Date, Booking_Time;";
-            
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            
+        String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time, Booking_Status FROM Bookings WHERE Customer=" + this.id + " AND Booking_Status!='cancelled' ORDER BY Booking_Date, Booking_Time;";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);){
             
-            ResultSet rs = stmt.executeQuery(query);
             while(rs.next()) {
                 String[] booking_info = new String[9];
                 String[] barber = getBarber(rs.getInt("Barber"));
@@ -214,14 +183,10 @@ public class DBConnection {
         String currDate, currTime, currStatus;
         int currID;
         
-        try {
-            String bookingQ = "SELECT * FROM Bookings WHERE Barber=" + this.id + " AND Booking_Status!='cancelled' ORDER BY Booking_Date, Booking_Time;";
-            
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            
+        String bookingQ = "SELECT * FROM Bookings WHERE Barber=" + this.id + " AND Booking_Status!='cancelled' ORDER BY Booking_Date, Booking_Time;";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
-            
-            ResultSet rs = stmt.executeQuery(bookingQ);
+            ResultSet rs = stmt.executeQuery(bookingQ);){
             
             int c = 0;
             while(rs.next()) {
@@ -256,12 +221,10 @@ public class DBConnection {
     public ArrayList<String[]> getAllBarberBookings(int id) {
         ArrayList<String[]> all = new ArrayList<>();
         
-        try {
-            String query = "SELECT * FROM Bookings WHERE Barber=" + id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
-            
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+        String query = "SELECT * FROM Bookings WHERE Barber=" + id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
+            ResultSet rs = stmt.executeQuery(query);){
             
             while(rs.next()) {
                 String currID = rs.getString("Booking_ID");
@@ -287,12 +250,10 @@ public class DBConnection {
     public ArrayList<String[]> getAllCustomerBookings(int id) {
         ArrayList<String[]> all = new ArrayList<>();
         
-        try {
-            String query = "SELECT * FROM Bookings WHERE Customer=" + id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
-            
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+        String query = "SELECT * FROM Bookings WHERE Customer=" + id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
+            ResultSet rs = stmt.executeQuery(query);){
             
             while(rs.next()) {
                 String currID = rs.getString("Booking_ID");
@@ -316,10 +277,9 @@ public class DBConnection {
     }
     
     public void addReview(int id, String review, int stars) {
-        try {
-            String query = "INSERT INTO Booking_Review(Booking_ID, Review, Stars) VALUES(?, ?, ?);";
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            PreparedStatement stmt = conn.prepareStatement(query);
+        String query = "INSERT INTO Booking_Review(Booking_ID, Review, Stars) VALUES(?, ?, ?);";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            PreparedStatement stmt = conn.prepareStatement(query);){
             stmt.setInt(1, id);
             stmt.setString(2, review);
             stmt.setInt(3, stars);
@@ -328,17 +288,15 @@ public class DBConnection {
             
             stmt.close();
             conn.close();
-            
         } catch (SQLException se) {
             handleExceptions(se);
         }
     }
     
     public void updateReview(int id, String review, int stars) {
-        try {
-            String query = "UPDATE Booking_Review SET Review='" + review + "', Stars=" + stars + " WHERE Booking_ID=" + id + ";";
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            Statement stmt = conn.createStatement();
+        String query = "UPDATE Booking_Review SET Review='" + review + "', Stars=" + stars + " WHERE Booking_ID=" + id + ";";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            Statement stmt = conn.createStatement();){
             
             stmt.executeQuery(query);
             
@@ -350,12 +308,10 @@ public class DBConnection {
     }
     
     public void cancelBooking(int id) {
-        try {
-            String statusQ = "UPDATE Bookings SET Booking_Status=? WHERE Booking_ID=?;";
+        String statusQ = "UPDATE Bookings SET Booking_Status=? WHERE Booking_ID=?;";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            PreparedStatement stmt = conn.prepareStatement(statusQ);){
             
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            
-            PreparedStatement stmt = conn.prepareStatement(statusQ);
             stmt.setString(1, "cancelled");
             stmt.setInt(2, id);
             
@@ -370,10 +326,9 @@ public class DBConnection {
     }
     
     public void addAvailability(int id, String date, String time) {
-        try {
-            String query = "INSERT INTO Barber_Availability(Account_ID, Available_Date, Available_Time) VALUES(" + id + ", '" + date + "', '" + time + "');";
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            PreparedStatement stmt = conn.prepareStatement(query);
+        String query = "INSERT INTO Barber_Availability(Account_ID, Available_Date, Available_Time) VALUES(" + id + ", '" + date + "', '" + time + "');";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            PreparedStatement stmt = conn.prepareStatement(query);){
             
             stmt.execute();
             
@@ -385,14 +340,11 @@ public class DBConnection {
     }
     
     public void removeAvailability(int id, String date, String time) {
-        try {
-            String query = "DELETE FROM Barber_Availability WHERE Account_ID=" + id + " AND Available_Date='" + date + "' AND Available_Time='" + time + "';";
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            PreparedStatement stmt = conn.prepareStatement(query);
+        String query = "DELETE FROM Barber_Availability WHERE Account_ID=" + id + " AND Available_Date='" + date + "' AND Available_Time='" + time + "';";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            PreparedStatement stmt = conn.prepareStatement(query);){
             
             stmt.execute();
-            
-            System.out.println("CONN time: " + Time.valueOf(time));
             
             stmt.close();
             conn.close();
@@ -404,16 +356,15 @@ public class DBConnection {
     public ArrayList<String[]> getAvailability(int barber, String dateToCheck) {
         ArrayList<String[]> available = new ArrayList<>();
         
-        try {
-            String query = "SELECT Available_Date, Available_Time FROM Barber_Availability WHERE Account_ID=" + barber;
-            if (dateToCheck != null) {
-                query += " AND Available_Date='" + dateToCheck + "'";
-            }
-            query += " ORDER BY Available_Date, Available_Time;";
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+        String query = "SELECT Available_Date, Available_Time FROM Barber_Availability WHERE Account_ID=" + barber;
+        if (dateToCheck != null) {
+            query += " AND Available_Date='" + dateToCheck + "'";
+        }
+        query += " ORDER BY Available_Date, Available_Time;";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();){
             
-            ResultSet rs = stmt.executeQuery();
             while(rs.next()) {
                 String date = rs.getString("Available_Date");
                 String time = rs.getString("Available_Time");
@@ -437,15 +388,9 @@ public class DBConnection {
         
         String query = "SELECT Account_ID, Email FROM Accounts";
         
-        try {
-            // open connection
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            
-            // create statement
-            Statement stmt = conn.createStatement();
-            
-            // execute query
-            ResultSet rs = stmt.executeQuery(query);
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password); // open connection
+            Statement stmt = conn.createStatement(); // create statement
+            ResultSet rs = stmt.executeQuery(query);){  // execute query
             
             // put id and email into hashmap
             while (rs.next()) {
@@ -469,12 +414,9 @@ public class DBConnection {
         
         String query = "SELECT Account_ID, Pass FROM Accounts";
         
-        try {
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
-            
-            ResultSet rs = stmt.executeQuery(query);
+            ResultSet rs = stmt.executeQuery(query);){
             
             // put id and password into hashmap
             while (rs.next()) {
@@ -492,11 +434,10 @@ public class DBConnection {
     }
     
     private void setSession() {
-        try {
-            String query = "SELECT First_Name, Last_Name, Type FROM Accounts WHERE Account_ID=" + this.id + ";";
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+        String query = "SELECT First_Name, Last_Name, Type FROM Accounts WHERE Account_ID=" + this.id + ";";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
+            ResultSet rs = stmt.executeQuery(query);){
             
             while(rs.next()){
                 this.name = rs.getString("First_Name");
@@ -552,11 +493,11 @@ public class DBConnection {
     }
     
     public void createBooking(String date, String time, int customer, int barber) {
-        try {
-            String query = "INSERT INTO Bookings(Booking_Date, Booking_Time, Booking_Status, Customer, Barber)"
-                    + "VALUES('" + date + "', '" + time + "', 'requested', " + customer + ", " + barber + ");";
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            Statement stmt = conn.createStatement();
+        String query = "INSERT INTO Bookings(Booking_Date, Booking_Time, Booking_Status, Customer, Barber)"
+                + "VALUES('" + date + "', '" + time + "', 'requested', " + customer + ", " + barber + ");";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            Statement stmt = conn.createStatement();){
+            
             stmt.execute(query);
             
             stmt.close();
@@ -568,10 +509,10 @@ public class DBConnection {
     }
     
     public void confirmBooking(int id) {
-        try {
-            String query = "UPDATE Bookings SET Booking_Status='upcoming' WHERE Booking_ID=" + id + ";";
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-            Statement stmt = conn.createStatement();
+        String query = "UPDATE Bookings SET Booking_Status='upcoming' WHERE Booking_ID=" + id + ";";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            Statement stmt = conn.createStatement();){
+            
             stmt.executeUpdate(query);
             
             stmt.close();
@@ -584,11 +525,10 @@ public class DBConnection {
     public int getBookingID(String date, String time, int customer, int barber) {
         int booking = 0;
         
-        try {
-            String query = "SELECT Booking_ID FROM Bookings WHERE (Booking_Date='" + date + "' AND Booking_Time='" + time + "' AND Booking_Status!='cancelled' AND Customer=" + customer + " AND Barber=" + barber + ");";
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+        String query = "SELECT Booking_ID FROM Bookings WHERE (Booking_Date='" + date + "' AND Booking_Time='" + time + "' AND Booking_Status!='cancelled' AND Customer=" + customer + " AND Barber=" + barber + ");";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
+            ResultSet rs = stmt.executeQuery(query);){
             
             while(rs.next()) {
                 booking = rs.getInt("Booking_ID");
@@ -607,19 +547,27 @@ public class DBConnection {
     public HashMap<String, String> getBookingInfo(int id) {
         HashMap<String, String> info = null;
         
-        try {
-            info = new HashMap<>();
-            String query = "SELECT * FROM Bookings WHERE Booking_ID=" + id + ";";
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+        String query = "SELECT * FROM Bookings WHERE Booking_ID=" + id + ";";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
+            ResultSet rs = stmt.executeQuery(query);){
+            info = new HashMap<>();
             
             while(rs.next()) {
+                String[] c = getCustomer(rs.getInt("Customer"));
+                String[] b = getBarber(rs.getInt("Barber"));
+                
                 info.put("date", rs.getString("Booking_Date"));
                 info.put("time", rs.getString("Booking_Time"));
                 info.put("status", rs.getString("Booking_Status"));
-                info.put("customer", rs.getString("Customer"));
-                info.put("barber", rs.getString("Barber"));
+                info.put("customer name", c[0]);
+                info.put("customer phone", c[1]);
+                info.put("barber name", b[0]);
+                info.put("barber last name", b[5]);
+                info.put("barber phone", b[4]);
+                info.put("address", b[1]);
+                info.put("town", b[2]);
+                info.put("location", b[3]);
             }
             
             rs.close();
@@ -633,29 +581,30 @@ public class DBConnection {
         return info;
     }
     
-    // ** NOT WORKING **
     public ArrayList<String[]> searchForBarberName(String search) {
         ArrayList<String[]> results = new ArrayList<>();
         String[] fullName = null;
         String name1 = null;
         String name2 = null;
         search = search.toLowerCase();
+        
         if (search.contains(" ")) {
             fullName = search.split(" ");
             name1 = fullName[0];
             name2 = fullName[1];
         }
-        try {
-            String query;
-            if (fullName != null) {
-                query = "SELECT * FROM Accounts WHERE Type='barber' AND (lower(First_Name)='" + name1 + "' OR lower(Last_Name)='" + name1 + "' OR lower(First_Name)='" + name2 + "' OR lower(Last_Name)='" + name2 + "')";
-            } else {
-                query = "SELECT * FROM Accounts WHERE Type='barber' AND (lower(First_Name)='" + search + "' OR lower(Last_Name)='" + search + "')";
-            }
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+        
+        String query;
+        if (fullName != null) {
+            query = "SELECT * FROM Accounts WHERE Type='barber' AND (lower(First_Name)='" + name1 + "' OR lower(Last_Name)='" + name1 + "' OR lower(First_Name)='" + name2 + "' OR lower(Last_Name)='" + name2 + "')";
+        } else {
+            query = "SELECT * FROM Accounts WHERE Type='barber' AND (lower(First_Name)='" + search + "' OR lower(Last_Name)='" + search + "')";
+        }
+        
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);){
             
-            ResultSet rs = stmt.executeQuery(query);
             while(rs.next()) {
                 String[] bLocation = getBarber(rs.getInt("Account_ID"));
                 String i = rs.getString("Account_ID");
@@ -678,13 +627,11 @@ public class DBConnection {
     public ArrayList<String[]> searchForBarberLocation(String l) {
         ArrayList<String[]> results = new ArrayList<>();
         
-        try {
-            String query = "SELECT * FROM Barber_Location WHERE Barber_Location.Location='" + l + "'";
- 
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+        String query = "SELECT * FROM Barber_Location WHERE Barber_Location.Location='" + l + "'";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);){
             
-            ResultSet rs = stmt.executeQuery(query);
             while(rs.next()) {
                 String[] ba = getBarber(rs.getInt("Account_ID"));
                 String i = rs.getString("Account_ID");
@@ -719,13 +666,12 @@ public class DBConnection {
         if (success != null) {
             return success;
         }
-        PreparedStatement stmt;
-        try {
-            Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+        
+        // creates new account inserting email into accounts
+        String accountQ = "INSERT INTO Accounts(Email, First_Name, Last_Name, Pass, Type, Phone) VALUES(?, ?, ?, ?, ?, ?);";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);){
             
-            // creates new account inserting email into accounts
-            String accountQ = "INSERT INTO Accounts(Email, First_Name, Last_Name, Pass, Type, Phone) VALUES(?, ?, ?, ?, ?, ?);";
-            stmt = conn.prepareStatement(accountQ);
+            PreparedStatement stmt = conn.prepareStatement(accountQ);
             stmt.setString(1, email);
             stmt.setString(2, firstName);
             stmt.setString(3, lastName);
@@ -771,6 +717,7 @@ public class DBConnection {
         return success;
     }
     
+    /*
     private String hashNsalt(String pass) {
         String password = null;
         try {
@@ -790,6 +737,7 @@ public class DBConnection {
         
         return password;
     }
+    */
     
     private void handleExceptions(SQLException se) {
         System.out.println("SQL Exception:");
