@@ -16,7 +16,6 @@ import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
-import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -1497,18 +1496,24 @@ public class View extends JFrame {
                         change.setActionCommand("change status " + b.get(i)[0]);
                         book.add(change, BorderLayout.SOUTH);
                     }
-                    if (b.get(i)[3].equals("completed")) {
-                        JButton review = new JButton("SEE REVIEW");
-                        review.setActionCommand("change status " + b.get(i)[0]);
-                        book.add(review, BorderLayout.EAST);
-                    } else if (b.get(i)[3].equals("upcoming")) {
-                        JButton cancel = new JButton("CANCEL");
-                        cancel.setActionCommand("cancel booking " + b.get(i)[0]);
-                        book.add(cancel, BorderLayout.EAST);
-                    } else if (b.get(i)[3].equals("requested")) {
-                        JButton accept = new JButton("CONFIRM");
-                        accept.setActionCommand("confirm " + b.get(i)[0]);
-                        book.add(accept);
+                    switch (b.get(i)[3]) {
+                        case "completed":
+                            JButton review = new JButton("SEE REVIEW");
+                            review.setActionCommand("change status " + b.get(i)[0]);
+                            book.add(review, BorderLayout.EAST);
+                            break;
+                        case "upcoming":
+                            JButton cancel = new JButton("CANCEL");
+                            cancel.setActionCommand("cancel booking " + b.get(i)[0]);
+                            book.add(cancel, BorderLayout.EAST);
+                            break;
+                        case "requested":
+                            JButton accept = new JButton("CONFIRM");
+                            accept.setActionCommand("confirm " + b.get(i)[0]);
+                            book.add(accept);
+                            break;
+                        default:
+                            break;
                     }
 
                     bookings.add(book);
@@ -1934,20 +1939,22 @@ public class View extends JFrame {
         Image star = null;
         try {
             star = ImageIO.read(getClass().getResource("unselectedStar.png"));
+            star = star.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
         } catch (IOException ex) {
             Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return star.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
+        return star;
     }
     
     public Image selectedStar() {
         Image star = null;
         try {
             star = ImageIO.read(getClass().getResource("selectedStar.png"));
+            star = star.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
         } catch (IOException ex) {
             Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return star.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
+        return star;
     }
     
     public void starPressed(int n) {
@@ -1990,4 +1997,5 @@ public class View extends JFrame {
         }
         stars = n;
     }
+    
 }

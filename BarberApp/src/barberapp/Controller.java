@@ -2,12 +2,10 @@ package barberapp;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
@@ -15,8 +13,8 @@ import javax.swing.JPanel;
  * @author José Felipe Flores da Silva
  */
 public class Controller implements ActionListener{
-    private DBConnection connection;
-    private View view;
+    private final DBConnection connection;
+    private final View view;
     
     public Controller() {
         this.connection = new DBConnection(this);
@@ -246,7 +244,7 @@ public class Controller implements ActionListener{
                 addZero = "0";
             }
             currTime = addZero + String.valueOf(h) + m + ":00";
-            String[] dateTime = {date, currTime};
+            
             boolean isIn = false;
             for (int j = 0; j < availability.size(); j++) {
                 if (availability.get(j)[0].equals(date) && availability.get(j)[1].equals(currTime)) {
