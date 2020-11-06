@@ -15,7 +15,10 @@ import java.util.HashMap;
 /**
  *
  * @author José Felipe Flores da Silva
+ * 2019405
+ * 
  */
+
 public class DBConnection {
     // state global variables
     private String dbServer;
@@ -27,34 +30,43 @@ public class DBConnection {
     private String success;
     private String type;
     
+    // initialise variables
     public DBConnection() {
-        // initialise variables
         initialise();
-        //logIn("jimmijoey@gmail.com");
     }
     
+    // sets the server, the user and the password for the database
     private void initialise() {
         this.dbServer = "jdbc:mysql://apontejaj.com:3306/Felipe_2019405?useSSL=false";
         this.user = "Felipe_2019405";
         this.password = "2019405";
     }
     
+    // @returns session's first name
     public String getFirstName() {
         return this.name;
     }
     
+    // @return session's last name
     public String getLastName() {
         return this.lastName;
     }
     
+    // @return session's type (barber or customer)
     public String getType() {
         return this.type;
     }
     
+    // @return session's ID
     public int getID() {
         return this.id;
     }
     
+    /**
+     * Gets locations from all barbers.
+     * 
+     * @return String array with unique locations
+     */
     public String[] getLocations() {
         ArrayList<String> locations = new ArrayList<>();
         String[] l;
@@ -84,7 +96,14 @@ public class DBConnection {
         return l;
     }
     
+    /**
+     * Gets one barber information.
+     * 
+     * @param id - barber to get info ID number
+     * @return HashMap with the keys "first name", "last name", "address", "town", "location", "phone"
+     */
     public HashMap<String, String> getBarber(int id) {
+        
         HashMap<String, String> barber = new HashMap<>();
         
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
@@ -109,6 +128,12 @@ public class DBConnection {
         return barber;
     }
     
+    /**
+     * Gets one customer information.
+     * 
+     * @param id - customer to get info ID number
+     * @return HashMap with the keys "first name", "last name", "phone"
+     */
     public HashMap<String, String> getCustomer(int id){
         HashMap<String, String> customer = new HashMap<>();
         
@@ -134,8 +159,12 @@ public class DBConnection {
         return customer;
     }
     
+    /**
+     * Gets next upcoming booking for the logged customer.
+     * 
+     * @return HashMap with the keys "id", "date", "time", "status", "name", "phone", "address", "town", "location"
+     */
     public HashMap<String, String> getNextCustomerBooking() {
-        // hashmap to store customer's bookings
         ArrayList<HashMap<String, String>> customerBookings = new ArrayList<>();
         
         String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time, Booking_Status FROM Bookings WHERE Customer=" + this.id + " AND Booking_Status!='cancelled' ORDER BY Booking_Date, Booking_Time;";
@@ -172,6 +201,11 @@ public class DBConnection {
         return customerBookings.get(0);
     }
     
+    /**
+     * Gets all upcoming bookings for the logged barber
+     * 
+     * @return ArrayList of HashMaps with the keys "id", "date", "time", "customer name", "customer phone", "status"
+     */
     public ArrayList<HashMap<String, String>> getBarberUpcomingBookings() {
         ArrayList<HashMap<String, String>> upcoming = new ArrayList<>();
         HashMap<String, String> currCustomer;
@@ -215,10 +249,15 @@ public class DBConnection {
         return upcoming;
     }
     
-    public ArrayList<HashMap<String, String>> getAllBarberBookings(int id) {
+    /**
+     * Gets all bookings for the logged barber.
+     * 
+     * @return  ArrayList of HashMaps with the keys "id", "date", "time", "status", "customer name", "phone"
+     */
+    public ArrayList<HashMap<String, String>> getAllBarberBookings() {
         ArrayList<HashMap<String, String>> all = new ArrayList<>();
         
-        String query = "SELECT * FROM Bookings WHERE Barber=" + id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
+        String query = "SELECT * FROM Bookings WHERE Barber=" + this.id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);){
@@ -253,10 +292,15 @@ public class DBConnection {
         return all;
     }
     
-    public ArrayList<HashMap<String, String>> getAllCustomerBookings(int id) {
+    /**
+     * Gets all bookings for the logged customer.
+     * 
+     * @return  ArrayList of HashMaps with the keys "id", "date", "time", "status", "barber name", "phone", "address", "town", "location"
+     */
+    public ArrayList<HashMap<String, String>> getAllCustomerBookings() {
         ArrayList<HashMap<String, String>> all = new ArrayList<>();
         
-        String query = "SELECT * FROM Bookings WHERE Customer=" + id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
+        String query = "SELECT * FROM Bookings WHERE Customer=" + this.id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);){
@@ -294,6 +338,13 @@ public class DBConnection {
         return all;
     }
     
+    /**
+     * Inserts a new review into the database.
+     * 
+     * @param id - booking ID
+     * @param review - review written by customer
+     * @param stars  - number of stars given by customer
+     */
     public void addReview(int id, String review, int stars) {
         String query = "INSERT INTO Booking_Review(Booking_ID, Review, Stars) VALUES(?, ?, ?);";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
@@ -311,6 +362,13 @@ public class DBConnection {
         }
     }
     
+    /**
+     * Update a review previously inserted into the database.
+     * 
+     * @param id - booking UD
+     * @param review - new review written by customer
+     * @param stars - new number of stars given by customer
+     */
     public void updateReview(int id, String review, int stars) {
         String query = "UPDATE Booking_Review SET Review='" + review + "', Stars=" + stars + " WHERE Booking_ID=" + id + ";";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
@@ -325,6 +383,11 @@ public class DBConnection {
         }
     }
     
+    /**
+     * Cancels an appointment.
+     * 
+     * @param id - booking ID to be cancelled
+     */
     public void cancelBooking(int id) {
         String statusQ = "UPDATE Bookings SET Booking_Status=? WHERE Booking_ID=?;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
@@ -343,6 +406,13 @@ public class DBConnection {
         }
     }
     
+    /**
+     * Inserts new available slot into the database.
+     * 
+     * @param id - barber ID
+     * @param date - date of available slot
+     * @param time - time of available slot
+     */
     public void addAvailability(int id, String date, String time) {
         String query = "INSERT INTO Barber_Availability(Account_ID, Available_Date, Available_Time) VALUES(" + id + ", '" + date + "', '" + time + "');";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
@@ -357,6 +427,13 @@ public class DBConnection {
         }
     }
     
+    /**
+     * Deletes availability slot from the database.
+     * 
+     * @param id - barber ID
+     * @param date - date of unavailable slot
+     * @param time - time of unavailable slot
+     */
     public void removeAvailability(int id, String date, String time) {
         String query = "DELETE FROM Barber_Availability WHERE Account_ID=" + id + " AND Available_Date='" + date + "' AND Available_Time='" + time + "';";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
@@ -371,6 +448,12 @@ public class DBConnection {
         }
     }
     
+    /**
+     * Updates an appointment status.
+     * 
+     * @param id - booking ID
+     * @param status - new status
+     */
     public void updateStatus(int id, String status) {
         String query = "UPDATE Bookings SET Booking_Status='" + status.toLowerCase() + "' WHERE Booking_ID=" + id + ";";
         
@@ -387,6 +470,13 @@ public class DBConnection {
         }
     }
     
+    /**
+     * Gets a barber availability
+     * 
+     * @param barber - barber ID
+     * @param dateToCheck - if not checking for a specific date set to null
+     * @return ArrayList of HashMaps with the keys "date", "time"
+     */
     public ArrayList<HashMap<String, String>> getAvailability(int barber, String dateToCheck) {
         ArrayList<HashMap<String, String>> available = new ArrayList<>();
         
@@ -426,6 +516,11 @@ public class DBConnection {
         return available;
     }
     
+    /**
+     * Gets all e-mails from accounts.
+     * 
+     * @return HashMap with the key being the Account ID to value of the e-mail address
+     */
     private HashMap<Integer, String> getEmails() {
         // initialise a hashmap to store emails
         HashMap<Integer, String> emails = new HashMap<>();
@@ -452,6 +547,11 @@ public class DBConnection {
         return emails;
     }
     
+    /**
+     * Gets all passwords from accounts.
+     * 
+     * @return HashMap with the key being the Account_ID for the value of the password
+     */
     private HashMap<Integer, String> getPasswords() {
         // initialise hashmap to store id and passwords
         HashMap<Integer, String> passwords = new HashMap<>();
@@ -477,6 +577,7 @@ public class DBConnection {
         return passwords;
     }
     
+    // Sets the session's first name, last name and type
     private void setSession() {
         String query = "SELECT First_Name, Last_Name, Type FROM Accounts WHERE Account_ID=" + this.id + ";";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
@@ -498,6 +599,13 @@ public class DBConnection {
         }
     }
     
+    /**
+     * Checks the email and password input in the login page against the database
+     * 
+     * @param user - email input by user
+     * @param pass - password input by user
+     * @return boolean to check whether the credentials are valid or not
+     */
     public boolean checkCredentials(String user, String pass) {
         // set id to -1
         id = -1;
@@ -518,6 +626,12 @@ public class DBConnection {
         
     }
     
+    /**
+     * Logs into the system.
+     * Sets the session's id and redirect to setSession()
+     * 
+     * @param email - email to log in with
+     */
     public void logIn(String email) {
         this.id = -1;
         getEmails().forEach((i, e) -> {
@@ -529,6 +643,7 @@ public class DBConnection {
         setSession();
     }
     
+    // sets the session to null
     public void logOut() {
         this.name = null;
         this.lastName = null;
@@ -536,6 +651,14 @@ public class DBConnection {
         this.id = -1;
     }
     
+    /**
+     * Inserts a new booking into the database.
+     * 
+     * @param date - date of booking
+     * @param time - time of booking
+     * @param customer - customer ID
+     * @param barber - barber ID
+     */
     public void createBooking(String date, String time, int customer, int barber) {
         String query = "INSERT INTO Bookings(Booking_Date, Booking_Time, Booking_Status, Customer, Barber)"
                 + "VALUES('" + date + "', '" + time + "', 'requested', " + customer + ", " + barber + ");";
@@ -552,6 +675,11 @@ public class DBConnection {
         }
     }
     
+    /**
+     * Confirms a requested appointment
+     * 
+     * @param id - booking ID
+     */
     public void confirmBooking(int id) {
         String query = "UPDATE Bookings SET Booking_Status='upcoming' WHERE Booking_ID=" + id + ";";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
@@ -566,6 +694,15 @@ public class DBConnection {
         }
     }
     
+    /**
+     * Gets the booking ID
+     * 
+     * @param date - booking date
+     * @param time - booking time
+     * @param customer - customer ID
+     * @param barber - barber ID
+     * @return booking ID
+     */
     public int getBookingID(String date, String time, int customer, int barber) {
         int booking = 0;
         
@@ -588,6 +725,12 @@ public class DBConnection {
         return booking;
     }
     
+    /**
+     * Gets a booking review.
+     * 
+     * @param b - booking ID
+     * @return HashMap with the keys "review", "stars"
+     */
     public HashMap<String, String> getBookingReview (int b) {
         HashMap<String, String> review = new HashMap<>();
         
@@ -613,6 +756,12 @@ public class DBConnection {
         return review;
     }
     
+    /**
+     * Gets a booking info.
+     * 
+     * @param id - booking ID
+     * @return HashMap with the keys "date", "time", "status", "customer name", "customer phone", "barber name", "barber phone", "address", "town", "location"
+     */
     public HashMap<String, String> getBookingInfo(int id) {
         HashMap<String, String> info = null;
         
@@ -649,6 +798,12 @@ public class DBConnection {
         return info;
     }
     
+    /**
+     * Gets all barbers that have the given first name or second name.
+     * 
+     * @param search - name to look for
+     * @return ArrayList of HashMaps with the keys "id", "name", "phone", "address", "town", "location"
+     */
     public ArrayList<HashMap<String, String>> searchForBarberName(String search) {
         ArrayList<HashMap<String, String>> results = new ArrayList<>();
         String[] fullName = null;
@@ -702,6 +857,12 @@ public class DBConnection {
         return results;
     }
     
+    /**
+     * Gets all barbers that have the given location.
+     * 
+     * @param l - location to search for
+     * @return ArrayList of HashMaps with the keys "id", "name", "phone", "address", "town", "location"
+     */
     public ArrayList<HashMap<String, String>> searchForBarberLocation(String l) {
         ArrayList<HashMap<String, String>> results = new ArrayList<>();
         
@@ -739,6 +900,20 @@ public class DBConnection {
         return results;
     }
     
+    /**
+     * Inserts new account into the database.
+     * 
+     * @param email - e-mail address
+     * @param pass - password
+     * @param type - account type (barber or customer)
+     * @param firstName - first name
+     * @param lastName - last name
+     * @param phone - phone number
+     * @param location - location (D1, D2, D3...)
+     * @param address - full address
+     * @param town - town
+     * @return message to customer
+     */
     public String createAccount(String email, String pass, String type, String firstName, String lastName, String phone, String location, String address, String town) {
         // set string success to null
         success = null;
@@ -806,6 +981,31 @@ public class DBConnection {
     }
     
     /**
+     * Handles SQL Exceptions.
+     * 
+     * @param se - SQLExecption
+     */
+    private void handleExceptions(SQLException se) {
+        System.out.println("SQL Exception:");
+
+            // Loop through the SQL Exceptions
+            while (se != null) {
+                System.out.println("State  : " + se.getSQLState());
+                System.out.println("Message: " + se.getMessage());
+                System.out.println("Error  : " + se.getErrorCode());
+
+                se = se.getNextException();
+            }
+    }
+    
+    /**
+     * Hashes and salts the password.
+     * 
+     * @param pass - password to be hashed and salted
+     * @return new password
+     */
+    
+    /**
     private String hashNsalt(String pass) {
         String password = null;
         try {
@@ -825,18 +1025,5 @@ public class DBConnection {
         
         return password;
     }
-    */
-    
-    private void handleExceptions(SQLException se) {
-        System.out.println("SQL Exception:");
-
-            // Loop through the SQL Exceptions
-            while (se != null) {
-                System.out.println("State  : " + se.getSQLState());
-                System.out.println("Message: " + se.getMessage());
-                System.out.println("Error  : " + se.getErrorCode());
-
-                se = se.getNextException();
-            }
-    }
+    */   
 }

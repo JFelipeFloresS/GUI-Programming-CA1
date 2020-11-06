@@ -11,7 +11,10 @@ import javax.swing.JPanel;
 /**
  *
  * @author José Felipe Flores da Silva
+ * 2019405
+ * 
  */
+
 public class Controller implements ActionListener{
     private final DBConnection connection;
     private final View view;
@@ -185,11 +188,11 @@ public class Controller implements ActionListener{
     }
     
     public ArrayList<HashMap<String, String>> getBarberBookings() {
-        return this.connection.getAllBarberBookings(this.connection.getID());
+        return this.connection.getAllBarberBookings();
     }
     
     public ArrayList<HashMap<String, String>> getCustomerBookings() {
-        return this.connection.getAllCustomerBookings(this.connection.getID());
+        return this.connection.getAllCustomerBookings();
     }
     
     public HashMap<String, String> getNextCustomerBooking() {

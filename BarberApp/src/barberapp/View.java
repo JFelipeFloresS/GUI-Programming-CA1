@@ -47,6 +47,8 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
 /**
  *
  * @author José Felipe Flores da Silva
+ * 2019405
+ * 
  */
 public class View extends JFrame {
      // window size

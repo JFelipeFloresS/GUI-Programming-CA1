@@ -8,6 +8,7 @@ package barberapp;
  * CA1
  * 
  */
+
 public class BarberApp{
     
     public static void main(String[] args) {
