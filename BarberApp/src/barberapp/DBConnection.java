@@ -1,11 +1,14 @@
 package barberapp;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -23,13 +26,11 @@ public class DBConnection {
     private int id;
     private String success;
     private String type;
-    private final Controller controller;
     
-    public DBConnection(Controller controller) {
+    public DBConnection() {
         // initialise variables
-        this.controller = controller;
         initialise();
-        logIn("jimmijoey@gmail.com");
+        //logIn("jimmijoey@gmail.com");
     }
     
     private void initialise() {
@@ -83,8 +84,8 @@ public class DBConnection {
         return l;
     }
     
-    public String[] getBarber(int id) {
-        String[] barber = new String[6];
+    public HashMap<String, String> getBarber(int id) {
+        HashMap<String, String> barber = new HashMap<>();
         
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();){
@@ -94,12 +95,12 @@ public class DBConnection {
             ResultSet rs = stmt.executeQuery(query);
             
             while(rs.next()) {
-                barber[0] = rs.getString("First_Name");
-                barber[1] = rs.getString("Address");
-                barber[2] = rs.getString("Town");
-                barber[3] = rs.getString("Location");
-                barber[4] = rs.getString("Phone");
-                barber[5] = rs.getString("Last_Name");
+                barber.put("first name", rs.getString("First_Name"));
+                barber.put("last name", rs.getString("Last_Name"));
+                barber.put("address", rs.getString("Address"));
+                barber.put("town", rs.getString("Town"));
+                barber.put("location", rs.getString("Location"));
+                barber.put("phone", rs.getString("Phone"));
             }
         } catch (SQLException se) {
             handleExceptions(se);
@@ -108,17 +109,18 @@ public class DBConnection {
         return barber;
     }
     
-    public String[] getCustomer(int id){
-        String[] customer = new String[2];
+    public HashMap<String, String> getCustomer(int id){
+        HashMap<String, String> customer = new HashMap<>();
         
-        String query = "SELECT First_Name, Phone FROM Accounts WHERE Account_ID=" + id + ";";
+        String query = "SELECT First_Name, Last_Name, Phone FROM Accounts WHERE Account_ID=" + id + ";";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);){
             
             while (rs.next()) {
-                customer[0] = rs.getString("First_Name");
-                customer[1] = rs.getString("Phone");
+                customer.put("first name", rs.getString("First_Name"));
+                customer.put("last name", rs.getString("Last_Name"));
+                customer.put("phone", rs.getString("Phone"));
             }
             
             rs.close();
@@ -134,26 +136,30 @@ public class DBConnection {
     
     public HashMap<String, String> getNextCustomerBooking() {
         // hashmap to store customer's bookings
-        ArrayList<String[]> customerBookings = new ArrayList<>();
+        ArrayList<HashMap<String, String>> customerBookings = new ArrayList<>();
         
         String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time, Booking_Status FROM Bookings WHERE Customer=" + this.id + " AND Booking_Status!='cancelled' ORDER BY Booking_Date, Booking_Time;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);){
             
+            int c = 0;
             while(rs.next()) {
-                String[] booking_info = new String[9];
-                String[] barber = getBarber(rs.getInt("Barber"));
-                booking_info[0] = rs.getString("Booking_Date");
-                booking_info[1] = rs.getString("Booking_Time").substring(0, 5);
-                booking_info[2] = rs.getString("Booking_ID");
-                booking_info[3] = barber[0]; // barber's name
-                booking_info[4] = barber[1]; // address
-                booking_info[5] = barber[2]; // town
-                booking_info[6] = barber[3]; // location
-                booking_info[7] = barber[4]; // phone
-                booking_info[8] = rs.getString("Booking_Status");
-                customerBookings.add(booking_info); // stores barber and date infos into array that is added to an array list
+                HashMap<String, String> barber = getBarber(rs.getInt("Barber"));
+                
+                customerBookings.add(new HashMap<>()); // stores barber and date infos into array that is added to an array list
+                
+                customerBookings.get(c).put("id", rs.getString("Booking_ID"));
+                customerBookings.get(c).put("date", rs.getString("Booking_Date"));
+                customerBookings.get(c).put("time", rs.getString("Booking_Time").substring(0, 5));
+                customerBookings.get(c).put("status", rs.getString("Booking_Status"));
+                customerBookings.get(c).put("name", barber.get("first name") + " " + barber.get("last name"));
+                customerBookings.get(c).put("phone", barber.get("phone"));
+                customerBookings.get(c).put("address", barber.get("address"));
+                customerBookings.get(c).put("town", barber.get("town"));
+                customerBookings.get(c).put("location", barber.get("location"));
+                
+                c++;
             }
             rs.close();
             stmt.close();
@@ -163,46 +169,37 @@ public class DBConnection {
             handleExceptions(se);
         }
         
-        HashMap<String, String> next = new HashMap<>();
-        next.put("date", customerBookings.get(0)[0]);
-        next.put("time", customerBookings.get(0)[1]);
-        next.put("id", customerBookings.get(0)[2]);
-        next.put("name", customerBookings.get(0)[3]);
-        next.put("address", customerBookings.get(0)[4]);
-        next.put("town", customerBookings.get(0)[5]);
-        next.put("location", customerBookings.get(0)[6]);
-        next.put("phone", customerBookings.get(0)[7]);
-        next.put("status", customerBookings.get(0)[8]);
-        
-        return next;
+        return customerBookings.get(0);
     }
     
-    public ArrayList<String[]> getBarberUpcomingBookings() {
-        ArrayList<String[]> upcoming = new ArrayList<>();
-        String[] currCustomer;
+    public ArrayList<HashMap<String, String>> getBarberUpcomingBookings() {
+        ArrayList<HashMap<String, String>> upcoming = new ArrayList<>();
+        HashMap<String, String> currCustomer;
         String currDate, currTime, currStatus;
         int currID;
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateTime today = LocalDateTime.now();
         
-        String bookingQ = "SELECT * FROM Bookings WHERE Barber=" + this.id + " AND Booking_Status!='cancelled' ORDER BY Booking_Date, Booking_Time;";
+        String bookingQ = "SELECT * FROM Bookings WHERE Barber=" + this.id + " AND Booking_Status!='cancelled' AND Booking_Date >='" + String.valueOf(dtf.format(today)) + "' ORDER BY Booking_Date, Booking_Time;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(bookingQ);){
             
             int c = 0;
             while(rs.next()) {
-                upcoming.add(new String[6]);
+                upcoming.add(new HashMap<>());
                 currID = rs.getInt("Booking_ID");
                 currCustomer = getCustomer(rs.getInt("Customer"));
                 currDate = rs.getString("Booking_Date");
                 currTime = rs.getString("Booking_Time").substring(0, 5);
                 currStatus = rs.getString("Booking_Status");
                 
-                upcoming.get(c)[0] = currDate; // date
-                upcoming.get(c)[1] = currTime; // time
-                upcoming.get(c)[2] = String.valueOf(currID); // booking ID
-                upcoming.get(c)[3] = currCustomer[0]; // customer name
-                upcoming.get(c)[4] = currCustomer[1]; // customer phone
-                upcoming.get(c)[5] = currStatus; // booking status
+                upcoming.get(c).put("date", currDate); // date
+                upcoming.get(c).put("time", currTime); // time
+                upcoming.get(c).put("id", String.valueOf(currID)); // booking ID
+                upcoming.get(c).put("customer name", currCustomer.get("first name") + " " + currCustomer.get("last name")); // customer name
+                upcoming.get(c).put("customer phone", currCustomer.get("phone")); // customer phone
+                upcoming.get(c).put("status", currStatus); // booking status
                 
                 c++;
             }
@@ -218,23 +215,32 @@ public class DBConnection {
         return upcoming;
     }
     
-    public ArrayList<String[]> getAllBarberBookings(int id) {
-        ArrayList<String[]> all = new ArrayList<>();
+    public ArrayList<HashMap<String, String>> getAllBarberBookings(int id) {
+        ArrayList<HashMap<String, String>> all = new ArrayList<>();
         
         String query = "SELECT * FROM Bookings WHERE Barber=" + id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);){
             
+            int c = 0;
             while(rs.next()) {
                 String currID = rs.getString("Booking_ID");
                 String currDate = rs.getString("Booking_Date");
                 String currTime = rs.getString("Booking_Time");
                 String currStatus = rs.getString("Booking_Status");
-                String[] currCustomer = getCustomer(rs.getInt("Customer"));
+                HashMap<String, String> currCustomer = getCustomer(rs.getInt("Customer"));
                 
-                all.add(new String[]{currID, currDate, currTime, currStatus, currCustomer[0], currCustomer[1]});
+                all.add(new HashMap<>());
                 
+                all.get(c).put("id", currID);
+                all.get(c).put("date", currDate);
+                all.get(c).put("time", currTime);
+                all.get(c).put("status", currStatus);
+                all.get(c).put("customer name", currCustomer.get("first name") + " " + currCustomer.get("last name"));
+                all.get(c).put("phone", currCustomer.get("phone"));
+                
+                c++;
             }
             rs.close();
             stmt.close();
@@ -247,23 +253,35 @@ public class DBConnection {
         return all;
     }
     
-    public ArrayList<String[]> getAllCustomerBookings(int id) {
-        ArrayList<String[]> all = new ArrayList<>();
+    public ArrayList<HashMap<String, String>> getAllCustomerBookings(int id) {
+        ArrayList<HashMap<String, String>> all = new ArrayList<>();
         
         String query = "SELECT * FROM Bookings WHERE Customer=" + id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);){
             
+            int c = 0;
             while(rs.next()) {
                 String currID = rs.getString("Booking_ID");
                 String currDate = rs.getString("Booking_Date");
                 String currTime = rs.getString("Booking_Time");
                 String currStatus = rs.getString("Booking_Status");
-                String currBarber[] = getBarber(rs.getInt("Barber"));
+                HashMap<String, String> currBarber = getBarber(rs.getInt("Barber"));
                 
-                all.add(new String[]{currID, currDate, currTime, currStatus, currBarber[0], currBarber[1], currBarber[2], currBarber[3], currBarber[4], currBarber[5]});
+                all.add(new HashMap<>());
                 
+                all.get(c).put("id", currID);
+                all.get(c).put("date", currDate);
+                all.get(c).put("time", currTime);
+                all.get(c).put("status", currStatus);
+                all.get(c).put("barber name", currBarber.get("first name") + " " + currBarber.get("last name"));
+                all.get(c).put("phone", currBarber.get("phone"));
+                all.get(c).put("address", currBarber.get("address"));
+                all.get(c).put("town", currBarber.get("town"));
+                all.get(c).put("location", currBarber.get("location"));
+                
+                c++;
             }
             rs.close();
             stmt.close();
@@ -353,23 +371,49 @@ public class DBConnection {
         }
     }
     
-    public ArrayList<String[]> getAvailability(int barber, String dateToCheck) {
-        ArrayList<String[]> available = new ArrayList<>();
+    public void updateStatus(int id, String status) {
+        String query = "UPDATE Bookings SET Booking_Status='" + status.toLowerCase() + "' WHERE Booking_ID=" + id + ";";
+        
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            Statement stmt = conn.createStatement();){
+            
+            stmt.executeUpdate(query);
+            
+            stmt.close();
+            conn.close();
+            
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+    }
+    
+    public ArrayList<HashMap<String, String>> getAvailability(int barber, String dateToCheck) {
+        ArrayList<HashMap<String, String>> available = new ArrayList<>();
         
         String query = "SELECT Available_Date, Available_Time FROM Barber_Availability WHERE Account_ID=" + barber;
         if (dateToCheck != null) {
             query += " AND Available_Date='" + dateToCheck + "'";
+        } else {
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDateTime today = LocalDateTime.now();
+            query += " AND Available_Date >='" + String.valueOf(dtf.format(today)) + "'";
         }
         query += " ORDER BY Available_Date, Available_Time;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             PreparedStatement stmt = conn.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();){
             
+            int c = 0;
             while(rs.next()) {
                 String date = rs.getString("Available_Date");
                 String time = rs.getString("Available_Time");
-                String[] dateTime = {date, time};
-                available.add(dateTime);
+                
+                available.add(new HashMap<>());
+                
+                available.get(c).put("date", date);
+                available.get(c).put("time", time);
+                
+                c++;
             }
             rs.close();
             stmt.close();
@@ -544,6 +588,31 @@ public class DBConnection {
         return booking;
     }
     
+    public HashMap<String, String> getBookingReview (int b) {
+        HashMap<String, String> review = new HashMap<>();
+        
+        String query = "SELECT * FROM Booking_Review WHERE Booking_ID=" + b + ";";
+        
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query)){
+            
+            while(rs.next()) {
+                review.put("review", rs.getString("Review"));
+                review.put("stars", rs.getString("Stars"));
+            }
+            
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+        
+        return review;
+    }
+    
     public HashMap<String, String> getBookingInfo(int id) {
         HashMap<String, String> info = null;
         
@@ -554,20 +623,19 @@ public class DBConnection {
             info = new HashMap<>();
             
             while(rs.next()) {
-                String[] c = getCustomer(rs.getInt("Customer"));
-                String[] b = getBarber(rs.getInt("Barber"));
+                HashMap<String, String> c = getCustomer(rs.getInt("Customer"));
+                HashMap<String, String> b = getBarber(rs.getInt("Barber"));
                 
                 info.put("date", rs.getString("Booking_Date"));
                 info.put("time", rs.getString("Booking_Time"));
                 info.put("status", rs.getString("Booking_Status"));
-                info.put("customer name", c[0]);
-                info.put("customer phone", c[1]);
-                info.put("barber name", b[0]);
-                info.put("barber last name", b[5]);
-                info.put("barber phone", b[4]);
-                info.put("address", b[1]);
-                info.put("town", b[2]);
-                info.put("location", b[3]);
+                info.put("customer name", c.get("first name") + " " + c.get("last name"));
+                info.put("customer phone", c.get("phone"));
+                info.put("barber name", b.get("first name") + " " + b.get("last name"));
+                info.put("barber phone", b.get("phone"));
+                info.put("address", b.get("address"));
+                info.put("town", b.get("town"));
+                info.put("location", b.get("location"));
             }
             
             rs.close();
@@ -581,8 +649,8 @@ public class DBConnection {
         return info;
     }
     
-    public ArrayList<String[]> searchForBarberName(String search) {
-        ArrayList<String[]> results = new ArrayList<>();
+    public ArrayList<HashMap<String, String>> searchForBarberName(String search) {
+        ArrayList<HashMap<String, String>> results = new ArrayList<>();
         String[] fullName = null;
         String name1 = null;
         String name2 = null;
@@ -605,14 +673,24 @@ public class DBConnection {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);){
             
+            int c = 0;
             while(rs.next()) {
-                String[] bLocation = getBarber(rs.getInt("Account_ID"));
+                HashMap<String, String> bLocation = getBarber(rs.getInt("Account_ID"));
                 String i = rs.getString("Account_ID");
                 String fn = rs.getString("First_Name");
                 String ln = rs.getString("Last_Name");
                 String p = rs.getString("Phone");
-                String[] result = {i, fn, ln, p, bLocation[1], bLocation[2], bLocation[3]};
-                results.add(result);
+                
+                results.add(new HashMap<>());
+                
+                results.get(c).put("id", i);
+                results.get(c).put("name", fn + " " + ln);
+                results.get(c).put("phone", p);
+                results.get(c).put("address", bLocation.get("address"));
+                results.get(c).put("town", bLocation.get("town"));
+                results.get(c).put("location", bLocation.get("location"));
+                
+                c++;
             }
             rs.close();
             stmt.close();
@@ -624,22 +702,32 @@ public class DBConnection {
         return results;
     }
     
-    public ArrayList<String[]> searchForBarberLocation(String l) {
-        ArrayList<String[]> results = new ArrayList<>();
+    public ArrayList<HashMap<String, String>> searchForBarberLocation(String l) {
+        ArrayList<HashMap<String, String>> results = new ArrayList<>();
         
         String query = "SELECT * FROM Barber_Location WHERE Barber_Location.Location='" + l + "'";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);){
             
+            int c = 0;
             while(rs.next()) {
-                String[] ba = getBarber(rs.getInt("Account_ID"));
+                HashMap<String, String> ba = getBarber(rs.getInt("Account_ID"));
                 String i = rs.getString("Account_ID");
                 String a = rs.getString("Address");
                 String t = rs.getString("Town");
                 String lo = rs.getString("Location");
-                String[] result = {i, ba[0], ba[5], ba[4], a, t, lo};
-                results.add(result);
+                
+                results.add(new HashMap<>());
+                
+                results.get(c).put("id", i);
+                results.get(c).put("address", a);
+                results.get(c).put("town", t);
+                results.get(c).put("location", lo);
+                results.get(c).put("name", ba.get("first name") + " " + ba.get("last name"));
+                results.get(c).put("phone", ba.get("phone"));
+                
+                c++;
             }
             rs.close();
             stmt.close();
@@ -717,7 +805,7 @@ public class DBConnection {
         return success;
     }
     
-    /*
+    /**
     private String hashNsalt(String pass) {
         String password = null;
         try {

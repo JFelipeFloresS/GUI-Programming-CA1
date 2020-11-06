@@ -17,7 +17,7 @@ public class Controller implements ActionListener{
     private final View view;
     
     public Controller() {
-        this.connection = new DBConnection(this);
+        this.connection = new DBConnection();
         this.view = new View(this);
     }
     
@@ -25,15 +25,7 @@ public class Controller implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         
         if (e.getActionCommand().contains("cancel booking ")) {
-            try {
-                cancelBooking(Integer.parseInt(e.getActionCommand().substring(15)));
-                HashMap<String, String> bookingInfo = this.connection.getBookingInfo(Integer.parseInt(e.getActionCommand().substring(15)));
-                this.connection.addAvailability(Integer.parseInt(bookingInfo.get("barber")), bookingInfo.get("date"), bookingInfo.get("time"));
-                this.view.setError("THE BOOKING WAS CANCELLED");
-            } catch (NumberFormatException exc) {
-                this.view.setError(exc.getMessage());
-            }
-            
+            cancelBooking(Integer.parseInt(e.getActionCommand().substring(15)));
             return;
         }
         
@@ -43,23 +35,12 @@ public class Controller implements ActionListener{
         }
         
         if (e.getActionCommand().contains("book ")) {
-            String[] bookInfo = e.getActionCommand().split(" ");
-            String bookDate = bookInfo[1];
-            String bookTime = bookInfo[2];
-            int barberID = Integer.parseInt(bookInfo[3]);
-            int customerID = this.connection.getID();
-            if (this.connection.getBookingID(bookDate, bookTime, customerID, barberID) == 0) {
-                this.connection.createBooking(bookDate, bookTime, customerID, barberID);
-                this.connection.removeAvailability(barberID, bookDate, bookTime);
-                this.view.setError("BOOKING REQUESTED SUCCESSFULLY");
-            } else {
-                this.view.setError("YOU HAVE ALREADY REQUESTED THIS BOOKING");
-            }
+            bookAppointment(e.getActionCommand().split(" "));
             return;
         }
         
         if (e.getActionCommand().startsWith("review ")) {
-            changeScreen(this.view.new submitReview(Integer.parseInt(e.getActionCommand().substring(6))));
+            changeScreen(this.view.new submitReview(Integer.parseInt(e.getActionCommand().substring(7))));
             return;
         }
         
@@ -77,6 +58,16 @@ public class Controller implements ActionListener{
             int booking = Integer.parseInt(e.getActionCommand().substring(8));
             this.connection.confirmBooking(booking);
             this.view.setError("BOOKING ACCEPTED");
+            return;
+        }
+        
+        if (e.getActionCommand().startsWith("change status ")) {
+            changeStatus(Integer.parseInt(e.getActionCommand().substring(14)));
+            return;
+        }
+        
+        if (e.getActionCommand().contains("go to change status ")){
+            changeScreen(this.view.new barberChangeStatus(Integer.parseInt(e.getActionCommand().substring(20))));
             return;
         }
         
@@ -105,21 +96,12 @@ public class Controller implements ActionListener{
                 changeScreen(this.view.new createCustomer());
                 break;
                 
-            case "go to review":
-                System.out.println("show review page");
-                //this.changeScreen(new customerReview(this));
-                break;
-                
             case "view customer bookings":
                 showAllCustomerBookings();
                 break;
                 
             case "view barber bookings":
                 showAllBarberBookings();
-                break;
-                
-            case "customer booking cancel":
-                System.out.println("cancel booking");
                 break;
                 
             case "create customer":
@@ -156,6 +138,10 @@ public class Controller implements ActionListener{
                 
             case "back to main customer":
                 changeScreen(this.view.new customerMain());
+                break;
+            
+            case "back to barber bookings":
+                changeScreen(this.view.new barberBookings());
                 break;
                 
             default:
@@ -194,15 +180,15 @@ public class Controller implements ActionListener{
         this.view.repaint();
     }
     
-    public ArrayList<String[]> getBarberUpcomingBookings() {
+    public ArrayList<HashMap<String, String>> getBarberUpcomingBookings() {
         return this.connection.getBarberUpcomingBookings();
     }
     
-    public ArrayList<String[]> getBarberBookings() {
+    public ArrayList<HashMap<String, String>> getBarberBookings() {
         return this.connection.getAllBarberBookings(this.connection.getID());
     }
     
-    public ArrayList<String[]> getCustomerBookings() {
+    public ArrayList<HashMap<String, String>> getCustomerBookings() {
         return this.connection.getAllCustomerBookings(this.connection.getID());
     }
     
@@ -218,11 +204,11 @@ public class Controller implements ActionListener{
         return this.connection.getFirstName();
     }
     
-    public ArrayList<String[]> searchForBarberName() {
+    public ArrayList<HashMap<String, String>> searchForBarberName() {
         return this.connection.searchForBarberName(this.view.getBarberName());
     }
     
-    public ArrayList<String[]> searchForBarberLocation() {
+    public ArrayList<HashMap<String, String>> searchForBarberLocation() {
         return this.connection.searchForBarberLocation(this.view.getAllLocationsBox().getSelectedItem().toString());
     }
     
@@ -232,7 +218,7 @@ public class Controller implements ActionListener{
     
     public boolean[] checkBarberAvailability(int barber, String date) {
         boolean[] isAvailable = new boolean[48];
-        ArrayList<String[]> availability = this.connection.getAvailability(barber, date);
+        ArrayList<HashMap<String, String>> availability = this.connection.getAvailability(barber, date);
         
         int h = 0;
         String currTime;
@@ -247,7 +233,7 @@ public class Controller implements ActionListener{
             
             boolean isIn = false;
             for (int j = 0; j < availability.size(); j++) {
-                if (availability.get(j)[0].equals(date) && availability.get(j)[1].equals(currTime)) {
+                if (availability.get(j).get("date").equals(date) && availability.get(j).get("time").equals(currTime)) {
                     isIn = true;
                 }
             }
@@ -264,11 +250,11 @@ public class Controller implements ActionListener{
         return isAvailable;
     }
     
-    public String[] getBarber(int id) {
+    public HashMap<String, String> getBarber(int id) {
         return this.connection.getBarber(id);
     }
     
-    public ArrayList<String[]> getbarberAvailability(int id, String date) {
+    public ArrayList<HashMap<String, String>> getbarberAvailability(int id, String date) {
         return this.connection.getAvailability(id, date);
     }
     
@@ -276,8 +262,18 @@ public class Controller implements ActionListener{
         return this.connection.getBookingInfo(b);
     }
     
+    public HashMap<String, String> getBookingReview(int b) {
+        return this.connection.getBookingReview(b);
+    }
+    
+    private void changeStatus(int s) {
+        this.connection.updateStatus(s, this.view.getStatus());
+        changeScreen(this.view.new barberBookings());
+        this.view.setError("STATUS UPDATED SUCCESSFULLY");
+    }
+    
     private void updateBarberAvailability() {
-        ArrayList<String[]> currAvailability = this.connection.getAvailability(this.connection.getID(), this.view.getpickedDate());
+        ArrayList<HashMap<String, String>> currAvailability = this.connection.getAvailability(this.connection.getID(), this.view.getpickedDate());
         HashMap<String, Boolean> availability = this.view.getAvailableCheckBoxSelection();
         int h = 0;
         String m = ":00";
@@ -293,7 +289,7 @@ public class Controller implements ActionListener{
             boolean isInNew = availability.get(currTime);
             boolean isInOld = false;
             for (int j = 0; j < currAvailability.size(); j++) {
-                if (currAvailability.get(j)[0].equals(this.view.getpickedDate()) && currAvailability.get(j)[1].equals(currTime)) {
+                if (currAvailability.get(j).get("date").equals(this.view.getpickedDate()) && currAvailability.get(j).get("time").equals(currTime)) {
                     isInOld = true;
                 }
             }
@@ -316,6 +312,8 @@ public class Controller implements ActionListener{
             }
             isHalf = !isHalf;
         }
+        changeScreen(this.view.new availabilityPage());
+        this.view.setError("AVAILABILITY UPDATED SUCCESSFULLY");
     }
     
     private void searchBarberByName() {
@@ -331,7 +329,9 @@ public class Controller implements ActionListener{
     }
     
     private void searchBarberByLocation() {
+        String selected = this.view.getSelectedLocation();
         changeScreen(this.view.new findABarber());
+        this.view.setSelectedLocation(selected);
         this.view.searchForBarber("location");
     }
     
@@ -376,13 +376,17 @@ public class Controller implements ActionListener{
             case "done":
                 changeScreen(this.view.new initialPage());
                 this.view.setError("Account created successfully");
+                break;
             case "repeated email":
+                changeScreen(this.view.new initialPage());
                 this.view.setError("<html>An account with this<br /> email address already exists</html>");
                 break;
             case "account created":
+                changeScreen(this.view.new initialPage());
                 this.view.setError("Error adding location to the database");
                 break;
             default: 
+                changeScreen(this.view.new initialPage());
                 this.view.setError("Unexpected error. Please try again.");
                 break;
         }
@@ -419,13 +423,17 @@ public class Controller implements ActionListener{
             case "done":
                 changeScreen(this.view.new initialPage());
                 this.view.setError("Account created successfully");
+                break;
             case "repeated email":
+                changeScreen(this.view.new initialPage());
                 this.view.setError("<html>An account with this<br /> email address already exists</html>");
                 break;
             case "account created":
+                changeScreen(this.view.new initialPage());
                 this.view.setError("Account created successfully, error adding your address");
                 break;
             default: 
+                changeScreen(this.view.new initialPage());
                 this.view.setError("Unexpected error. Please try again.");
                 break;
         }
@@ -450,13 +458,15 @@ public class Controller implements ActionListener{
     }
     
     private void cancelBooking(int booking) {
-        try {
-            this.connection.cancelBooking(booking);
-            this.view.setError("Booking cancelled successfully");
-        } catch (Exception except) {
-            this.view.setError("<html>Error:<br />" + except.getMessage() + "</html>");
+        this.connection.cancelBooking(booking);
+        this.view.setError("Booking cancelled successfully");
+        HashMap<String, String> bookingInfo = this.connection.getBookingInfo(booking);
+        this.connection.addAvailability(Integer.parseInt(bookingInfo.get("id")), bookingInfo.get("date"), bookingInfo.get("time"));
+        if (this.connection.getType().equals("barber")) {
+            changeScreen(this.view.new barberMain());
+        } else {
+            changeScreen(this.view.new customerMain());
         }
-        
     }
     
     private void submitReview(int booking) {
@@ -465,4 +475,19 @@ public class Controller implements ActionListener{
         this.view.setError("REVIEW SUBMITTED SUCCESSFULLY");
     }
             
+    private void bookAppointment(String[] bookInfo) {
+        String bookDate = bookInfo[1];
+        String bookTime = bookInfo[2];
+        int barberID = Integer.parseInt(bookInfo[3]);
+        int customerID = this.connection.getID();
+        if (this.connection.getBookingID(bookDate, bookTime, customerID, barberID) == 0) {
+            this.connection.createBooking(bookDate, bookTime, customerID, barberID);
+            this.connection.removeAvailability(barberID, bookDate, bookTime);
+            changeScreen(this.view.new customerMain());
+            this.view.setError("BOOKING REQUESTED SUCCESSFULLY");
+        } else {
+            this.view.setError("YOU HAVE ALREADY REQUESTED THIS BOOKING");
+        }
+    }
+    
 }
