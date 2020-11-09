@@ -1,7 +1,6 @@
 package barberapp;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,35 +27,47 @@ public class DBConnection {
     private Session session;
     private int id;
     
-    // initialise variables
+    /**
+     * Initialise variables and sets session to null.
+     */
     public DBConnection() {
         initialise();
         this.session = null;
     }
     
-    // sets the server, the user and the password for the database
+    /**
+     * sets the server, the user and the password for the database
+     */
     private void initialise() {
         this.dbServer = "jdbc:mysql://apontejaj.com:3306/Felipe_2019405?useSSL=false";
         this.user = "Felipe_2019405";
         this.password = "2019405";
     }
     
-    // @returns session's first name
+    /**
+     * @return session's first name
+     */
     public String getFirstName() {
         return this.session.getFirstName();
     }
     
-    // @return session's last name
+    /**
+     * @return session's last name
+     */
     public String getLastName() {
         return this.session.getLastName();
     }
     
-    // @return session's type (barber or customer)
+    /**
+     * @return session's type (barber or customer)
+     */
     public String getType() {
         return this.session.getType();
     }
     
-    // @return session's ID
+    /**
+     * @return session's ID
+     */
     public int getID() {
         return this.session.getID();
     }
@@ -70,7 +81,7 @@ public class DBConnection {
         ArrayList<String> locations = new ArrayList<>();
         String[] l;
         
-        String query = "SELECT Location FROM Barber_Location";
+        String query = "SELECT DISTINCT Location FROM Barber_Location ORDER BY Location";
         
         // open connection
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password); // create statement
@@ -373,7 +384,7 @@ public class DBConnection {
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();){
             
-            stmt.executeQuery(query);
+            stmt.execute(query);
             
             stmt.close();
             conn.close();
@@ -576,7 +587,11 @@ public class DBConnection {
         return passwords;
     }
     
-    // Sets the session's first name, last name and type
+    /**
+     * Starts a new session.
+     * 
+     * @param id user ID to start the session
+     */
     private void setSession(int id) {
         String firstName = null, lastName = null, type = null;
         String query = "SELECT First_Name, Last_Name, Type FROM Accounts WHERE Account_ID=" + id + ";";
@@ -646,7 +661,9 @@ public class DBConnection {
         setSession(id);
     }
     
-    // sets the session to null
+    /**
+     * sets the session to null
+     */
     public void logOut() {
         this.session = null;
         this.id = -1;

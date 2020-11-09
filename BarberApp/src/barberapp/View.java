@@ -63,7 +63,13 @@ public class View extends JFrame {
     public final Font smallFont = new Font("Tahoma", Font.PLAIN, 16);
     public final Font largeFont = new Font("Tahoma", Font.PLAIN, 36);
     
-    // border
+    /**
+     * Creates border.
+     * 
+     * @param colour colour of border
+     * @param width width of border
+     * @return border
+     */
     public Border border (Color colour, int width) {
         return BorderFactory.createLineBorder(colour, width);
     }
@@ -129,15 +135,19 @@ public class View extends JFrame {
     Controller controller;
       
     /**
-     *
-     * @param controller
+     * View constructor.
+     * 
+     * @param controller the controller that calls the view
      */
     public View(Controller controller) {
         this.controller = controller; 
         windowSetup();
         
     }
-    
+
+    /**
+     * Initialise JFrame and sets the page to initialPage.
+     */
     private void windowSetup() {
         //initialise JFrame
         this.setVisible(true);
@@ -156,8 +166,10 @@ public class View extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
     
-    // initial page
     public class initialPage extends JPanel {
+        /**
+         * Shows initial page.
+         */
         public initialPage() {
             this.setLayout(new BorderLayout());
             
@@ -291,7 +303,7 @@ public class View extends JFrame {
             mainPanel.add(blankPanel, BorderLayout.PAGE_START);
             mainPanel.add(centerPanel, BorderLayout.CENTER);
             mainPanel.add(createAccountPanel, BorderLayout.SOUTH);
-            standardiseChildren(mainPanel, true, true, true);
+            standardiseChildren(mainPanel, true);
             // adding panels to initial page
             this.add(topPanel, BorderLayout.PAGE_START);
             this.add(mainPanel, BorderLayout.CENTER);
@@ -301,8 +313,10 @@ public class View extends JFrame {
         
     }
     
-    // left panel on create account pages
     public class accountCreateLeftPanel extends JPanel {
+        /**
+         * Creates left panel for account creating pages.
+         */
         public accountCreateLeftPanel() {
             this.setPreferredSize(leftPanelDimension);
             this.setBackground(BLUE);
@@ -360,8 +374,8 @@ public class View extends JFrame {
             
             this.add(logoPanel, BorderLayout.NORTH);
             this.add(bottomPanel, BorderLayout.SOUTH);
-            standardiseChildren(logoPanel, true, true, true);
-            standardiseChildren(bottomPanel, true, true, true);
+            standardiseChildren(logoPanel, true);
+            standardiseChildren(bottomPanel, true);
             create.setForeground(Color.white);
             account.setForeground(Color.white);
             
@@ -369,6 +383,9 @@ public class View extends JFrame {
     }
     
     public class createChoice extends JPanel {
+        /**
+         * Creates main page of choice between creating a barber account and customer account pages.
+         */
         public createChoice () {
             this.setLayout(new BorderLayout());
             
@@ -421,7 +438,7 @@ public class View extends JFrame {
             
             // padding/back button
             JPanel rightPanel = new JPanel();
-            rightPanel.setPreferredSize(paddingX2);
+            rightPanel.setPreferredSize(paddingX3);
             rightPanel.setBackground(WHITE);
             
             JButton back = new JButton("BACK");
@@ -437,11 +454,14 @@ public class View extends JFrame {
             this.add(new accountCreateLeftPanel(), BorderLayout.WEST);
             this.add(mainPanel, BorderLayout.CENTER);
             
-            standardiseChildren(mainPanel, true, false, true);
+            standardiseChildren(mainPanel, true);
         }
     }
     
     public class createBarber extends JPanel {
+        /**
+         * Creates page to create a barber account.
+         */
         public createBarber() {
             this.setLayout(new BorderLayout());
             
@@ -453,7 +473,7 @@ public class View extends JFrame {
             
             // padding
             JPanel leftBlank = new JPanel();
-            leftBlank.setPreferredSize(paddingX2);
+            leftBlank.setPreferredSize(paddingX1);
             leftBlank.setBackground(WHITE);
             
             // center panel
@@ -517,7 +537,7 @@ public class View extends JFrame {
             
             // padding/back button
             JPanel rightPanel = new JPanel();
-            rightPanel.setPreferredSize(paddingX2);
+            rightPanel.setPreferredSize(paddingX3);
             rightPanel.setBackground(WHITE);
             
             JButton back = new JButton("BACK");
@@ -533,12 +553,15 @@ public class View extends JFrame {
             this.add(new accountCreateLeftPanel(), BorderLayout.WEST);
             this.add(mainPanel, BorderLayout.CENTER);
             
-            standardiseChildren(infoPanel, true, true, true);
-            standardiseChildren(mainPanel, true, false, true);
+            standardiseChildren(infoPanel, true);
+            standardiseChildren(mainPanel, true);
         }
     }
     
     public class createCustomer extends JPanel {
+        /**
+         * Creates page to create a customer account.
+         */
         public createCustomer() {
             this.setLayout(new BorderLayout());
             
@@ -550,7 +573,7 @@ public class View extends JFrame {
             
             // padding
             JPanel leftBlank = new JPanel();
-            leftBlank.setPreferredSize(paddingX2);
+            leftBlank.setPreferredSize(paddingX1);
             leftBlank.setBackground(WHITE);
             
             // center panel
@@ -610,7 +633,7 @@ public class View extends JFrame {
             
             // padding/back button
             JPanel rightPanel = new JPanel();
-            rightPanel.setPreferredSize(paddingX2);
+            rightPanel.setPreferredSize(paddingX3);
             rightPanel.setBackground(WHITE);
             
             JButton back = new JButton("BACK");
@@ -626,12 +649,15 @@ public class View extends JFrame {
             this.add(new accountCreateLeftPanel(), BorderLayout.WEST);
             this.add(mainPanel, BorderLayout.CENTER);
             
-            standardiseChildren(infoPanel, true, true, true);
-            standardiseChildren(mainPanel, true, false, true);
+            standardiseChildren(infoPanel, true);
+            standardiseChildren(mainPanel, true);
         }
     }
     
     public class loggedLeftPanel extends JPanel {
+        /**
+         * Creates left panel for all logged pages.
+         */
         public loggedLeftPanel() {
             this.setPreferredSize(leftPanelDimension);
             this.setBackground(BLUE);
@@ -679,38 +705,37 @@ public class View extends JFrame {
             cacc.setBackground(DARKBLUE);
             cacc.setPreferredSize(new Dimension((int)windowWidth / 5, (int)windowHeight / 13));
             
-            JLabel create = new JLabel("WELCOME");
-            create.setForeground(Color.WHITE);
-            JLabel account = new JLabel(controller.getSessionFirstName().toUpperCase());
-            account.setForeground(Color.WHITE);
+            JLabel welcome = new JLabel("WELCOME");
+            welcome.setForeground(Color.WHITE);
+            JLabel thisName = new JLabel(controller.getSessionFirstName().toUpperCase());
+            thisName.setForeground(Color.WHITE);
             
-            cacc.add(create);
-            cacc.add(account);
+            cacc.add(welcome);
+            cacc.add(thisName);
             
             bottomPanel.add(cacc, BorderLayout.SOUTH);
             
             this.add(logoPanel, BorderLayout.NORTH);
             this.add(bottomPanel, BorderLayout.SOUTH);
             
-            create.setForeground(Color.white);
-            standardiseChildren(logoPanel, true, false ,true);
-            standardiseChildren(bottomPanel, true, false ,true);
+            standardiseChildren(logoPanel, true);
+            standardiseChildren(bottomPanel, true);
+            welcome.setForeground(Color.white);
+            thisName.setForeground(Color.white);
         }
     }
     
     public class customerMain extends JPanel {
+        /**
+         * Creates home page for customer.
+         */
         public customerMain() {
-            this.setLayout(new BorderLayout());
+            this.setLayout(new BorderLayout(10, 10));
             // **main panel**
             JPanel mainPanel = new JPanel();
             mainPanel.setPreferredSize(rightPanelDimension);
             mainPanel.setBackground(WHITE);
-            mainPanel.setLayout(new BorderLayout());
-            
-            // padding
-            JPanel leftBlank = new JPanel();
-            leftBlank.setPreferredSize(paddingX1);
-            leftBlank.setBackground(WHITE);
+            mainPanel.setLayout(new BorderLayout(10, 10));
             
             // center panel
             JPanel centerPanel = new JPanel();
@@ -723,7 +748,6 @@ public class View extends JFrame {
             p1.setLayout(new BorderLayout());
             p1.setPreferredSize(paddingY1);
             p1.setBackground(WHITE);
-            p1.setForeground(Color.WHITE);
             p1.add(error, BorderLayout.PAGE_START);
             
             JPanel infoPanel = new JPanel();
@@ -874,7 +898,6 @@ public class View extends JFrame {
             
             rightPanel.add(logout, BorderLayout.NORTH);
             
-            mainPanel.add(leftBlank, BorderLayout.WEST);
             mainPanel.add(centerPanel, BorderLayout.CENTER);
             mainPanel.add(rightPanel, BorderLayout.EAST);
             
@@ -882,19 +905,23 @@ public class View extends JFrame {
             this.add(mainPanel, BorderLayout.CENTER);
             
             
-            standardiseChildren(mainPanel, true, false, true);
+            standardiseChildren(centerPanel, false);
+            standardiseChildren(rightPanel, true);
             viewBookings.setFont(smallFont);
             cancelBooking.setFont(smallFont);
         }
     }
     
     public class findABarber extends JPanel {
+        /**
+         * Creates the find a barber page.
+         */
         public findABarber() {
-            this.setLayout(new BorderLayout());
+            this.setLayout(new BorderLayout(10, 10));
             
             JPanel mainPanel = new JPanel();
             mainPanel.setBackground(WHITE);
-            mainPanel.setLayout(new BorderLayout());
+            mainPanel.setLayout(new BorderLayout(10, 10));
             
             // ** top panel **
             JPanel topPanel = new JPanel();
@@ -976,12 +1003,15 @@ public class View extends JFrame {
             this.add(new loggedLeftPanel(), BorderLayout.WEST);
             this.add(mainPanel, BorderLayout.CENTER);
             
-            standardiseChildren(mainPanel, true, false, true);
+            standardiseChildren(mainPanel, false);
             error.setForeground(Color.red);
         }
     }
     
     public class customerBookings extends JPanel {
+        /**
+         * Creates a view for all bookings for a given customer.
+         */
         public customerBookings() {
             this.setLayout(new BorderLayout(15, 0));
             this.setBackground(WHITE);
@@ -1008,7 +1038,7 @@ public class View extends JFrame {
                 for (int i = 0; i < b.size(); i++) {
                     JPanel book = new JPanel();
                     book.setBorder(border(DARKBLUE, 1));
-                    book.setLayout(new BorderLayout());
+                    book.setLayout(new BorderLayout(10, 0));
                     
                     book.add(new JLabel("<html>Barber: " + b.get(i).get("barber name") + "<br />"
                             + b.get(i).get("address") + "<br />" 
@@ -1020,16 +1050,19 @@ public class View extends JFrame {
                             + "Status: " + b.get(i).get("status").substring(0, 1).toUpperCase() + b.get(i).get("status").substring(1)
                             + "</html>"), BorderLayout.CENTER);
 
+                    JPanel bPanel = new JPanel();
+                    
                     if (b.get(i).get("status").equals("completed")) {
                         JButton review = new JButton("REVIEW");
                         review.setActionCommand("review " + b.get(i).get("id"));
-                        book.add(review, BorderLayout.EAST);
+                        bPanel.add(review);
                     } else if (b.get(i).get("status").equals("upcoming")) {
                         JButton cancel = new JButton("CANCEL");
                         cancel.setActionCommand("cancel booking " + b.get(i).get("id"));
-                        book.add(cancel, BorderLayout.EAST);
+                        bPanel.add(cancel);
                     }
-
+                    
+                    book.add(bPanel, BorderLayout.EAST);
                     bookings.add(book);
                 }
             } else {
@@ -1039,7 +1072,7 @@ public class View extends JFrame {
                 bookings.add(noBook);
             }
             JScrollPane sp = new JScrollPane(bookings);
-            standardiseChildren(bookings, true, true, true);
+            standardiseChildren(bookings, true);
             
             allBookings.add(new JLabel("ALL MY BOOKINGS:"), BorderLayout.NORTH);
             allBookings.add(sp);
@@ -1070,11 +1103,16 @@ public class View extends JFrame {
             this.add(new loggedLeftPanel(), BorderLayout.WEST);
             this.add(mainBookings);
             
-            standardiseChildren(mainBookings, true, true, true);
+            standardiseChildren(mainBookings, false);
         }
     }
     
     public class submitReview extends JPanel {
+        /**
+         * Creates a page for customers to write a review for an appointment.
+         * 
+         * @param bookingID booking to be reviewed
+         */
         public submitReview(int bookingID) {
             this.setLayout(new BorderLayout(10, 0));
             this.setBackground(WHITE);
@@ -1116,7 +1154,7 @@ public class View extends JFrame {
             JPanel starPanel = new JPanel();
             
             star1 = new JButton();
-            star1.setIcon(new ImageIcon(selectedStar()));
+            star1.setIcon(new ImageIcon(unselectedStar()));
             star1.setActionCommand("star 1");
             
             star2 = new JButton();
@@ -1135,6 +1173,24 @@ public class View extends JFrame {
             star5.setIcon(new ImageIcon(unselectedStar()));
             star5.setActionCommand("star 5");
             
+            HashMap<String, String> previousReview =  controller.getBookingReview(bookingID);
+            if (!previousReview.isEmpty()) {
+                switch (previousReview.get("stars")) {
+                    case "5":
+                        star5.setIcon(new ImageIcon(selectedStar()));
+                    case "4":
+                        star4.setIcon(new ImageIcon(selectedStar()));
+                    case "3":
+                        star3.setIcon(new ImageIcon(selectedStar()));
+                    case "2":
+                        star2.setIcon(new ImageIcon(selectedStar()));
+                    case "1":
+                        star1.setIcon(new ImageIcon(selectedStar()));
+                }
+                
+                stars = Integer.parseInt(previousReview.get("stars"));
+            }
+            
             starPanel.add(star1);
             starPanel.add(star2);
             starPanel.add(star3);
@@ -1146,12 +1202,19 @@ public class View extends JFrame {
             
             JPanel centerPanel = new JPanel();
             review = new JTextArea(7, 20);
+            if (!previousReview.isEmpty()) {
+                review.setText(previousReview.get("review"));
+            }
             
             centerPanel.add(review);
             
             JPanel bottomPanel = new JPanel();
             JButton submit = new JButton("SUBMIT");
-            submit.setActionCommand("submit review " + bookingID);
+            if (previousReview.isEmpty()) {
+                submit.setActionCommand("submit review " + bookingID);
+            } else {
+                submit.setActionCommand("update review " + bookingID);
+            }
             bottomPanel.add(submit);
             
             reviewPanel.add(topPanel, BorderLayout.NORTH);
@@ -1184,13 +1247,16 @@ public class View extends JFrame {
             this.add(centerSubmit, BorderLayout.CENTER);
             this.add(rightSubmit, BorderLayout.EAST);
             
-            standardiseChildren(centerSubmit, true, true, true);
-            standardiseChildren(rightSubmit, true, true, true);
-            standardiseChildren(starPanel, false, false, false);
+            standardiseChildren(centerSubmit, true);
+            standardiseChildren(rightSubmit, true);
+            standardiseChildren(starPanel, false);
         }
     }
     
     public class barberMain extends JPanel {
+        /**
+         * Creates home page for barber.
+         */
         public barberMain() {
             this.setLayout(new BorderLayout());
             
@@ -1299,7 +1365,7 @@ public class View extends JFrame {
                     booking.add(right, BorderLayout.EAST);
                     
                     multipleBookingsPanel.add(booking);
-                    standardiseChildren(multipleBookingsPanel, true, false, true);
+                    standardiseChildren(multipleBookingsPanel, true);
                 }
                 
             } catch (Exception e) {
@@ -1348,11 +1414,14 @@ public class View extends JFrame {
             this.add(mainPanel, BorderLayout.CENTER);
             
             
-            standardiseChildren(mainPanel, true, false, true);
+            standardiseChildren(mainPanel, true);
         }
     }
     
     public class availabilityPage extends JPanel {
+        /**
+         * Creates a page for a barber to enter their availability.
+         */
         public availabilityPage() {
             this.setLayout(new BorderLayout());
             
@@ -1476,11 +1545,14 @@ public class View extends JFrame {
             this.add(new loggedLeftPanel(), BorderLayout.WEST);
             this.add(mainPanel, BorderLayout.CENTER);
             
-            standardiseChildren(mainPanel, true, false, true);
+            standardiseChildren(mainPanel, true);
         }
     }
     
     public class barberBookings extends JPanel {
+        /**
+         * Creates a page to show the barber all their bookings.
+         */
         public barberBookings(){
             this.setLayout(new BorderLayout(15, 0));
             this.setBackground(WHITE);
@@ -1550,7 +1622,7 @@ public class View extends JFrame {
                 bookings.add(noBook);
             }
             JScrollPane sp = new JScrollPane(bookings);
-            standardiseChildren(bookings, true, true, true);
+            standardiseChildren(bookings, true);
             
             allBookings.add(new JLabel("ALL MY BOOKINGS:"), BorderLayout.NORTH);
             allBookings.add(sp);
@@ -1581,12 +1653,17 @@ public class View extends JFrame {
             this.add(new loggedLeftPanel(), BorderLayout.WEST);
             this.add(mainBookings);
             
-            standardiseChildren(mainBookings, true, true, true);
+            standardiseChildren(mainBookings, true);
         }
     }
     
-    public class barberChangeStatus extends JPanel {
-        public barberChangeStatus(int bookingID) {
+    public class barberViewReview extends JPanel {
+        /**
+         * Creates a page to show the review for an appointment.
+         * 
+         * @param bookingID booking ID to be seen
+         */
+        public barberViewReview(int bookingID) {
             this.setLayout(new BorderLayout(10, 0));
             this.setBackground(WHITE);
             
@@ -1763,16 +1840,19 @@ public class View extends JFrame {
             this.add(mainPanel, BorderLayout.CENTER);
             this.add(rightPanel, BorderLayout.EAST);
             
-            standardiseChildren(mainPanel, true, true, true);
-            standardiseChildren(rightPanel, true, true, true);
+            standardiseChildren(mainPanel, true);
+            standardiseChildren(rightPanel, true);
         }
     }
     
     /**
-     * sets standard parameters to components 
-     * concept retrieved from https://stackoverflow.com/questions/27774581/change-background-color-of-components-with-reference-to-color-variable-java
-    */
-    private void standardiseChildren(JPanel panel, boolean font, boolean foreground, boolean background) {
+     * Sets standard parameters to components.
+     * Concept retrieved from https://stackoverflow.com/questions/27774581/change-background-color-of-components-with-reference-to-color-variable-java
+     * 
+     * @param panel the panel to standardise the children from
+     * @param buttonStandardSize whether the buttons should be set to standard size
+     */
+    private void standardiseChildren(JPanel panel, boolean buttonStandardSize) {
         if (panel.getBackground().equals(DEFAULTCOLOUR)) {
             panel.setBackground(WHITE);
         }
@@ -1785,37 +1865,26 @@ public class View extends JFrame {
                     c.setBackground(null);
                     ((JButton) c).setBorder(null);
                 } else {
-                    if (font) {
-                        c.setFont(bodyFont);
-                    }
-                    if (background) {
-                        c.setBackground(BLUE);
-                        ((JButton) c).setBorder(border(DARKBLUE, 2));
-                        c.setForeground(WHITE);
-                    }
-                    if (foreground) {
+                    c.setFont(bodyFont);
+                    c.setBackground(BLUE);
+                    ((JButton) c).setBorder(border(DARKBLUE, 2));
+                    c.setForeground(WHITE);
+                    
+                    if (buttonStandardSize) {
                         c.setPreferredSize(regularButtonDimension);
                     }
                 }
                 ((JButton) c).addActionListener(controller);
                 ((JButton) c).setCursor(new Cursor(Cursor.HAND_CURSOR));
             } else if (c instanceof JPanel) {
-                standardiseChildren((JPanel)c, font, foreground, background);
+                standardiseChildren((JPanel)c, buttonStandardSize);
             } else if (c instanceof JLabel) {
-                if (font) {
-                    c.setFont(bodyFont);
-                }
-                if (foreground) {
-                    c.setForeground(Color.black);
-                }
+                c.setFont(bodyFont);
+                c.setForeground(Color.black);
             } else if (c instanceof JTextField) {
-                if (background) {
-                    c.setBackground(TEXTFIELDCOLOUR);
-                    ((JTextField) c).setBorder(border(DARKBLUE, 1));
-                }
-                if (font) {
-                    c.setFont(bodyFont);
-                }
+                c.setBackground(TEXTFIELDCOLOUR);
+                ((JTextField) c).setBorder(border(DARKBLUE, 1));
+                c.setFont(bodyFont);
             } else if(c instanceof JTextArea) {
                 c.setBackground(TEXTFIELDCOLOUR);
                 ((JTextArea) c).setBorder(border(DARKBLUE, 1));
@@ -1837,7 +1906,7 @@ public class View extends JFrame {
     }
     
     /**
-     * code to change color of combo box retrieved from
+     * Code to change colour of combo box retrieved from
      * http://www.java2s.com/Tutorial/Java/0240__Swing/CustomizingaJComboBoxLookandFeel.htm
      */
     public static class ColorArrowUI extends BasicComboBoxUI{
@@ -1857,7 +1926,7 @@ public class View extends JFrame {
     }
     
     /**
-     * hiding buttons from scrollbar code retrieved from
+     * Hiding buttons from scrollbar code retrieved from
      * https://stackoverflow.com/questions/7633354/how-to-hide-the-arrow-buttons-in-a-jscrollbar
      */
     public static class standardScrollBar extends BasicScrollBarUI {
@@ -1880,38 +1949,65 @@ public class View extends JFrame {
         }
 }
     
+    /**
+     * @return combo box with all locations there are barbers in
+     */
     public JComboBox getAllLocationsBox() {
         return allLocationsBox;
     }
     
+    /**
+     * @return email address input into the text field emailAddress
+     */
     public String getEmailAddress() {
         return emailAddress.getText();
     } 
     
+    /**
+     * @return password input into the password field password
+     */
     public String getPass() {
         return password.getText();
     }
     
+    /**
+     * @return password input into the password field confirmPass
+     */
     public String getConfirmPass() {
         return confirmPass.getText();
     }
     
+    /**
+     * @return first name input into the text field firstName
+     */
     public String getFirstName() {
         return firstName.getText();
     }
     
+    /**
+     * @return last name input into the text field lastName
+     */
     public String getLastName() {
         return lastName.getText();
     }
     
+    /**
+     * @return phone input into the text field phoneNumber
+     */
     public String getPhoneNumber() {
         return phoneNumber.getText();
     }
     
+    /**
+     * @return location input into the text field location
+     */
     public String getSetLocation() {
         return location.getText();
     }
     
+    /**
+     * @return picked date from the label pickedDate
+     */
     public String getpickedDate() {
         String full = pickedDate.getText();
         String y = full.substring(6);
@@ -1921,18 +2017,32 @@ public class View extends JFrame {
         return y+"-"+m+"-"+d;
     }
     
+    /**
+     * @return address input into the text field address
+     */
     public String getAddress() {
         return address.getText();
     }
     
+    /**
+     * @return town input into the text field town
+     */
     public String getTown() {
         return town.getText();
     }
     
+    /**
+     * @return barber name to be searched from the text field barberName
+     */
     public String getBarberName() {
         return barberName.getText();
     }
     
+    /**
+     * Gets available check box selection.
+     * 
+     * @return HashMap with the keys being the slot time and the value being whether the barber is available for that slot
+     */
     public HashMap<String, Boolean> getAvailableCheckBoxSelection() {
         HashMap<String, Boolean> available = new HashMap<>();
         
@@ -1943,38 +2053,73 @@ public class View extends JFrame {
         return available;
     }
     
+    /**
+     * @return review input into the text field review
+     */
     public String getReview() {
         return review.getText();
     }
     
+    /**
+     * @return number of stars given by customer to an appointment
+     */
     public int getStars() {
         return stars;
     }
     
+    /**
+     * @return status chosen from combo box statuses
+     */
     public String getStatus() {
         return statuses.getSelectedItem().toString();
     }
     
+    /**
+     * @return location selected by user
+     */
     public String getSelectedLocation() {
         return allLocationsBox.getSelectedItem().toString();
     }
     
+    /**
+     * Sets what location is selected.
+     * 
+     * @param l location to be selected
+     */
     public void setSelectedLocation(String l) {
         allLocationsBox.setSelectedItem(l);
     }
     
+    /**
+     * Sets review inserted by customer to the text area review.
+     * 
+     * @param r review to be displayed
+     */
     public void setReview(String r) {
         review.setText(r);
     }
     
+    /**
+     * Sets stars given by customer to an appointment.
+     * 
+     * @param s stars to be displayed
+     */
     public void setStars(int s) {
         stars = s;
     }
     
+    /**
+     * Sets the text of the text field barberName.
+     * 
+     * @param n name to set the text as
+     */
     public void setBarberName(String n) {
         barberName.setText(n);
     }
     
+    /**
+     * Shows all hours for the date picked by barber and whether or not that slot is set as available.
+     */
     public void setPickedDate() {
         if (allTimesSP != null) {
             allTimesSP.removeAll();
@@ -2049,10 +2194,15 @@ public class View extends JFrame {
             
             mainTime.add(enterAvailability);
             
-            standardiseChildren(mainTime, true, false, true);
-            standardiseChildren(allTimes, true, false, true);
+            standardiseChildren(mainTime, true);
+            standardiseChildren(allTimes, true);
     }
     
+    /**
+     * Shows all barbers that show up on the search.
+     * 
+     * @param searchBy "name" or "location"
+     */
     public void searchForBarber(String searchBy) {
         if (leftFindABarberPanel.getComponentCount()>1) {
             leftFindABarberPanel.removeAll();
@@ -2114,10 +2264,15 @@ public class View extends JFrame {
             leftFindABarberPanel.add(new JLabel("NO MATCHES FOUND"));
         }
         
-        standardiseChildren(leftFindABarberPanel, true, false, true);
-        standardiseChildren(allBarbers, true, false, true);
+        standardiseChildren(leftFindABarberPanel, true);
+        standardiseChildren(allBarbers, false);
     }
     
+    /**
+     * Shows all available slots for the chosen barber.
+     * 
+     * @param getB barber ID
+     */
     public void showBarberAvailability(int getB) {
         ArrayList<HashMap<String, String>> availableList = controller.getbarberAvailability(getB, null);
         HashMap<String, String> bInfo = controller.getBarber(getB);
@@ -2144,14 +2299,22 @@ public class View extends JFrame {
         JScrollPane sp = new JScrollPane(times);
         rightFindABarberPanel.add(sp);
         
-        standardiseChildren(rightFindABarberPanel, true, false, true);
-        standardiseChildren(times, true, false, true);
+        standardiseChildren(rightFindABarberPanel, true);
+        standardiseChildren(times, false);
     }
     
+    /**
+     * Sets message to be displayed to user.
+     * 
+     * @param e message to be displayed
+     */
     public void setError(String e) {
         error.setText(e);
     }
     
+    /**
+     * @return scaled image of an unselected star
+     */
     public Image unselectedStar() {
         Image star = null;
         try {
@@ -2163,6 +2326,9 @@ public class View extends JFrame {
         return star;
     }
     
+    /**
+     * @return scaled image of an selected star
+     */
     public Image selectedStar() {
         Image star = null;
         try {
@@ -2174,6 +2340,11 @@ public class View extends JFrame {
         return star;
     }
     
+    /**
+     * Changes the image of the stars and the integer stars based on what star has been pressed.
+     * 
+     * @param n star number
+     */
     public void starPressed(int n) {
         switch(n) {
             case 5:

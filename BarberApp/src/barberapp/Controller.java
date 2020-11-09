@@ -19,6 +19,10 @@ public class Controller implements ActionListener{
     private final DBConnection connection;
     private final View view;
     
+    /**
+     * Controller constructor.
+     * Starts connection and view.
+     */
     public Controller() {
         this.connection = new DBConnection();
         this.view = new View(this);
@@ -57,6 +61,11 @@ public class Controller implements ActionListener{
             return;
         }
         
+        if (e.getActionCommand().contains("update review ")) {
+            updateReview(Integer.parseInt(e.getActionCommand().substring(14)));
+            return;
+        }
+        
         if (e.getActionCommand().contains("confirm ")) {
             int booking = Integer.parseInt(e.getActionCommand().substring(8));
             this.connection.confirmBooking(booking);
@@ -70,7 +79,7 @@ public class Controller implements ActionListener{
         }
         
         if (e.getActionCommand().contains("go to change status ")){
-            changeScreen(this.view.new barberChangeStatus(Integer.parseInt(e.getActionCommand().substring(20))));
+            changeScreen(this.view.new barberViewReview(Integer.parseInt(e.getActionCommand().substring(20))));
             return;
         }
         
@@ -246,8 +255,9 @@ public class Controller implements ActionListener{
     }
     
     /**
+     * Gets logged session first name.
      * 
-     * @return 
+     * @return session first name
      */
     public String getSessionFirstName() {
         return this.connection.getFirstName();
@@ -272,8 +282,9 @@ public class Controller implements ActionListener{
     }
     
     /**
+     * Gets logged session ID.
      * 
-     * @return 
+     * @return session ID
      */
     public int getSessionID() {
         return connection.getID();
@@ -617,7 +628,18 @@ public class Controller implements ActionListener{
         changeScreen(this.view.new customerMain());
         this.view.setError("REVIEW SUBMITTED SUCCESSFULLY");
     }
-            
+       
+    /**
+     * Updates review for a booking based on the text area review and the integer stars.
+     * 
+     * @param booking booking ID to be updated
+     */
+    private void updateReview(int booking) {
+        this.connection.updateReview(booking, this.view.getReview(), this.view.getStars());
+        changeScreen(this.view.new customerMain());
+        this.view.setError("REVIEW UPDATED SUCCESSFULLY");
+    }
+    
     /**
      * Request a booking.
      * 

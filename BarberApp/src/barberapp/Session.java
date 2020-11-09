@@ -11,12 +11,21 @@ package barberapp;
  * 2019405
  * 
  */
+
 public class Session {
     private final int id;
     private final String firstName;
     private final String lastName;
     private final String type;
     
+    /**
+     * Session constructor.
+     * 
+     * @param id user ID
+     * @param firstName user first name
+     * @param lastName user last name
+     * @param type user type (barber or customer)
+     */
     public Session(int id, String firstName, String lastName, String type) {
         this.id = id;
         this.firstName = firstName;
@@ -24,18 +33,30 @@ public class Session {
         this.type = type;
     }
     
+    /**
+     * @return session ID
+     */
     public int getID() {
         return this.id;
     }
     
+    /**
+     * @return session first name
+     */
     public String getFirstName() {
         return this.firstName;
     }
     
+    /**
+     * @return session last name
+     */
     public String getLastName() {
         return this.lastName;
     }
     
+    /**
+     * @return session type
+     */
     public String getType() {
         return this.type;
     }
