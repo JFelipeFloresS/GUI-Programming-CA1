@@ -152,7 +152,13 @@ public class Controller implements ActionListener{
                 break;
         }
     }
-        
+      
+    /**
+     * Checks whether the input email is in the valid format.
+     * 
+     * @param e email to check
+     * @return boolean saying whether the email input is in valid format.
+     */
     private boolean isValidEmailAddress(String e) {
         /**
         * code to check if string is a valid email address
@@ -164,6 +170,12 @@ public class Controller implements ActionListener{
        return mat.matches();
     }
     
+    /**
+     * Checks whether the input password is in the valid format.
+     * 
+     * @param p password to check
+     * @return boolean saying whether the password is in valid format.
+     */
     private boolean isValidPassword(String p) {
         /**
          * manipulating regex
@@ -176,6 +188,11 @@ public class Controller implements ActionListener{
         return mat.matches();
     }
     
+    /**
+     * Removes all panels from the frame and adds a new panel.
+     * 
+     * @param newPanel panel to be added
+     */
     private void changeScreen(JPanel newPanel) {
         this.view.getContentPane().removeAll();
         this.view.add(newPanel);
@@ -183,42 +200,92 @@ public class Controller implements ActionListener{
         this.view.repaint();
     }
     
+    /**
+     * Gets all upcoming bookings for the logged barber.
+     * 
+     * @return ArrayList of HashMaps with the keys "id", "date", "time", "customer name", "customer phone", "status" 
+     */
     public ArrayList<HashMap<String, String>> getBarberUpcomingBookings() {
         return this.connection.getBarberUpcomingBookings();
     }
     
+    /**
+     * Gets all bookings for the logged barber.
+     * 
+     * @return ArrayList of HashMaps with the keys "id", "date", "time", "status", "customer name", "phone"
+     */
     public ArrayList<HashMap<String, String>> getBarberBookings() {
         return this.connection.getAllBarberBookings();
     }
     
+    /**
+     * Gets all bookings for the logged customer.
+     * 
+     * @return ArrayList of HashMaps with the keys "id", "date", "time", "status", "barber name", "phone", "address", "town", "location"
+     */
     public ArrayList<HashMap<String, String>> getCustomerBookings() {
         return this.connection.getAllCustomerBookings();
     }
     
+    /**
+     * Gets next upcoming booking for the logged customer.
+     * 
+     * @return HashMap with the keys "id", "date", "time", "status", "name", "phone", "address", "town", "location"
+     */
     public HashMap<String, String> getNextCustomerBooking() {
         return this.connection.getNextCustomerBooking();
     }
     
+    /**
+     * Gets locations from all barbers.
+     * 
+     * @return String array with unique locations 
+     */
     public String[] getLocations() {
         return this.connection.getLocations();
     }
     
+    /**
+     * 
+     * @return 
+     */
     public String getSessionFirstName() {
         return this.connection.getFirstName();
     }
     
+    /**
+     * Gets all barbers that have the given first name or second name.
+     * 
+     * @return ArrayList of HashMaps with the keys "id", "name", "phone", "address", "town", "location"
+     */
     public ArrayList<HashMap<String, String>> searchForBarberName() {
         return this.connection.searchForBarberName(this.view.getBarberName());
     }
     
+    /**
+     * Gets all barbers that have the given location.
+     * 
+     * @return ArrayList of HashMaps with the keys "id", "name", "phone", "address", "town", "location"
+     */
     public ArrayList<HashMap<String, String>> searchForBarberLocation() {
         return this.connection.searchForBarberLocation(this.view.getAllLocationsBox().getSelectedItem().toString());
     }
     
+    /**
+     * 
+     * @return 
+     */
     public int getSessionID() {
         return connection.getID();
     }
     
+    /**
+     * Checks barber availability against the database.
+     * 
+     * @param barber barber ID to be checked
+     * @param date date to be checked
+     * @return boolean array saying whether the barber is available at all slots throughout the date specified
+     */
     public boolean[] checkBarberAvailability(int barber, String date) {
         boolean[] isAvailable = new boolean[48];
         ArrayList<HashMap<String, String>> availability = this.connection.getAvailability(barber, date);
@@ -253,28 +320,61 @@ public class Controller implements ActionListener{
         return isAvailable;
     }
     
+    /**
+     * Gets one barber information.
+     * 
+     * @param id barber to get info ID number
+     * @return HashMap with the keys "first name", "last name", "address", "town", "location", "phone"
+     */
     public HashMap<String, String> getBarber(int id) {
         return this.connection.getBarber(id);
     }
     
+    /**
+     * Gets a barber availability.
+     * 
+     * @param id barber ID
+     * @param date if not checking for a specific date set to null
+     * @return ArrayList of HashMaps with the keys "date", "time"
+     */
     public ArrayList<HashMap<String, String>> getbarberAvailability(int id, String date) {
         return this.connection.getAvailability(id, date);
     }
     
+    /**
+     * Gets a booking info.
+     * 
+     * @param b booking ID
+     * @return "customer name", "customer phone", "barber name", "barber phone", "address", "town", "location"
+     */
     public HashMap<String, String> getBookingInfo(int b) {
         return this.connection.getBookingInfo(b);
     }
     
+    /**
+     * Gets a booking review.
+     * 
+     * @param b booking ID
+     * @return HashMap with the keys "review", "stars"
+     */
     public HashMap<String, String> getBookingReview(int b) {
         return this.connection.getBookingReview(b);
     }
     
+    /**
+     * Updates an appointment status.
+     * 
+     * @param s booking ID
+     */
     private void changeStatus(int s) {
         this.connection.updateStatus(s, this.view.getStatus());
         changeScreen(this.view.new barberBookings());
         this.view.setError("STATUS UPDATED SUCCESSFULLY");
     }
     
+    /**
+     * Updates currently logged barber for the date picked based on the availability check boxes.
+     */
     private void updateBarberAvailability() {
         ArrayList<HashMap<String, String>> currAvailability = this.connection.getAvailability(this.connection.getID(), this.view.getpickedDate());
         HashMap<String, Boolean> availability = this.view.getAvailableCheckBoxSelection();
@@ -319,6 +419,9 @@ public class Controller implements ActionListener{
         this.view.setError("AVAILABILITY UPDATED SUCCESSFULLY");
     }
     
+    /**
+     * Search for barber based on the name put into the text field barberName and setBarberName.
+     */
     private void searchBarberByName() {
         if (this.view.getBarberName().length() < 1) {
             this.view.setError("Please enter a name to search for");
@@ -331,6 +434,9 @@ public class Controller implements ActionListener{
         }
     }
     
+    /**
+     * Search for barber based on the location selected from the combo box allLocationsBox. setSelectedLocation.
+     */
     private void searchBarberByLocation() {
         String selected = this.view.getSelectedLocation();
         changeScreen(this.view.new findABarber());
@@ -338,18 +444,32 @@ public class Controller implements ActionListener{
         this.view.searchForBarber("location");
     }
     
+    /**
+     * Shows all slots available for a given barber.
+     * 
+     * @param i barber ID to show available slots
+     */
     private void showBarberAvailability(int i) {
         this.view.showBarberAvailability(i);
     }
     
+    /**
+     * Changes screen to customerBookings.
+     */
     private void showAllCustomerBookings() {
         changeScreen(this.view.new customerBookings());
     }
     
+    /**
+     * Changes screen to barberBookings.
+     */
     private void showAllBarberBookings() {
         changeScreen(this.view.new barberBookings());
     }
     
+    /**
+     * Creates customer account and changes screen to initialPage.
+     */
     private void createCustomerAccount() {
         if (isValidEmailAddress(this.view.getEmailAddress())) {
             this.view.setError("");
@@ -396,14 +516,18 @@ public class Controller implements ActionListener{
 
     }
     
+    /**
+     * Creates barber account and changes screen to initialPage.
+     */
     private void createBarberAccount() {
         
-        if (!isValidEmailAddress(this.view.getEmailAddress())) {
+        if (isValidEmailAddress(this.view.getEmailAddress())) {
+            this.view.setError("");
+        } else {
             this.view.setError("Please insert a valid email address");
             return;
-        } else {
-            this.view.setError("");
         }
+        
         if (this.view.getPass().length() < 8) {
             this.view.setError("Password too short");
             return;
@@ -442,6 +566,9 @@ public class Controller implements ActionListener{
         }
     }
     
+    /**
+     * Logs into an account based on the email address and password entered. If successful, changes screen to customerMain or barberMain based on the account type.
+     */
     private void logIn() {
         if (this.connection.checkCredentials(this.view.getEmailAddress(), this.view.getPass())) {
             this.connection.logIn(this.view.getEmailAddress());
@@ -455,11 +582,19 @@ public class Controller implements ActionListener{
         }
     }
     
+    /**
+     * Logs out of the session and changes the screen to the initialPage.
+     */
     private void logOut() {
         this.connection.logOut();
         changeScreen(this.view.new initialPage());
     }
     
+    /**
+     * Cancel given booking.
+     * 
+     * @param booking booking ID to be cancelled
+     */
     private void cancelBooking(int booking) {
         this.connection.cancelBooking(booking);
         this.view.setError("Booking cancelled successfully");
@@ -472,19 +607,29 @@ public class Controller implements ActionListener{
         }
     }
     
+    /**
+     * Submits review for a booking based on the text area review and the integer stars.
+     * 
+     * @param booking booking ID to submit a review
+     */
     private void submitReview(int booking) {
         this.connection.addReview(booking, this.view.getReview(), this.view.getStars());
         changeScreen(this.view.new customerMain());
         this.view.setError("REVIEW SUBMITTED SUCCESSFULLY");
     }
             
+    /**
+     * Request a booking.
+     * 
+     * @param bookInfo HashMap with the keys "date", "time", "customer", "barber"
+     */
     private void bookAppointment(String[] bookInfo) {
         String bookDate = bookInfo[1];
         String bookTime = bookInfo[2];
         int barberID = Integer.parseInt(bookInfo[3]);
         int customerID = this.connection.getID();
         if (this.connection.getBookingID(bookDate, bookTime, customerID, barberID) == 0) {
-            this.connection.createBooking(bookDate, bookTime, customerID, barberID);
+            this.connection.createBooking(bookDate, bookTime, barberID);
             this.connection.removeAvailability(barberID, bookDate, bookTime);
             changeScreen(this.view.new customerMain());
             this.view.setError("BOOKING REQUESTED SUCCESSFULLY");

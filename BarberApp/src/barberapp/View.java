@@ -50,6 +50,7 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
  * 2019405
  * 
  */
+
 public class View extends JFrame {
      // window size
     public static int windowWidth = 1200;

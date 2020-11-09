@@ -24,15 +24,14 @@ public class DBConnection {
     private String dbServer;
     private String user;
     private String password;
-    private String name;
-    private String lastName;
-    private int id;
     private String success;
-    private String type;
+    private Session session;
+    private int id;
     
     // initialise variables
     public DBConnection() {
         initialise();
+        this.session = null;
     }
     
     // sets the server, the user and the password for the database
@@ -44,22 +43,22 @@ public class DBConnection {
     
     // @returns session's first name
     public String getFirstName() {
-        return this.name;
+        return this.session.getFirstName();
     }
     
     // @return session's last name
     public String getLastName() {
-        return this.lastName;
+        return this.session.getLastName();
     }
     
     // @return session's type (barber or customer)
     public String getType() {
-        return this.type;
+        return this.session.getType();
     }
     
     // @return session's ID
     public int getID() {
-        return this.id;
+        return this.session.getID();
     }
     
     /**
@@ -167,7 +166,7 @@ public class DBConnection {
     public HashMap<String, String> getNextCustomerBooking() {
         ArrayList<HashMap<String, String>> customerBookings = new ArrayList<>();
         
-        String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time, Booking_Status FROM Bookings WHERE Customer=" + this.id + " AND Booking_Status!='cancelled' ORDER BY Booking_Date, Booking_Time;";
+        String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time, Booking_Status FROM Bookings WHERE Customer=" + this.session.getID() + " AND Booking_Status!='cancelled' ORDER BY Booking_Date, Booking_Time;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);){
@@ -214,7 +213,7 @@ public class DBConnection {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDateTime today = LocalDateTime.now();
         
-        String bookingQ = "SELECT * FROM Bookings WHERE Barber=" + this.id + " AND Booking_Status!='cancelled' AND Booking_Date >='" + String.valueOf(dtf.format(today)) + "' ORDER BY Booking_Date, Booking_Time;";
+        String bookingQ = "SELECT * FROM Bookings WHERE Barber=" + this.session.getID() + " AND Booking_Status!='cancelled' AND Booking_Date >='" + String.valueOf(dtf.format(today)) + "' ORDER BY Booking_Date, Booking_Time;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(bookingQ);){
@@ -257,7 +256,7 @@ public class DBConnection {
     public ArrayList<HashMap<String, String>> getAllBarberBookings() {
         ArrayList<HashMap<String, String>> all = new ArrayList<>();
         
-        String query = "SELECT * FROM Bookings WHERE Barber=" + this.id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
+        String query = "SELECT * FROM Bookings WHERE Barber=" + this.session.getID() + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);){
@@ -300,7 +299,7 @@ public class DBConnection {
     public ArrayList<HashMap<String, String>> getAllCustomerBookings() {
         ArrayList<HashMap<String, String>> all = new ArrayList<>();
         
-        String query = "SELECT * FROM Bookings WHERE Customer=" + this.id + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
+        String query = "SELECT * FROM Bookings WHERE Customer=" + this.session.getID() + " ORDER BY Booking_Date DESC, Booking_Time DESC;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);){
@@ -578,25 +577,29 @@ public class DBConnection {
     }
     
     // Sets the session's first name, last name and type
-    private void setSession() {
-        String query = "SELECT First_Name, Last_Name, Type FROM Accounts WHERE Account_ID=" + this.id + ";";
+    private void setSession(int id) {
+        String firstName = null, lastName = null, type = null;
+        String query = "SELECT First_Name, Last_Name, Type FROM Accounts WHERE Account_ID=" + id + ";";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);){
             
             while(rs.next()){
-                this.name = rs.getString("First_Name");
-                this.lastName = rs.getString("Last_Name");
-                this.type = rs.getString("Type");
+                firstName = rs.getString("First_Name");
+                lastName = rs.getString("Last_Name");
+                type = rs.getString("Type");
             }
             
             rs.close();
             stmt.close();
             conn.close();
             
+            this.session = new Session(id, firstName, lastName, type);
+            
         } catch (SQLException se) {
             handleExceptions(se);
         }
+        
     }
     
     /**
@@ -633,21 +636,19 @@ public class DBConnection {
      * @param email - email to log in with
      */
     public void logIn(String email) {
-        this.id = -1;
+        id = -1;
         getEmails().forEach((i, e) -> {
             if (e.equalsIgnoreCase(email)) {
-                this.id = i;
+                id = i;
             }
         });
         
-        setSession();
+        setSession(id);
     }
     
     // sets the session to null
     public void logOut() {
-        this.name = null;
-        this.lastName = null;
-        this.type = null;
+        this.session = null;
         this.id = -1;
     }
     
@@ -656,12 +657,11 @@ public class DBConnection {
      * 
      * @param date - date of booking
      * @param time - time of booking
-     * @param customer - customer ID
      * @param barber - barber ID
      */
-    public void createBooking(String date, String time, int customer, int barber) {
+    public void createBooking(String date, String time, int barber) {
         String query = "INSERT INTO Bookings(Booking_Date, Booking_Time, Booking_Status, Customer, Barber)"
-                + "VALUES('" + date + "', '" + time + "', 'requested', " + customer + ", " + barber + ");";
+                + "VALUES('" + date + "', '" + time + "', 'requested', " + this.getID() + ", " + barber + ");";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
             Statement stmt = conn.createStatement();){
             
