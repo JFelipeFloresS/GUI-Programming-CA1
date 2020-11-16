@@ -2,10 +2,17 @@ package barberapp;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /**
@@ -69,7 +76,7 @@ public class Controller implements ActionListener{
         if (e.getActionCommand().contains("confirm ")) {
             int booking = Integer.parseInt(e.getActionCommand().substring(8));
             this.connection.confirmBooking(booking);
-            this.view.setError("BOOKING ACCEPTED");
+            JOptionPane.showMessageDialog(this.view, "Booking accepted.");
             return;
         }
         
@@ -80,6 +87,16 @@ public class Controller implements ActionListener{
         
         if (e.getActionCommand().contains("go to change status ")){
             changeScreen(this.view.new barberViewReview(Integer.parseInt(e.getActionCommand().substring(20))));
+            return;
+        }
+        
+        if (e.getActionCommand().contains("complete booking ")) {
+            completeBooking(Integer.parseInt(e.getActionCommand().substring(17)));
+            return;
+        }
+        
+        if (e.getActionCommand().contains("no show booking ")) {
+            noShowBooking(Integer.parseInt(e.getActionCommand().substring(16)));
             return;
         }
         
@@ -154,6 +171,10 @@ public class Controller implements ActionListener{
             
             case "back to barber bookings":
                 changeScreen(this.view.new barberBookings());
+                break;
+                
+            case "GRAPHS":
+                changeScreen(this.view.new graphs());
                 break;
                 
             default:
@@ -372,15 +393,38 @@ public class Controller implements ActionListener{
         return this.connection.getBookingReview(b);
     }
     
+    public int getAccountsCount() {
+        return this.connection.getAccountsCount();
+    }
+    
+    public int getBarbersCount() {
+        return this.connection.getBarbersCount();
+    }
+    
+    public int getCustomersCount() {
+        return this.connection.getCustomersCount();
+    }
+    
+    public int getTotalAppointmentsCount() {
+        return this.connection.getTotalAppointmentsCount();
+    }
+    
+    public int getAppointmentsCount(String status) {
+        return this.connection.getAppointmentsCount(status);
+    }
+    
     /**
      * Updates an appointment status.
      * 
      * @param s booking ID
      */
     private void changeStatus(int s) {
-        this.connection.updateStatus(s, this.view.getStatus());
-        changeScreen(this.view.new barberBookings());
-        this.view.setError("STATUS UPDATED SUCCESSFULLY");
+        int response = JOptionPane.showConfirmDialog(this.view, "Are you sure you want to change this appointment status?", "Appointment status", JOptionPane.YES_NO_OPTION);
+        if (response == JOptionPane.YES_OPTION) {
+            this.connection.updateStatus(s, this.view.getStatus());
+            changeScreen(this.view.new barberBookings());
+            JOptionPane.showMessageDialog(this.view, "Status updated successfully");
+        }
     }
     
     /**
@@ -427,7 +471,7 @@ public class Controller implements ActionListener{
             isHalf = !isHalf;
         }
         changeScreen(this.view.new availabilityPage());
-        this.view.setError("AVAILABILITY UPDATED SUCCESSFULLY");
+        JOptionPane.showMessageDialog(this.view, "Availability updated successfully!");
     }
     
     /**
@@ -435,7 +479,7 @@ public class Controller implements ActionListener{
      */
     private void searchBarberByName() {
         if (this.view.getBarberName().length() < 1) {
-            this.view.setError("Please enter a name to search for");
+            JOptionPane.showMessageDialog(this.view, "Please enter a name to search for");
         } else {
             this.view.setError("");
             String n = this.view.getBarberName();
@@ -483,45 +527,42 @@ public class Controller implements ActionListener{
      */
     private void createCustomerAccount() {
         if (isValidEmailAddress(this.view.getEmailAddress())) {
-            this.view.setError("");
         } else {
-            this.view.setError("Please insert a valid email address");
+            JOptionPane.showMessageDialog(this.view, "Please insert a valid email address", "Invalid email address", JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (this.view.getPass().length() < 8) {
-            this.view.setError("Password too short");
+            JOptionPane.showMessageDialog(this.view, "Your password is too short", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
         } else if (!isValidPassword(this.view.getPass())) {
-            this.view.setError("<html>Password must contain a digit, <br />a lowercase and an uppercase letter</html>");
+            JOptionPane.showMessageDialog(this.view, "Your password must contain a digit, a lowercase and an uppercase letter", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
         } else if (!this.view.getPass().equals(this.view.getConfirmPass())) {
-            this.view.setError("Password and confirmation don't match");
+            JOptionPane.showMessageDialog(this.view, "Your password and confirmation password don't match", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        this.view.setError("");
-
         if (this.view.getFirstName().length() < 1 || this.view.getLastName().length() < 1) {
-            this.view.setError("Please fill in all fields!");
+            JOptionPane.showMessageDialog(this.view, "Please fill in all fields!", "Incomplete fields", JOptionPane.WARNING_MESSAGE);
             return;
         } 
-        this.view.setError("");
+        
         switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "customer", this.view.getFirstName(), this.view.getLastName(), this.view.getPhoneNumber(), null, null, null)){
             case "done":
                 changeScreen(this.view.new initialPage());
-                this.view.setError("Account created successfully");
+                JOptionPane.showMessageDialog(this.view, "Account created successfully, welcome to find a barber!", "Account created", JOptionPane.INFORMATION_MESSAGE);
                 break;
             case "repeated email":
                 changeScreen(this.view.new initialPage());
-                this.view.setError("<html>An account with this<br /> email address already exists</html>");
+                JOptionPane.showMessageDialog(this.view, "An account with this email address already exists", "Account already exists", JOptionPane.WARNING_MESSAGE);
                 break;
             case "account created":
                 changeScreen(this.view.new initialPage());
-                this.view.setError("Error adding location to the database");
+                JOptionPane.showMessageDialog(this.view, "Error adding location to the database, account created successfully.", "Error", JOptionPane.ERROR_MESSAGE);
                 break;
             default: 
                 changeScreen(this.view.new initialPage());
-                this.view.setError("Unexpected error. Please try again.");
+                JOptionPane.showMessageDialog(this.view, "Unexpected error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
                 break;
         }
 
@@ -532,47 +573,44 @@ public class Controller implements ActionListener{
      */
     private void createBarberAccount() {
         
-        if (isValidEmailAddress(this.view.getEmailAddress())) {
-            this.view.setError("");
-        } else {
-            this.view.setError("Please insert a valid email address");
+        if (!isValidEmailAddress(this.view.getEmailAddress())) {
+            JOptionPane.showMessageDialog(this.view, "Please insert a valid email address.", "Invalid email address", JOptionPane.WARNING_MESSAGE);
             return;
         }
         
         if (this.view.getPass().length() < 8) {
-            this.view.setError("Password too short");
+            JOptionPane.showMessageDialog(this.view, "Your password is too short", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
         } else if (!isValidPassword(this.view.getPass())) {
-            this.view.setError("<html>Password must contain a digit, <br />a lowercase and an uppercase letter</html>");
+            JOptionPane.showMessageDialog(this.view, "Your password must contain a digit, a lowercase and an uppercase letter", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
         } else if (!this.view.getPass().equals(this.view.getConfirmPass())) {
-            this.view.setError("Password and confirmation don't match");
+            JOptionPane.showMessageDialog(this.view, "Your password and confirmation password don't match", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        this.view.setError("");
-
         if (this.view.getFirstName().length() < 1 || this.view.getLastName().length() < 1 || this.view.getSetLocation().length() < 1 || this.view.getAddress().length() < 1) {
-            this.view.setError("Please fill in all fields!");
+            JOptionPane.showMessageDialog(this.view, "Please fill in all fields!", "Incomplete fields", JOptionPane.WARNING_MESSAGE);
             return;
         } 
-        this.view.setError("");
+        
         switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "barber", this.view.getFirstName(), this.view.getLastName(), this.view.getPhoneNumber(), this.view.getSetLocation(), this.view.getAddress(), this.view.getTown())){
             case "done":
                 changeScreen(this.view.new initialPage());
-                this.view.setError("Account created successfully");
+                JOptionPane.showMessageDialog(this.view, "Account created successfully, welcome to find a barber!", "Account created", JOptionPane.INFORMATION_MESSAGE);
                 break;
             case "repeated email":
                 changeScreen(this.view.new initialPage());
+                JOptionPane.showMessageDialog(this.view, "An account with this email address already exists", "Account already exists", JOptionPane.WARNING_MESSAGE);
                 this.view.setError("<html>An account with this<br /> email address already exists</html>");
                 break;
             case "account created":
                 changeScreen(this.view.new initialPage());
-                this.view.setError("Account created successfully, error adding your address");
+                JOptionPane.showMessageDialog(this.view, "Error adding location to the database, account created successfully.", "Error", JOptionPane.ERROR_MESSAGE);
                 break;
             default: 
                 changeScreen(this.view.new initialPage());
-                this.view.setError("Unexpected error. Please try again.");
+                JOptionPane.showMessageDialog(this.view, "Unexpected error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
                 break;
         }
     }
@@ -585,11 +623,13 @@ public class Controller implements ActionListener{
             this.connection.logIn(this.view.getEmailAddress());
             if (this.connection.getType().equals("customer")) {
                 changeScreen(this.view.new customerMain());
-            } else {
+            } else if (this.connection.getType().equals("barber")) {
                 changeScreen(this.view.new barberMain());
+            } else if (this.connection.getType().equals("admin")) {
+                changeScreen(this.view.new adminMain());
             }
         } else {
-            this.view.setError("<html>Email or password incorrect, please try again!<br />Don't have an account? Create one now!</html>");
+            JOptionPane.showMessageDialog(this.view, "Email or password incorrect, please try again! Don't have an account? Create one now!", "Email or password incorrect", JOptionPane.WARNING_MESSAGE);
         }
     }
     
@@ -607,14 +647,17 @@ public class Controller implements ActionListener{
      * @param booking booking ID to be cancelled
      */
     private void cancelBooking(int booking) {
-        this.connection.cancelBooking(booking);
-        this.view.setError("Booking cancelled successfully");
-        HashMap<String, String> bookingInfo = this.connection.getBookingInfo(booking);
-        this.connection.addAvailability(Integer.parseInt(bookingInfo.get("id")), bookingInfo.get("date"), bookingInfo.get("time"));
-        if (this.connection.getType().equals("barber")) {
-            changeScreen(this.view.new barberMain());
-        } else {
-            changeScreen(this.view.new customerMain());
+        int response = JOptionPane.showConfirmDialog(this.view, "Are you sure you want to cancel this appointment?", "Cancel appointment", JOptionPane.YES_NO_OPTION);
+        if (response == JOptionPane.YES_OPTION) {
+            this.connection.cancelBooking(booking);
+            JOptionPane.showMessageDialog(this.view, "Booking cancelled successfully");
+            HashMap<String, String> bookingInfo = this.connection.getBookingInfo(booking);
+            this.connection.addAvailability(Integer.parseInt(bookingInfo.get("id")), bookingInfo.get("date"), bookingInfo.get("time"));
+            if (this.connection.getType().equals("barber")) {
+                changeScreen(this.view.new barberMain());
+            } else {
+                changeScreen(this.view.new customerMain());
+            }
         }
     }
     
@@ -626,7 +669,7 @@ public class Controller implements ActionListener{
     private void submitReview(int booking) {
         this.connection.addReview(booking, this.view.getReview(), this.view.getStars());
         changeScreen(this.view.new customerMain());
-        this.view.setError("REVIEW SUBMITTED SUCCESSFULLY");
+        JOptionPane.showMessageDialog(this.view, "Review submitted successfully");
     }
        
     /**
@@ -637,7 +680,7 @@ public class Controller implements ActionListener{
     private void updateReview(int booking) {
         this.connection.updateReview(booking, this.view.getReview(), this.view.getStars());
         changeScreen(this.view.new customerMain());
-        this.view.setError("REVIEW UPDATED SUCCESSFULLY");
+        JOptionPane.showMessageDialog(this.view, "Review updated successfully");
     }
     
     /**
@@ -654,10 +697,46 @@ public class Controller implements ActionListener{
             this.connection.createBooking(bookDate, bookTime, barberID);
             this.connection.removeAvailability(barberID, bookDate, bookTime);
             changeScreen(this.view.new customerMain());
-            this.view.setError("BOOKING REQUESTED SUCCESSFULLY");
+            JOptionPane.showMessageDialog(this.view, "Booking requested successfully");
         } else {
-            this.view.setError("YOU HAVE ALREADY REQUESTED THIS BOOKING");
+            JOptionPane.showMessageDialog(this.view, "You have alread requested this appointment", "Already requested", JOptionPane.WARNING_MESSAGE);
         }
     }
     
+    private void completeBooking(int id) {
+        this.connection.updateStatus(id, "completed");
+        changeScreen(this.view.new barberBookings());
+    }
+    
+    private void noShowBooking(int id) {
+        this.connection.updateStatus(id, "no show");
+        changeScreen(this.view.new barberBookings());
+    }
+    
+    public boolean isOld(String date, String time) {
+        boolean old = false;
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter tf = DateTimeFormatter.ofPattern("HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+        
+        try {
+            Date today = new SimpleDateFormat("yyyy-MM-dd").parse(df.format(now));
+            Date check = new SimpleDateFormat("yyyy-MM-dd").parse(date);
+            
+            if (today.after(check)) {
+                old = true;
+            } else {
+                Date thisHour = new SimpleDateFormat("HH:mm:ss").parse(tf.format(now));
+                Date checkHour = new SimpleDateFormat("HH:mm:ss").parse(time);
+                
+                if (thisHour.after(checkHour)) {
+                    old = true;
+                }
+            }
+        } catch (ParseException e) {
+            this.view.setError(e.getMessage());
+        }
+        
+        return old;
+    }
 }

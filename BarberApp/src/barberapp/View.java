@@ -156,7 +156,8 @@ public class View extends JFrame {
         this.setResizable(false);
         
         //initialise main panel
-        this.add(new initialPage());
+        //this.add(new initialPage());
+        this.add(new adminMain());
         
         //finalise JFrame
         getContentPane().setFont(bodyFont);
@@ -876,11 +877,6 @@ public class View extends JFrame {
             p2.setPreferredSize(paddingY3);
             p2.setBackground(WHITE);
             
-            JButton review = new JButton("<html>REVIEW AN<br /> APPOINTMENT</html>");
-            review.setActionCommand("go to review");
-            review.setPreferredSize(regularButtonDimension);
-            p2.add(review);
-            
             centerPanel.add(p1, BorderLayout.NORTH);
             centerPanel.add(infoPanel, BorderLayout.CENTER);
             centerPanel.add(p2, BorderLayout.SOUTH);
@@ -1258,18 +1254,14 @@ public class View extends JFrame {
          * Creates home page for barber.
          */
         public barberMain() {
-            this.setLayout(new BorderLayout());
+            this.setLayout(new BorderLayout(10, 0));
+            this.setBackground(WHITE);
             
             // **main panel**
             JPanel mainPanel = new JPanel();
             mainPanel.setPreferredSize(rightPanelDimension);
             mainPanel.setBackground(WHITE);
-            mainPanel.setLayout(new BorderLayout());
-            
-            // padding
-            JPanel leftBlank = new JPanel();
-            leftBlank.setPreferredSize(paddingX1);
-            leftBlank.setBackground(WHITE);
+            mainPanel.setLayout(new BorderLayout(20, 20));
             
             // center panel
             JPanel centerPanel = new JPanel();
@@ -1287,8 +1279,8 @@ public class View extends JFrame {
             
             // *** CENTRAL INFO PANEL ***
             JPanel infoPanel = new JPanel();
-            infoPanel.setBackground(Color.blue);
-            infoPanel.setLayout(new BorderLayout());
+            infoPanel.setBackground(WHITE);
+            infoPanel.setLayout(new BorderLayout(0, 20));
             infoPanel.setBorder(border(DARKBLUE, 2));
             
             JPanel topLabelPanel = new JPanel();
@@ -1304,13 +1296,9 @@ public class View extends JFrame {
             JPanel multipleBookingsPanel = new JPanel();
             multipleBookingsPanel.setBackground(Color.WHITE);
             
-            JPanel padding1 = new JPanel();
-            padding1.setPreferredSize(new Dimension(250, 20));
-            padding1.setBackground(Color.WHITE);
-            
             try {
                 ArrayList<HashMap<String, String>> upcoming = controller.getBarberUpcomingBookings();
-                multipleBookingsPanel.setLayout(new GridLayout(upcoming.size() + 1,1));
+                multipleBookingsPanel.setLayout(new GridLayout(upcoming.size(),1, 10, 20));
                 
                 for (int i = 0; i < upcoming.size(); i++) {
                     JPanel booking = new JPanel();
@@ -1374,7 +1362,6 @@ public class View extends JFrame {
                 multipleBookingsPanel.add(new JLabel("NO BOOKINGS FOUND"));
             }
             
-            multipleBookingsPanel.add(padding1);
             JScrollPane multiplePane = new JScrollPane(multipleBookingsPanel);
             
             infoPanel.add(topLabelPanel, BorderLayout.PAGE_START);
@@ -1406,7 +1393,6 @@ public class View extends JFrame {
             rightPanel.add(setAvailability, BorderLayout.NORTH);
             rightPanel.add(logout, BorderLayout.SOUTH);
             
-            mainPanel.add(leftBlank, BorderLayout.WEST);
             mainPanel.add(centerPanel, BorderLayout.CENTER);
             mainPanel.add(rightPanel, BorderLayout.EAST);
             
@@ -1588,30 +1574,46 @@ public class View extends JFrame {
                             + b.get(i).get("time").substring(0, 5) + "<br />"
                             + "Status: " + b.get(i).get("status").substring(0, 1).toUpperCase() + b.get(i).get("status").substring(1)
                             + "</html>"), BorderLayout.WEST);
-                    if (!b.get(i).get("status").equals("cancelled")) {
-                        JButton change = new JButton("UPDATE");
-                        change.setActionCommand("go to change status " + b.get(i).get("id"));
-                        book.add(change, BorderLayout.SOUTH);
-                    }
+                    
+                    JPanel buttonPanel = new JPanel();
+                    buttonPanel.setBackground(TEXTFIELDCOLOUR);
+                    
                     switch (b.get(i).get("status")) {
                         case "completed":
                             JButton review = new JButton("SEE REVIEW");
                             review.setActionCommand("go to change status " + b.get(i).get("id"));
-                            book.add(review, BorderLayout.EAST);
+                            buttonPanel.add(review);
                             break;
                         case "upcoming":
-                            JButton cancel = new JButton("CANCEL");
-                            cancel.setActionCommand("cancel booking " + b.get(i).get("id"));
-                            book.add(cancel, BorderLayout.EAST);
+                            if (controller.isOld(b.get(i).get("date"), b.get(i).get("time"))) {
+                                buttonPanel.setLayout(new BorderLayout(10, 10));
+                                JButton complete = new JButton("COMPLETED");
+                                complete.setActionCommand("complete booking " + b.get(i).get("id"));
+                                buttonPanel.add(complete, BorderLayout.NORTH);
+                                
+                                JButton noShow = new JButton("NO SHOW");
+                                noShow.setActionCommand("no show booking " + b.get(i).get("id"));
+                                buttonPanel.add(noShow, BorderLayout.SOUTH);
+                            } else {
+                                JButton cancel = new JButton("CANCEL");
+                                cancel.setActionCommand("cancel booking " + b.get(i).get("id"));
+                                buttonPanel.add(cancel);
+                            }
                             break;
                         case "requested":
+                            buttonPanel.setLayout(new BorderLayout(10, 10));
                             JButton accept = new JButton("CONFIRM");
                             accept.setActionCommand("confirm " + b.get(i).get("id"));
-                            book.add(accept);
+                            buttonPanel.add(accept, BorderLayout.NORTH);
+                            
+                            JButton cancel = new JButton("CANCEL");
+                            cancel.setActionCommand("cancel booking " + b.get(i).get("id"));
+                            buttonPanel.add(cancel, BorderLayout.SOUTH);
                             break;
                         default:
                             break;
                     }
+                    book.add(buttonPanel, BorderLayout.EAST);
 
                     bookings.add(book);
                 }
@@ -1794,28 +1796,8 @@ public class View extends JFrame {
             center.add(starsPanel, BorderLayout.NORTH);
             center.add(reviewPanel, BorderLayout.CENTER);
             
-            JPanel bottom = new JPanel();
-            bottom.setLayout(new BorderLayout(30, 10));
-            
-            JPanel statusPanel = new JPanel();
-            
-            String[] s = {"COMPLETED", "NO SHOW"};
-            statuses = new JComboBox(s);
-            
-            statusPanel.add(statuses);
-            
-            JPanel changePanel = new JPanel();
-            JButton change = new JButton("<html>UPDATE<br />STATUS</html>");
-            change.setActionCommand("change status " + bookingID);
-            
-            changePanel.add(change);
-            
-            bottom.add(statusPanel, BorderLayout.WEST);
-            bottom.add(changePanel, BorderLayout.EAST);
-            
             centerPanel.add(top, BorderLayout.NORTH);
             centerPanel.add(center, BorderLayout.CENTER);
-            centerPanel.add(bottom, BorderLayout.SOUTH);
             
             JPanel p1 = new JPanel();
             p1.setPreferredSize(paddingY1);
@@ -1842,6 +1824,111 @@ public class View extends JFrame {
             
             standardiseChildren(mainPanel, true);
             standardiseChildren(rightPanel, true);
+        }
+    }
+    
+    public class adminMain extends JPanel {
+        public adminMain() {
+            this.setLayout(new BorderLayout(10, 10));
+            this.setBackground(WHITE);
+            
+            JPanel topPanel = new JPanel();
+            topPanel.setPreferredSize(new Dimension(windowWidth, (int)(windowHeight / 5)));
+            topPanel.setBackground(BLUE);
+            topPanel.setForeground(WHITE);
+            topPanel.setBorder(border(DARKBLUE, 2));
+            topPanel.setLayout(new BorderLayout());
+            
+            JLabel l = new JLabel("ADMIN");
+            l.setFont(titleFont);
+            l.setHorizontalAlignment(SwingConstants.CENTER);
+            
+            JPanel logPanel = new JPanel();
+            logPanel.setBackground(BLUE);
+            
+            JButton logout = new JButton("LOG OUT");
+            logout.setActionCommand("log out");
+            
+            logPanel.add(logout);
+            
+            topPanel.add(l, BorderLayout.CENTER);
+            topPanel.add(logPanel, BorderLayout.EAST);
+            
+            JPanel mainPanel = new JPanel();
+            mainPanel.setLayout(new BorderLayout(10, 10));
+            
+            JPanel leftMainPanel = new JPanel();
+            leftMainPanel.setLayout(new BorderLayout());
+            leftMainPanel.setPreferredSize(new Dimension((windowWidth / 2) - 20, (windowHeight / 3) - 20));
+            JPanel rightMainPanel = new JPanel();
+            rightMainPanel.setLayout(new BorderLayout());
+            rightMainPanel.setPreferredSize(new Dimension((windowWidth / 2) - 20, (windowHeight / 3) - 20));
+            
+            leftMainPanel.add(new JLabel("<html>Number of accounts: " + controller.getAccountsCount() + "<br />"
+                    + "Number of barbers: " + controller.getBarbersCount() + "<br />"
+                    + "Number of customers: " + controller.getCustomersCount() + "<br />"
+                    + "</html>"), BorderLayout.EAST);
+            rightMainPanel.add(new JLabel("<html>Number of appointments: " + controller.getTotalAppointmentsCount() + "<br />"
+                    + "Completed appointments: " + controller.getAppointmentsCount("completed") + "<br />"
+                    + "No show appointments: " + controller.getAppointmentsCount("no show") + "<br />"
+                    + "Upcoming appointments: " + controller.getAppointmentsCount("upcoming") + "<br />"
+                    + "Requested appointments: " + controller.getAppointmentsCount("requested") + "<br />"
+                    + "Cancelled appointments: " + controller.getAppointmentsCount("cancelled") + "<br />"
+                    + "</html>"), BorderLayout.WEST);
+            
+            JPanel botPanel = new JPanel();
+            
+            JButton graphs = new JButton("GRAPHS");
+            
+            botPanel.add(graphs);
+            
+            mainPanel.add(leftMainPanel, BorderLayout.WEST);
+            mainPanel.add(rightMainPanel, BorderLayout.EAST);
+            mainPanel.add(botPanel, BorderLayout.SOUTH);
+            
+            this.add(topPanel, BorderLayout.NORTH);
+            this.add(mainPanel, BorderLayout.CENTER);
+            standardiseChildren(topPanel, true);
+            standardiseChildren(mainPanel, true);
+        }
+    }
+    
+    public class graphs extends JPanel {
+        public graphs() {
+            this.setLayout(new BorderLayout());
+            this.setBackground(WHITE);
+            
+            JPanel topPanel = new JPanel();
+            topPanel.setPreferredSize(new Dimension(windowWidth, (int)(windowHeight / 5)));
+            topPanel.setBackground(BLUE);
+            topPanel.setForeground(WHITE);
+            topPanel.setBorder(border(DARKBLUE, 2));
+            topPanel.setLayout(new BorderLayout());
+            
+            JLabel l = new JLabel("ADMIN");
+            l.setFont(titleFont);
+            l.setHorizontalAlignment(SwingConstants.CENTER);
+            
+            JPanel logPanel = new JPanel();
+            logPanel.setBackground(BLUE);
+            
+            JButton logout = new JButton("LOG OUT");
+            logout.setActionCommand("log out");
+            
+            logPanel.add(logout);
+            
+            topPanel.add(l, BorderLayout.CENTER);
+            topPanel.add(logPanel, BorderLayout.EAST);
+            
+            JPanel mainPanel = new JPanel();
+            mainPanel.setLayout(new BorderLayout());
+            
+            JPanel graph = new JPanel();
+            
+            this.add(topPanel, BorderLayout.NORTH);
+            this.add(mainPanel, BorderLayout.CENTER);
+            standardiseChildren(topPanel, true);
+            standardiseChildren(mainPanel, true);
         }
     }
     
@@ -2385,5 +2472,4 @@ public class View extends JFrame {
         }
         stars = n;
     }
-    
 }

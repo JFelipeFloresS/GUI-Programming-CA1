@@ -997,6 +997,121 @@ public class DBConnection {
         return success;
     }
     
+    public int getAccountsCount() {
+        int i = -1;
+        String query = "SELECT DISTINCT COUNT(*) AS c FROM Accounts WHERE Type!='admin';";
+        
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);){
+            
+            while(rs.next()) {
+                i = rs.getInt("c");
+            }
+            
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+        
+        return i;
+    }
+    
+    public int getBarbersCount() {
+        int i = -1;
+        String query = "SELECT DISTINCT COUNT(*) AS c FROM Accounts WHERE Type='barber';";
+        
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);){
+            
+            while(rs.next()) {
+                i = rs.getInt("c");
+            }
+            
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+        
+        return i;
+    }
+    
+    public int getCustomersCount() {
+        int i = -1;
+        String query = "SELECT DISTINCT COUNT(*) AS c FROM Accounts WHERE Type='customer';";
+        
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);){
+            
+            while(rs.next()) {
+                i = rs.getInt("c");
+            }
+            
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+        
+        return i;
+    }
+    
+    public int getTotalAppointmentsCount() {
+        int i = -1;
+        String query = "SELECT DISTINCT COUNT(*) AS c FROM Bookings;";
+        
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);){
+            
+            while(rs.next()) {
+                i = rs.getInt("c");
+            }
+            
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+        
+        return i;
+    }
+    
+    public int getAppointmentsCount(String status) {
+        int i = -1;
+        String query = "SELECT DISTINCT COUNT(*) AS c FROM Bookings WHERE Booking_Status='" + status + "';";
+        
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);){
+            
+            while(rs.next()) {
+                i = rs.getInt("c");
+            }
+            
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+        
+        return i;
+    }
+    
     /**
      * Handles SQL Exceptions.
      * 
