@@ -997,6 +997,11 @@ public class DBConnection {
         return success;
     }
     
+    /**
+     * Gets how many accounts there are.
+     * 
+     * @return number of accounts
+     */
     public int getAccountsCount() {
         int i = -1;
         String query = "SELECT DISTINCT COUNT(*) AS c FROM Accounts WHERE Type!='admin';";
@@ -1020,6 +1025,11 @@ public class DBConnection {
         return i;
     }
     
+    /**
+     * Gets how many barbers there are.
+     * 
+     * @return number of barbers
+     */
     public int getBarbersCount() {
         int i = -1;
         String query = "SELECT DISTINCT COUNT(*) AS c FROM Accounts WHERE Type='barber';";
@@ -1043,6 +1053,11 @@ public class DBConnection {
         return i;
     }
     
+    /**
+     * Gets how many customers there are.
+     * 
+     * @return number of customers
+     */
     public int getCustomersCount() {
         int i = -1;
         String query = "SELECT DISTINCT COUNT(*) AS c FROM Accounts WHERE Type='customer';";
@@ -1066,6 +1081,11 @@ public class DBConnection {
         return i;
     }
     
+    /**
+     * Gets how many appointments there are.
+     * 
+     * @return number of appointments
+     */
     public int getTotalAppointmentsCount() {
         int i = -1;
         String query = "SELECT DISTINCT COUNT(*) AS c FROM Bookings;";
@@ -1089,6 +1109,12 @@ public class DBConnection {
         return i;
     }
     
+    /**
+     * Gets how many appointments of a specific status there are.
+     * 
+     * @param status status of appointment to get the number of
+     * @return number of appointments with the given status
+     */
     public int getAppointmentsCount(String status) {
         int i = -1;
         String query = "SELECT DISTINCT COUNT(*) AS c FROM Bookings WHERE Booking_Status='" + status + "';";

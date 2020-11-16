@@ -393,22 +393,48 @@ public class Controller implements ActionListener{
         return this.connection.getBookingReview(b);
     }
     
+    /**
+     * Gets how many accounts there are.
+     * 
+     * @return number of accounts
+     */
     public int getAccountsCount() {
         return this.connection.getAccountsCount();
     }
     
+    /**
+     * Gets how many barbers there are.
+     * 
+     * @return number of barbers 
+     */
     public int getBarbersCount() {
         return this.connection.getBarbersCount();
     }
     
+    /**
+     * Gets how many customers there are.
+     * 
+     * @return number of customers
+     */
     public int getCustomersCount() {
         return this.connection.getCustomersCount();
     }
     
+    /**
+     * Gets how many appointments there are.
+     * 
+     * @return number of appointments
+     */
     public int getTotalAppointmentsCount() {
         return this.connection.getTotalAppointmentsCount();
     }
     
+    /**
+     * Gets how many appointments of a specific status there are.
+     * 
+     * @param status status of appointment to get the number of
+     * @return number of appointments with the given status
+     */
     public int getAppointmentsCount(String status) {
         return this.connection.getAppointmentsCount(status);
     }
@@ -703,16 +729,33 @@ public class Controller implements ActionListener{
         }
     }
     
+    /**
+     * Updates an appointment status to "completed".
+     * 
+     * @param id booking ID
+     */
     private void completeBooking(int id) {
         this.connection.updateStatus(id, "completed");
         changeScreen(this.view.new barberBookings());
     }
     
+    /**
+     * Updates an appointment status to "no show".
+     * 
+     * @param id booking ID
+     */
     private void noShowBooking(int id) {
         this.connection.updateStatus(id, "no show");
         changeScreen(this.view.new barberBookings());
     }
     
+    /**
+     * Checks whether a date and time is older than the current date and time.
+     * 
+     * @param date string with the date to be checked
+     * @param time string with the time to be checked
+     * @return boolean: true is old, false is future
+     */
     public boolean isOld(String date, String time) {
         boolean old = false;
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -734,7 +777,7 @@ public class Controller implements ActionListener{
                 }
             }
         } catch (ParseException e) {
-            this.view.setError(e.getMessage());
+            JOptionPane.showMessageDialog(this.view, e.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
         }
         
         return old;
