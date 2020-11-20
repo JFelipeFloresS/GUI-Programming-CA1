@@ -2,7 +2,6 @@ package barberapp;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -54,7 +53,7 @@ public class Controller implements ActionListener{
         }
         
         if (e.getActionCommand().startsWith("review ")) {
-            changeScreen(this.view.new submitReview(Integer.parseInt(e.getActionCommand().substring(7))));
+            changeScreen(new SubmitReview(this, Integer.parseInt(e.getActionCommand().substring(7))));
             return;
         }
         
@@ -76,6 +75,7 @@ public class Controller implements ActionListener{
         if (e.getActionCommand().contains("confirm ")) {
             int booking = Integer.parseInt(e.getActionCommand().substring(8));
             this.connection.confirmBooking(booking);
+            changeScreen(new BarberMain(this));
             JOptionPane.showMessageDialog(this.view, "Booking accepted.");
             return;
         }
@@ -86,7 +86,7 @@ public class Controller implements ActionListener{
         }
         
         if (e.getActionCommand().contains("go to change status ")){
-            changeScreen(this.view.new barberViewReview(Integer.parseInt(e.getActionCommand().substring(20))));
+            changeScreen(new BarberViewReview(this, Integer.parseInt(e.getActionCommand().substring(20))));
             return;
         }
         
@@ -102,7 +102,7 @@ public class Controller implements ActionListener{
         
         switch(e.getActionCommand()) {
             case "create new account":
-                changeScreen(this.view.new createChoice());
+                changeScreen(new CreateChoice(this));
                 break;
                 
             case "log in":
@@ -114,7 +114,7 @@ public class Controller implements ActionListener{
                 break;
                 
             case "go to create barber":
-                changeScreen(this.view.new createBarber());
+                changeScreen(new CreateBarber(this));
                 break;
                 
             case "create barber":
@@ -122,7 +122,7 @@ public class Controller implements ActionListener{
                 break;
                 
             case "go to create customer":
-                changeScreen(this.view.new createCustomer());
+                changeScreen(new CreateCustomer(this));
                 break;
                 
             case "view customer bookings":
@@ -138,7 +138,7 @@ public class Controller implements ActionListener{
                 break;
                 
             case "back to initial page":
-                changeScreen(this.view.new initialPage());
+                changeScreen(new InitialPage(this));
                 break;
                 
             case "search barber name":
@@ -150,11 +150,11 @@ public class Controller implements ActionListener{
                 break;
                 
             case "go to set availability":
-                changeScreen(this.view.new availabilityPage());
+                changeScreen(new AvailabilityPage(this));
                 break;
                 
             case "select date":
-                this.view.setPickedDate();
+                new AvailabilityPage(this).setPickedDate(this);
                 break;
                 
             case "enter barber availability":
@@ -162,19 +162,19 @@ public class Controller implements ActionListener{
                 break;
                 
             case "back to main barber":
-                changeScreen(this.view.new barberMain());
+                changeScreen(new BarberMain(this));
                 break;
                 
             case "back to main customer":
-                changeScreen(this.view.new customerMain());
+                changeScreen(new CustomerMain(this));
                 break;
             
             case "back to barber bookings":
-                changeScreen(this.view.new barberBookings());
+                changeScreen(new BarberBookings(this));
                 break;
                 
             case "GRAPHS":
-                changeScreen(this.view.new graphs());
+                changeScreen(new Graphs(this));
                 break;
                 
             default:
@@ -290,7 +290,7 @@ public class Controller implements ActionListener{
      * @return ArrayList of HashMaps with the keys "id", "name", "phone", "address", "town", "location"
      */
     public ArrayList<HashMap<String, String>> searchForBarberName() {
-        return this.connection.searchForBarberName(this.view.getBarberName());
+        return this.connection.searchForBarberName(Globals.getBarberName());
     }
     
     /**
@@ -299,7 +299,7 @@ public class Controller implements ActionListener{
      * @return ArrayList of HashMaps with the keys "id", "name", "phone", "address", "town", "location"
      */
     public ArrayList<HashMap<String, String>> searchForBarberLocation() {
-        return this.connection.searchForBarberLocation(this.view.getAllLocationsBox().getSelectedItem().toString());
+        return this.connection.searchForBarberLocation(Globals.getAllLocationsBox().getSelectedItem().toString());
     }
     
     /**
@@ -447,8 +447,8 @@ public class Controller implements ActionListener{
     private void changeStatus(int s) {
         int response = JOptionPane.showConfirmDialog(this.view, "Are you sure you want to change this appointment status?", "Appointment status", JOptionPane.YES_NO_OPTION);
         if (response == JOptionPane.YES_OPTION) {
-            this.connection.updateStatus(s, this.view.getStatus());
-            changeScreen(this.view.new barberBookings());
+            this.connection.updateStatus(s, Globals.getStatus());
+            changeScreen(new BarberBookings(this));
             JOptionPane.showMessageDialog(this.view, "Status updated successfully");
         }
     }
@@ -457,8 +457,8 @@ public class Controller implements ActionListener{
      * Updates currently logged barber for the date picked based on the availability check boxes.
      */
     private void updateBarberAvailability() {
-        ArrayList<HashMap<String, String>> currAvailability = this.connection.getAvailability(this.connection.getID(), this.view.getpickedDate());
-        HashMap<String, Boolean> availability = this.view.getAvailableCheckBoxSelection();
+        ArrayList<HashMap<String, String>> currAvailability = this.connection.getAvailability(this.connection.getID(), Globals.getpickedDate());
+        HashMap<String, Boolean> availability = Globals.getAvailableCheckBoxSelection();
         int h = 0;
         String m = ":00";
         boolean isHalf = false;
@@ -473,18 +473,18 @@ public class Controller implements ActionListener{
             boolean isInNew = availability.get(currTime);
             boolean isInOld = false;
             for (int j = 0; j < currAvailability.size(); j++) {
-                if (currAvailability.get(j).get("date").equals(this.view.getpickedDate()) && currAvailability.get(j).get("time").equals(currTime)) {
+                if (currAvailability.get(j).get("date").equals(Globals.getpickedDate()) && currAvailability.get(j).get("time").equals(currTime)) {
                     isInOld = true;
                 }
             }
 
             if (isInOld) {
                 if (!isInNew) {
-                    this.connection.removeAvailability(this.connection.getID(), this.view.getpickedDate(), currTime);
+                    this.connection.removeAvailability(this.connection.getID(), Globals.getpickedDate(), currTime);
                 }
             } else {
                 if (isInNew) {
-                    this.connection.addAvailability(this.connection.getID(), this.view.getpickedDate(), currTime);
+                    this.connection.addAvailability(this.connection.getID(), Globals.getpickedDate(), currTime);
                 }
             }
 
@@ -496,7 +496,7 @@ public class Controller implements ActionListener{
             }
             isHalf = !isHalf;
         }
-        changeScreen(this.view.new availabilityPage());
+        changeScreen(new AvailabilityPage(this));
         JOptionPane.showMessageDialog(this.view, "Availability updated successfully!");
     }
     
@@ -504,14 +504,13 @@ public class Controller implements ActionListener{
      * Search for barber based on the name put into the text field barberName and setBarberName.
      */
     private void searchBarberByName() {
-        if (this.view.getBarberName().length() < 1) {
+        if (Globals.getBarberName().length() < 1) {
             JOptionPane.showMessageDialog(this.view, "Please enter a name to search for");
         } else {
-            this.view.setError("");
-            String n = this.view.getBarberName();
-            changeScreen(this.view.new findABarber());
-            this.view.setBarberName(n);
-            this.view.searchForBarber("name");
+            String n = Globals.getBarberName();
+            changeScreen(new FindABarber(this));
+            Globals.setBarberName(n);
+            new FindABarber(this).searchForBarber("name", this);
         }
     }
     
@@ -519,10 +518,10 @@ public class Controller implements ActionListener{
      * Search for barber based on the location selected from the combo box allLocationsBox. setSelectedLocation.
      */
     private void searchBarberByLocation() {
-        String selected = this.view.getSelectedLocation();
-        changeScreen(this.view.new findABarber());
-        this.view.setSelectedLocation(selected);
-        this.view.searchForBarber("location");
+        String selected = Globals.getSelectedLocation();
+        changeScreen(new FindABarber(this));
+        Globals.setSelectedLocation(selected);
+        new FindABarber(this).searchForBarber("location", this);
     }
     
     /**
@@ -531,63 +530,63 @@ public class Controller implements ActionListener{
      * @param i barber ID to show available slots
      */
     private void showBarberAvailability(int i) {
-        this.view.showBarberAvailability(i);
+        new FindABarber(this).showBarberAvailability(i, this);
     }
     
     /**
      * Changes screen to customerBookings.
      */
     private void showAllCustomerBookings() {
-        changeScreen(this.view.new customerBookings());
+        changeScreen(new CustomerBookings(this));
     }
     
     /**
      * Changes screen to barberBookings.
      */
     private void showAllBarberBookings() {
-        changeScreen(this.view.new barberBookings());
+        changeScreen(new BarberBookings(this));
     }
     
     /**
-     * Creates customer account and changes screen to initialPage.
+     * Creates customer account and changes screen to InitialPage.
      */
     private void createCustomerAccount() {
-        if (isValidEmailAddress(this.view.getEmailAddress())) {
+        if (isValidEmailAddress(Globals.getEmailAddress())) {
         } else {
             JOptionPane.showMessageDialog(this.view, "Please insert a valid email address", "Invalid email address", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        if (this.view.getPass().length() < 8) {
+        if (Globals.getPass().length() < 8) {
             JOptionPane.showMessageDialog(this.view, "Your password is too short", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
-        } else if (!isValidPassword(this.view.getPass())) {
+        } else if (!isValidPassword(Globals.getPass())) {
             JOptionPane.showMessageDialog(this.view, "Your password must contain a digit, a lowercase and an uppercase letter", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
-        } else if (!this.view.getPass().equals(this.view.getConfirmPass())) {
+        } else if (!Globals.getPass().equals(Globals.getConfirmPass())) {
             JOptionPane.showMessageDialog(this.view, "Your password and confirmation password don't match", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (this.view.getFirstName().length() < 1 || this.view.getLastName().length() < 1) {
+        if (Globals.getFirstName().length() < 1 || Globals.getLastName().length() < 1) {
             JOptionPane.showMessageDialog(this.view, "Please fill in all fields!", "Incomplete fields", JOptionPane.WARNING_MESSAGE);
             return;
         } 
         
-        switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "customer", this.view.getFirstName(), this.view.getLastName(), this.view.getPhoneNumber(), null, null, null)){
+        switch(this.connection.createAccount(Globals.getEmailAddress(), Globals.getPass(), "customer", Globals.getFirstName(), Globals.getLastName(), Globals.getPhoneNumber(), null, null, null)){
             case "done":
-                changeScreen(this.view.new initialPage());
+                changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "Account created successfully, welcome to find a barber!", "Account created", JOptionPane.INFORMATION_MESSAGE);
                 break;
             case "repeated email":
-                changeScreen(this.view.new initialPage());
+                changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "An account with this email address already exists", "Account already exists", JOptionPane.WARNING_MESSAGE);
                 break;
             case "account created":
-                changeScreen(this.view.new initialPage());
+                changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "Error adding location to the database, account created successfully.", "Error", JOptionPane.ERROR_MESSAGE);
                 break;
             default: 
-                changeScreen(this.view.new initialPage());
+                changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "Unexpected error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
                 break;
         }
@@ -595,47 +594,46 @@ public class Controller implements ActionListener{
     }
     
     /**
-     * Creates barber account and changes screen to initialPage.
+     * Creates barber account and changes screen to InitialPage.
      */
     private void createBarberAccount() {
         
-        if (!isValidEmailAddress(this.view.getEmailAddress())) {
+        if (!isValidEmailAddress(Globals.getEmailAddress())) {
             JOptionPane.showMessageDialog(this.view, "Please insert a valid email address.", "Invalid email address", JOptionPane.WARNING_MESSAGE);
             return;
         }
         
-        if (this.view.getPass().length() < 8) {
+        if (Globals.getPass().length() < 8) {
             JOptionPane.showMessageDialog(this.view, "Your password is too short", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
-        } else if (!isValidPassword(this.view.getPass())) {
+        } else if (!isValidPassword(Globals.getPass())) {
             JOptionPane.showMessageDialog(this.view, "Your password must contain a digit, a lowercase and an uppercase letter", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
-        } else if (!this.view.getPass().equals(this.view.getConfirmPass())) {
+        } else if (!Globals.getPass().equals(Globals.getConfirmPass())) {
             JOptionPane.showMessageDialog(this.view, "Your password and confirmation password don't match", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (this.view.getFirstName().length() < 1 || this.view.getLastName().length() < 1 || this.view.getSetLocation().length() < 1 || this.view.getAddress().length() < 1) {
+        if (Globals.getFirstName().length() < 1 || Globals.getLastName().length() < 1 || Globals.getSetLocation().length() < 1 || Globals.getAddress().length() < 1) {
             JOptionPane.showMessageDialog(this.view, "Please fill in all fields!", "Incomplete fields", JOptionPane.WARNING_MESSAGE);
             return;
         } 
         
-        switch(this.connection.createAccount(this.view.getEmailAddress(), this.view.getPass(), "barber", this.view.getFirstName(), this.view.getLastName(), this.view.getPhoneNumber(), this.view.getSetLocation(), this.view.getAddress(), this.view.getTown())){
+        switch(this.connection.createAccount(Globals.getEmailAddress(), Globals.getPass(), "barber", Globals.getFirstName(), Globals.getLastName(), Globals.getPhoneNumber(), Globals.getSetLocation(), Globals.getAddress(), Globals.getTown())){
             case "done":
-                changeScreen(this.view.new initialPage());
+                changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "Account created successfully, welcome to find a barber!", "Account created", JOptionPane.INFORMATION_MESSAGE);
                 break;
             case "repeated email":
-                changeScreen(this.view.new initialPage());
+                changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "An account with this email address already exists", "Account already exists", JOptionPane.WARNING_MESSAGE);
-                this.view.setError("<html>An account with this<br /> email address already exists</html>");
                 break;
             case "account created":
-                changeScreen(this.view.new initialPage());
+                changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "Error adding location to the database, account created successfully.", "Error", JOptionPane.ERROR_MESSAGE);
                 break;
             default: 
-                changeScreen(this.view.new initialPage());
+                changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "Unexpected error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
                 break;
         }
@@ -645,14 +643,18 @@ public class Controller implements ActionListener{
      * Logs into an account based on the email address and password entered. If successful, changes screen to customerMain or barberMain based on the account type.
      */
     private void logIn() {
-        if (this.connection.checkCredentials(this.view.getEmailAddress(), this.view.getPass())) {
-            this.connection.logIn(this.view.getEmailAddress());
-            if (this.connection.getType().equals("customer")) {
-                changeScreen(this.view.new customerMain());
-            } else if (this.connection.getType().equals("barber")) {
-                changeScreen(this.view.new barberMain());
-            } else if (this.connection.getType().equals("admin")) {
-                changeScreen(this.view.new adminMain());
+        if (this.connection.checkCredentials(Globals.getEmailAddress(), Globals.getPass())) {
+            this.connection.logIn(Globals.getEmailAddress());
+            switch (this.connection.getType()) {
+                case "customer":
+                    changeScreen(new CustomerMain(this));
+                    break;
+                case "barber":
+                    changeScreen(new BarberMain(this));
+                    break;
+                case "admin":
+                    changeScreen(new AdminMain(this));
+                    break;
             }
         } else {
             JOptionPane.showMessageDialog(this.view, "Email or password incorrect, please try again! Don't have an account? Create one now!", "Email or password incorrect", JOptionPane.WARNING_MESSAGE);
@@ -660,11 +662,11 @@ public class Controller implements ActionListener{
     }
     
     /**
-     * Logs out of the session and changes the screen to the initialPage.
+     * Logs out of the session and changes the screen to the InitialPage.
      */
     private void logOut() {
         this.connection.logOut();
-        changeScreen(this.view.new initialPage());
+        changeScreen(new InitialPage(this));
     }
     
     /**
@@ -680,9 +682,9 @@ public class Controller implements ActionListener{
             HashMap<String, String> bookingInfo = this.connection.getBookingInfo(booking);
             this.connection.addAvailability(Integer.parseInt(bookingInfo.get("id")), bookingInfo.get("date"), bookingInfo.get("time"));
             if (this.connection.getType().equals("barber")) {
-                changeScreen(this.view.new barberMain());
+                changeScreen(new BarberMain(this));
             } else {
-                changeScreen(this.view.new customerMain());
+                changeScreen(new CustomerMain(this));
             }
         }
     }
@@ -693,8 +695,8 @@ public class Controller implements ActionListener{
      * @param booking booking ID to submit a review
      */
     private void submitReview(int booking) {
-        this.connection.addReview(booking, this.view.getReview(), this.view.getStars());
-        changeScreen(this.view.new customerMain());
+        this.connection.addReview(booking, Globals.getReview(), Globals.getStars());
+        changeScreen(new CustomerMain(this));
         JOptionPane.showMessageDialog(this.view, "Review submitted successfully");
     }
        
@@ -704,8 +706,8 @@ public class Controller implements ActionListener{
      * @param booking booking ID to be updated
      */
     private void updateReview(int booking) {
-        this.connection.updateReview(booking, this.view.getReview(), this.view.getStars());
-        changeScreen(this.view.new customerMain());
+        this.connection.updateReview(booking, Globals.getReview(), Globals.getStars());
+        changeScreen(new CustomerMain(this));
         JOptionPane.showMessageDialog(this.view, "Review updated successfully");
     }
     
@@ -722,7 +724,7 @@ public class Controller implements ActionListener{
         if (this.connection.getBookingID(bookDate, bookTime, customerID, barberID) == 0) {
             this.connection.createBooking(bookDate, bookTime, barberID);
             this.connection.removeAvailability(barberID, bookDate, bookTime);
-            changeScreen(this.view.new customerMain());
+            changeScreen(new CustomerMain(this));
             JOptionPane.showMessageDialog(this.view, "Booking requested successfully");
         } else {
             JOptionPane.showMessageDialog(this.view, "You have alread requested this appointment", "Already requested", JOptionPane.WARNING_MESSAGE);
@@ -736,7 +738,7 @@ public class Controller implements ActionListener{
      */
     private void completeBooking(int id) {
         this.connection.updateStatus(id, "completed");
-        changeScreen(this.view.new barberBookings());
+        changeScreen(new BarberBookings(this));
     }
     
     /**
@@ -746,7 +748,7 @@ public class Controller implements ActionListener{
      */
     private void noShowBooking(int id) {
         this.connection.updateStatus(id, "no show");
-        changeScreen(this.view.new barberBookings());
+        changeScreen(new BarberBookings(this));
     }
     
     /**
