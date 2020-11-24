@@ -1,4 +1,4 @@
-package barberapp;
+package barberapp.main;
 
 /**
  *

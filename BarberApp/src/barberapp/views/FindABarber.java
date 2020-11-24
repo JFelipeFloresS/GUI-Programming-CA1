@@ -3,9 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package barberapp;
+package barberapp.views;
 
-import static barberapp.View.standardiseChildren;
+import barberapp.main.Controller;
+import barberapp.main.Globals;
+import barberapp.views.LoggedLeftPanel;
+import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -25,6 +28,11 @@ import javax.swing.SwingConstants;
  */
 public class FindABarber extends JPanel {
 
+    public static JTextField barberName = null;
+    public static JComboBox allLocationsBox = null;
+    public static JPanel leftFindABarberPanel = null;
+    public static JPanel rightFindABarberPanel = null;
+
     /**
      * Creates the find a barber page.
      *
@@ -40,7 +48,7 @@ public class FindABarber extends JPanel {
         // ** top panel **
         JPanel topPanel = new JPanel();
         topPanel.setBorder(Globals.border(Globals.DARKBLUE, 1));
-        topPanel.setPreferredSize(new Dimension(Globals.windowWidth, (int) Globals.windowHeight / 5));
+        topPanel.setPreferredSize(new Dimension(Globals.WINDOW_WIDTH, (int) Globals.WINDOW_HEIGHT / 5));
         topPanel.setBackground(Globals.WHITE);
         topPanel.setLayout(new BorderLayout());
 
@@ -63,11 +71,11 @@ public class FindABarber extends JPanel {
         JPanel centerLeftPanel = new JPanel();
         centerLeftPanel.setBackground(Globals.WHITE);
 
-        Globals.barberName = new JTextField(10);
+        barberName = new JTextField(10);
         JButton searchName = new JButton("SEARCH");
-        searchName.setActionCommand("search barber name");
+        searchName.setActionCommand("search barber name find");
 
-        centerLeftPanel.add(Globals.barberName);
+        centerLeftPanel.add(barberName);
         centerLeftPanel.add(searchName);
 
         leftTopPanel.add(topLeftLabel, BorderLayout.NORTH);
@@ -81,11 +89,11 @@ public class FindABarber extends JPanel {
         JPanel centerRightTopPanel = new JPanel();
         centerRightTopPanel.setBackground(Globals.WHITE);
 
-        Globals.allLocationsBox = new JComboBox(controller.getLocations());
+        allLocationsBox = new JComboBox(controller.getLocations());
         JButton searchLocation = new JButton("SEARCH");
-        searchLocation.setActionCommand("search barber location");
+        searchLocation.setActionCommand("search barber location find");
 
-        centerRightTopPanel.add(Globals.allLocationsBox);
+        centerRightTopPanel.add(allLocationsBox);
         centerRightTopPanel.add(searchLocation);
 
         rightTopPanel.add(topRightTopLabel, BorderLayout.NORTH);
@@ -96,20 +104,20 @@ public class FindABarber extends JPanel {
         topPanel.add(rightTopPanel, BorderLayout.EAST);
 
         // ** left panel **
-        Globals.leftFindABarberPanel = new JPanel();
-        Globals.leftFindABarberPanel.setPreferredSize(Globals.paddingX5);
-        Globals.leftFindABarberPanel.setBackground(Globals.WHITE);
-        Globals.leftFindABarberPanel.setLayout(new BorderLayout());
+        leftFindABarberPanel = new JPanel();
+        leftFindABarberPanel.setPreferredSize(Globals.PADDING_X5);
+        leftFindABarberPanel.setBackground(Globals.WHITE);
+        leftFindABarberPanel.setLayout(new BorderLayout());
 
         // ** right panel **
-        Globals.rightFindABarberPanel = new JPanel();
-        Globals.rightFindABarberPanel.setPreferredSize(Globals.paddingX5);
-        Globals.rightFindABarberPanel.setBackground(Globals.WHITE);
-        Globals.rightFindABarberPanel.setLayout(new BorderLayout());
+        rightFindABarberPanel = new JPanel();
+        rightFindABarberPanel.setPreferredSize(Globals.PADDING_X5);
+        rightFindABarberPanel.setBackground(Globals.WHITE);
+        rightFindABarberPanel.setLayout(new BorderLayout());
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
-        mainPanel.add(Globals.leftFindABarberPanel, BorderLayout.WEST);
-        mainPanel.add(Globals.rightFindABarberPanel, BorderLayout.CENTER);
+        mainPanel.add(leftFindABarberPanel, BorderLayout.WEST);
+        mainPanel.add(rightFindABarberPanel, BorderLayout.CENTER);
 
         this.add(new LoggedLeftPanel(controller), BorderLayout.WEST);
         this.add(mainPanel, BorderLayout.CENTER);
@@ -123,11 +131,11 @@ public class FindABarber extends JPanel {
      * @param searchBy "name" or "location"
      * @param controller controller for FindABarber
      */
-    public void searchForBarber(String searchBy, Controller controller) {
-        if (Globals.leftFindABarberPanel.getComponentCount() > 1) {
-            Globals.leftFindABarberPanel.removeAll();
+    public static void searchForBarber(String searchBy, Controller controller) {
+        if (leftFindABarberPanel.getComponentCount() > 1) {
+            leftFindABarberPanel.removeAll();
         }
-        Globals.leftFindABarberPanel.add(new JLabel("SEARCH RESULT: "), BorderLayout.NORTH);
+        leftFindABarberPanel.add(new JLabel("SEARCH RESULT: "), BorderLayout.NORTH);
         ArrayList<HashMap<String, String>> searchResults;
         if (searchBy.equals("name")) {
             searchResults = controller.searchForBarberName();
@@ -145,9 +153,9 @@ public class FindABarber extends JPanel {
                 singleBarber.setLayout(new BorderLayout());
                 singleBarber.setBorder(Globals.border(Globals.DARKBLUE, 1));
                 singleBarber.setBackground(Globals.WHITE);
-                singleBarber.setPreferredSize(new Dimension((int) (Globals.windowWidth / 3.5), (int) Globals.windowHeight / 10));
-                singleBarber.setMaximumSize(new Dimension((int) (Globals.windowWidth / 3.5), (int) Globals.windowHeight / 10));
-                singleBarber.setMinimumSize(new Dimension((int) (Globals.windowWidth / 3.5), (int) Globals.windowHeight / 10));
+                singleBarber.setPreferredSize(new Dimension((int) (Globals.WINDOW_WIDTH / 3.5), (int) Globals.WINDOW_HEIGHT / 10));
+                singleBarber.setMaximumSize(new Dimension((int) (Globals.WINDOW_WIDTH / 3.5), (int) Globals.WINDOW_HEIGHT / 10));
+                singleBarber.setMinimumSize(new Dimension((int) (Globals.WINDOW_WIDTH / 3.5), (int) Globals.WINDOW_HEIGHT / 10));
 
                 JPanel leftSingle = new JPanel();
                 leftSingle.setBackground(Globals.WHITE);
@@ -173,18 +181,18 @@ public class FindABarber extends JPanel {
             }
 
             JPanel p1 = new JPanel();
-            p1.setPreferredSize(new Dimension((int) (Globals.windowWidth / 3.5), (int) (Globals.windowHeight / 10)));
+            p1.setPreferredSize(new Dimension((int) (Globals.WINDOW_WIDTH / 3.5), (int) (Globals.WINDOW_HEIGHT / 10)));
             p1.setBackground(Globals.WHITE);
 
             allBarbers.add(p1);
 
             JScrollPane sp = new JScrollPane(allBarbers);
-            Globals.leftFindABarberPanel.add(sp, BorderLayout.CENTER);
+            leftFindABarberPanel.add(sp, BorderLayout.CENTER);
         } else {
-            Globals.leftFindABarberPanel.add(new JLabel("NO MATCHES FOUND"));
+            leftFindABarberPanel.add(new JLabel("NO MATCHES FOUND"));
         }
 
-        standardiseChildren(Globals.leftFindABarberPanel, true, controller);
+        standardiseChildren(leftFindABarberPanel, true, controller);
         standardiseChildren(allBarbers, false, controller);
     }
 
@@ -194,10 +202,10 @@ public class FindABarber extends JPanel {
      * @param getB barber ID
      * @param controller controller for FindABarber
      */
-    public void showBarberAvailability(int getB, Controller controller) {
+    public static void showBarberAvailability(int getB, Controller controller) {
         ArrayList<HashMap<String, String>> availableList = controller.getbarberAvailability(getB, null);
         HashMap<String, String> bInfo = controller.getBarber(getB);
-        Globals.rightFindABarberPanel.add(new JLabel("<html>AVAILABLE TIMES: <br />"
+        rightFindABarberPanel.add(new JLabel("<html>AVAILABLE TIMES: <br />"
                 + bInfo.get("first name") + " " + bInfo.get("last name") + "<br />"
                 + bInfo.get("address") + ", " + bInfo.get("town") + " - " + bInfo.get("location") + "<br />"
                 + "Phone: " + bInfo.get("phone") + "</html>"), BorderLayout.NORTH);
@@ -218,10 +226,49 @@ public class FindABarber extends JPanel {
         }
 
         JScrollPane sp = new JScrollPane(times);
-        Globals.rightFindABarberPanel.add(sp);
+        rightFindABarberPanel.add(sp);
 
-        standardiseChildren(Globals.rightFindABarberPanel, true, controller);
+        standardiseChildren(rightFindABarberPanel, true, controller);
         standardiseChildren(times, false, controller);
+    }
+
+    /**
+     * @return combo box with all locations there are barbers in
+     */
+    public static JComboBox getAllLocationsBox() {
+        return allLocationsBox;
+    }
+
+    /**
+     * @return barber name to be searched from the text field barberName
+     */
+    public static String getBarberName() {
+        return barberName.getText();
+    }
+
+    /**
+     * @return location selected by user
+     */
+    public static String getSelectedLocation() {
+        return allLocationsBox.getSelectedItem().toString();
+    }
+
+    /**
+     * Sets what location is selected.
+     *
+     * @param l location to be selected
+     */
+    public static void setSelectedLocation(String l) {
+        allLocationsBox.setSelectedItem(l);
+    }
+
+    /**
+     * Sets the text of the text field barberName.
+     *
+     * @param n name to set the text as
+     */
+    public static void setBarberName(String n) {
+        barberName.setText(n);
     }
 
 }

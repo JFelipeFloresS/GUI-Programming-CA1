@@ -3,14 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package barberapp;
+package barberapp.views;
 
-import static barberapp.View.standardiseChildren;
+import barberapp.main.Controller;
+import barberapp.main.Globals;
+import barberapp.views.LoggedLeftPanel;
+import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -24,6 +28,16 @@ import javax.swing.JScrollPane;
  */
 public class AvailabilityPage extends JPanel {
 
+    public static JComboBox[] date = null;
+    public static JButton selectDate = null;
+    public static JPanel mainTime = null;
+    public static JScrollPane allTimesSP = null;
+    public static JLabel pickedDate = null;
+    public static JPanel allTimes = null;
+    public static boolean[] isAvailable = null;
+    public static JCheckBox[] availableCheckBox = null;
+    public static JButton enterAvailability = null;
+
     /**
      * Creates a page for a barber to enter their availability.
      *
@@ -33,7 +47,7 @@ public class AvailabilityPage extends JPanel {
         this.setLayout(new BorderLayout());
 
         JPanel mainPanel = new JPanel();
-        mainPanel.setPreferredSize(Globals.rightPanelDimension);
+        mainPanel.setPreferredSize(Globals.RIGHT_PANEL_DIMENSION);
         mainPanel.setBackground(Globals.WHITE);
         mainPanel.setLayout(new BorderLayout());
 
@@ -42,17 +56,17 @@ public class AvailabilityPage extends JPanel {
         // ** 3 main panels **
         //*left panel - calendar*
         JPanel leftPanel = new JPanel();
-        leftPanel.setPreferredSize(Globals.paddingX5);
+        leftPanel.setPreferredSize(Globals.PADDING_X5);
         leftPanel.setBackground(Globals.WHITE);
 
         JPanel mainCalendar = new JPanel();
-        mainCalendar.setPreferredSize(new Dimension((int) (Globals.windowWidth / 3.5), (int) (Globals.windowHeight / 1.1)));
+        mainCalendar.setPreferredSize(new Dimension((int) (Globals.WINDOW_WIDTH / 3.5), (int) (Globals.WINDOW_HEIGHT / 1.1)));
         mainCalendar.setBorder(Globals.border(Globals.DARKBLUE, 2));
 
         leftPanel.add(mainCalendar);
 
         JPanel p2 = new JPanel();
-        p2.setPreferredSize(new Dimension((int) (Globals.windowWidth / 4), (int) (Globals.windowHeight / 8)));
+        p2.setPreferredSize(new Dimension((int) (Globals.WINDOW_WIDTH / 4), (int) (Globals.WINDOW_HEIGHT / 8)));
 
         JLabel pickLabel = new JLabel("PICK DATE:");
 
@@ -60,7 +74,7 @@ public class AvailabilityPage extends JPanel {
         LocalDateTime localToday = LocalDateTime.now();
         String today = String.valueOf(dtf.format(localToday));
 
-        Globals.date = new JComboBox[3];
+        date = new JComboBox[3];
         String[] days = new String[31];
         for (int i = 0; i < days.length; i++) {
             days[i] = "";
@@ -81,54 +95,54 @@ public class AvailabilityPage extends JPanel {
         years[0] = today.substring(6);
         years[1] = String.valueOf((Integer.parseInt(today.substring(6))) + 1);
 
-        Globals.date[0] = new JComboBox(days);
-        Globals.date[0].setSelectedItem(today.substring(0, 2));
+        date[0] = new JComboBox(days);
+        date[0].setSelectedItem(today.substring(0, 2));
 
-        Globals.date[1] = new JComboBox(months);
-        Globals.date[1].setSelectedItem(today.substring(3, 5));
+        date[1] = new JComboBox(months);
+        date[1].setSelectedItem(today.substring(3, 5));
 
-        Globals.date[2] = new JComboBox(years);
-        Globals.date[2].setSelectedItem(today.substring(6));
+        date[2] = new JComboBox(years);
+        date[2].setSelectedItem(today.substring(6));
 
         JPanel p3 = new JPanel();
-        p3.setPreferredSize(new Dimension((int) (Globals.windowWidth / 4), (int) (Globals.windowHeight / 8)));
+        p3.setPreferredSize(new Dimension((int) (Globals.WINDOW_WIDTH / 4), (int) (Globals.WINDOW_HEIGHT / 8)));
 
         // !!!!FIX DATE PICKER TO GET PICKED DATE!!!!!
-        Globals.selectDate = new JButton("PICK DATE");
-        Globals.selectDate.setActionCommand("select date");
+        selectDate = new JButton("PICK DATE");
+        selectDate.setActionCommand("select date");
 
         p2.add(pickLabel);
         mainCalendar.add(p2);
-        mainCalendar.add(Globals.date[0]);
-        mainCalendar.add(Globals.date[1]);
-        mainCalendar.add(Globals.date[2]);
+        mainCalendar.add(date[0]);
+        mainCalendar.add(date[1]);
+        mainCalendar.add(date[2]);
         mainCalendar.add(p3);
-        mainCalendar.add(Globals.selectDate);
+        mainCalendar.add(selectDate);
 
         //*middle panel - times*
         JPanel midPanel = new JPanel();
         midPanel.setBackground(Globals.WHITE);
 
-        Globals.mainTime = new JPanel();
-        Globals.mainTime.setBorder(Globals.border(Globals.DARKBLUE, 2));
-        Globals.mainTime.setPreferredSize(new Dimension((int) (Globals.windowWidth / 3.8), (int) (Globals.windowHeight / 1.1)));
+        mainTime = new JPanel();
+        mainTime.setBorder(Globals.border(Globals.DARKBLUE, 2));
+        mainTime.setPreferredSize(new Dimension((int) (Globals.WINDOW_WIDTH / 3.8), (int) (Globals.WINDOW_HEIGHT / 1.1)));
 
-        midPanel.add(Globals.mainTime);
+        midPanel.add(mainTime);
 
         //*right panel - log out*
         JPanel rightPanel = new JPanel();
-        rightPanel.setPreferredSize(Globals.paddingX2);
+        rightPanel.setPreferredSize(Globals.PADDING_X2);
         rightPanel.setBackground(Globals.WHITE);
 
         JPanel p4 = new JPanel();
-        p4.setPreferredSize(Globals.paddingY3);
+        p4.setPreferredSize(Globals.PADDING_Y3);
         p4.setBackground(Globals.WHITE);
 
         JButton goBack = new JButton("BACK");
         goBack.setActionCommand("back to main barber");
 
         JPanel p5 = new JPanel();
-        p5.setPreferredSize(Globals.paddingY3);
+        p5.setPreferredSize(Globals.PADDING_Y3);
         p5.setBackground(Globals.WHITE);
 
         JButton logOut = new JButton("LOG OUT");
@@ -153,37 +167,39 @@ public class AvailabilityPage extends JPanel {
     /**
      * Shows all hours for the date picked by barber and whether or not that
      * slot is set as available.
+     *
+     * @param controller controller for AvailabilityPage
      */
-    public void setPickedDate(Controller controller) {
-        if (Globals.allTimesSP != null) {
-            Globals.allTimesSP.removeAll();
+    public static void setPickedDate(Controller controller) {
+        if (allTimesSP != null) {
+            allTimesSP.removeAll();
         }
-        if (Globals.mainTime != null) {
-            Globals.mainTime.removeAll();
+        if (mainTime != null) {
+            mainTime.removeAll();
         }
 
-        Globals.pickedDate = new JLabel();
-        Globals.mainTime.add(Globals.pickedDate);
+        pickedDate = new JLabel();
+        mainTime.add(pickedDate);
 
-        Globals.allTimes = new JPanel();
-        Globals.allTimes.setBackground(Globals.WHITE);
-        Globals.allTimes.setLayout(new GridLayout(48, 1));
+        allTimes = new JPanel();
+        allTimes.setBackground(Globals.WHITE);
+        allTimes.setLayout(new GridLayout(48, 1));
 
-        String pickedDay = Globals.date[0].getSelectedItem().toString();
-        String pickedMonth = Globals.date[1].getSelectedItem().toString();
-        Globals.pickedDate.setText(pickedDay + "/" + pickedMonth + "/" + Globals.date[2].getSelectedItem());
-        Globals.isAvailable = controller.checkBarberAvailability(controller.getSessionID(), Globals.getpickedDate());
+        String pickedDay = date[0].getSelectedItem().toString();
+        String pickedMonth = date[1].getSelectedItem().toString();
+        pickedDate.setText(pickedDay + "/" + pickedMonth + "/" + date[2].getSelectedItem());
+        isAvailable = controller.checkBarberAvailability(controller.getSessionID(), getpickedDate());
 
         int h = 0;
         boolean isHalf = false;
         String m = ":00";
         String currentTime;
-        Globals.availableCheckBox = new JCheckBox[48];
+        availableCheckBox = new JCheckBox[48];
 
         for (int i = 0; i < 48; i++) {
             JPanel singleTime = new JPanel();
             singleTime.setBorder(Globals.border(Globals.DARKBLUE, 1));
-            singleTime.setPreferredSize(new Dimension((int) (Globals.windowWidth / 4.5), (int) (Globals.windowHeight / 10)));
+            singleTime.setPreferredSize(new Dimension((int) (Globals.WINDOW_WIDTH / 4.5), (int) (Globals.WINDOW_HEIGHT / 10)));
             singleTime.setLayout(new BorderLayout());
 
             String addZero = "";
@@ -193,11 +209,11 @@ public class AvailabilityPage extends JPanel {
             currentTime = addZero + String.valueOf(h) + m;
             JLabel thisTime = new JLabel(currentTime);
             JPanel availabilityPanel = new JPanel();
-            Globals.availableCheckBox[i] = new JCheckBox();
-            Globals.availableCheckBox[i].setName(currentTime);
+            availableCheckBox[i] = new JCheckBox();
+            availableCheckBox[i].setName(currentTime);
 
-            if (Globals.isAvailable[i]) {
-                Globals.availableCheckBox[i].setSelected(true);
+            if (isAvailable[i]) {
+                availableCheckBox[i].setSelected(true);
             }
 
             if (isHalf) {
@@ -209,24 +225,53 @@ public class AvailabilityPage extends JPanel {
             isHalf = !isHalf;
 
             availabilityPanel.add(new JLabel("Available"));
-            availabilityPanel.add(Globals.availableCheckBox[i]);
+            availabilityPanel.add(availableCheckBox[i]);
 
             singleTime.add(thisTime, BorderLayout.CENTER);
             singleTime.add(availabilityPanel, BorderLayout.EAST);
 
-            Globals.allTimes.add(singleTime);
+            allTimes.add(singleTime);
         }
 
-        Globals.allTimesSP = new JScrollPane(Globals.allTimes);
-        Globals.allTimesSP.setPreferredSize(new Dimension((int) (Globals.windowWidth / 3.9), (int) (Globals.windowHeight / 1.4)));
-        Globals.mainTime.add(Globals.allTimesSP);
+        allTimesSP = new JScrollPane(allTimes);
+        allTimesSP.setPreferredSize(new Dimension((int) (Globals.WINDOW_WIDTH / 3.9), (int) (Globals.WINDOW_HEIGHT / 1.4)));
+        mainTime.add(allTimesSP);
 
-        Globals.enterAvailability = new JButton("ENTER AVAILABILITY");
-        Globals.enterAvailability.setActionCommand("enter barber availability");
+        enterAvailability = new JButton("ENTER AVAILABILITY");
+        enterAvailability.setActionCommand("enter barber availability");
 
-        Globals.mainTime.add(Globals.enterAvailability);
+        mainTime.add(enterAvailability);
 
-        standardiseChildren(Globals.mainTime, true, controller);
-        standardiseChildren(Globals.allTimes, true, controller);
+        standardiseChildren(mainTime, true, controller);
+        standardiseChildren(allTimes, true, controller);
     }
+
+    /**
+     * @return picked date from the label pickedDate
+     */
+    public static String getpickedDate() {
+        String full = pickedDate.getText();
+        String y = full.substring(6);
+        String m = full.substring(3, 5);
+        String d = full.substring(0, 2);
+
+        return y + "-" + m + "-" + d;
+    }
+
+    /**
+     * Gets available check box selection.
+     *
+     * @return HashMap with the keys being the slot time and the value being
+     * whether the barber is available for that slot
+     */
+    public static HashMap<String, Boolean> getAvailableCheckBoxSelection() {
+        HashMap<String, Boolean> available = new HashMap<>();
+
+        for (int i = 0; i < availableCheckBox.length; i++) {
+            available.put(availableCheckBox[i].getName() + ":00", availableCheckBox[i].isSelected());
+        }
+
+        return available;
+    }
+
 }

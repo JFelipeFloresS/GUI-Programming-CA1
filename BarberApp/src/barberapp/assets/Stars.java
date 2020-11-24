@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package barberapp;
+package barberapp.assets;
 
+import barberapp.main.View;
 import java.awt.Image;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -16,6 +17,7 @@ import javax.imageio.ImageIO;
  * @author José Felipe Flores da Silva
  */
 public class Stars {
+
     /**
      * @return scaled image of an unselected star
      */

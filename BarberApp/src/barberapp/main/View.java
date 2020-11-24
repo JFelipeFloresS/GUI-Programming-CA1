@@ -3,24 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package barberapp;
+package barberapp.main;
 
-import java.awt.BorderLayout;
+import barberapp.views.InitialPage;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -28,11 +17,9 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.plaf.ComboBoxUI;
 import javax.swing.plaf.basic.BasicArrowButton;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -64,7 +51,7 @@ public class View extends JFrame {
     private void windowSetup() {
         //initialise JFrame
         this.setVisible(true);
-        this.setSize(Globals.windowWidth, Globals.windowHeight);
+        this.setSize(Globals.WINDOW_WIDTH, Globals.WINDOW_HEIGHT);
         this.setTitle("Find A Barber");
         this.setResizable(false);
 
@@ -73,7 +60,7 @@ public class View extends JFrame {
         this.add(new InitialPage(this.controller));
 
         //finalise JFrame
-        getContentPane().setFont(Globals.bodyFont);
+        getContentPane().setFont(Globals.BODY_FONT);
         getContentPane().setForeground(Color.black);
         this.validate();
         this.repaint();
@@ -102,13 +89,13 @@ public class View extends JFrame {
                     c.setBackground(null);
                     ((JButton) c).setBorder(null);
                 } else {
-                    c.setFont(Globals.bodyFont);
+                    c.setFont(Globals.BODY_FONT);
                     c.setBackground(Globals.BLUE);
                     ((JButton) c).setBorder(Globals.border(Globals.DARKBLUE, 2));
                     c.setForeground(Globals.WHITE);
 
                     if (buttonStandardSize) {
-                        c.setPreferredSize(Globals.regularButtonDimension);
+                        c.setPreferredSize(Globals.REGULAR_BUTTON_DIMENSION);
                     }
                 }
                 ((JButton) c).addActionListener(controller);
@@ -116,24 +103,24 @@ public class View extends JFrame {
             } else if (c instanceof JPanel) {
                 standardiseChildren((JPanel) c, buttonStandardSize, controller);
             } else if (c instanceof JLabel) {
-                c.setFont(Globals.bodyFont);
+                c.setFont(Globals.BODY_FONT);
                 c.setForeground(Color.black);
             } else if (c instanceof JTextField) {
                 c.setBackground(Globals.TEXTFIELDCOLOUR);
                 ((JTextField) c).setBorder(Globals.border(Globals.DARKBLUE, 1));
-                c.setFont(Globals.bodyFont);
+                c.setFont(Globals.BODY_FONT);
             } else if (c instanceof JTextArea) {
                 c.setBackground(Globals.TEXTFIELDCOLOUR);
                 ((JTextArea) c).setBorder(Globals.border(Globals.DARKBLUE, 1));
-                c.setFont(Globals.bodyFont);
+                c.setFont(Globals.BODY_FONT);
             } else if (c instanceof JComboBox) {
                 c.setBackground(Globals.WHITE);
                 ((JComboBox) c).setBorder(Globals.border(Globals.DARKBLUE, 1));
-                c.setFont(Globals.bodyFont);
+                c.setFont(Globals.BODY_FONT);
                 ((JComboBox) c).setUI(ColorArrowUI.createUI(((JComboBox) c)));
             } else if (c instanceof JCheckBox) {
                 c.setBackground(Globals.WHITE);
-                c.setFont(Globals.bodyFont);
+                c.setFont(Globals.BODY_FONT);
             } else if (c instanceof JScrollPane) {
                 ((JScrollPane) c).getVerticalScrollBar().setBackground(Globals.DARKBLUE);
                 ((JScrollPane) c).getVerticalScrollBar().setUI(new standardScrollBar());
@@ -188,52 +175,4 @@ public class View extends JFrame {
         }
     }
 
-    /**
-     * Changes the image of the stars and the integer stars based on what star
-     * has been pressed.
-     *
-     * @param n star number
-     */
-    public void starPressed(int n) {
-        Image selectedStar = new Stars().selectedStar();
-        Image unselectedStar = new Stars().unselectedStar();
-        switch (n) {
-            case 5:
-                Globals.star5.setIcon(new ImageIcon(selectedStar));
-                Globals.star4.setIcon(new ImageIcon(selectedStar));
-                Globals.star3.setIcon(new ImageIcon(selectedStar));
-                Globals.star2.setIcon(new ImageIcon(selectedStar));
-                Globals.star1.setIcon(new ImageIcon(selectedStar));
-                break;
-            case 4:
-                Globals.star5.setIcon(new ImageIcon(unselectedStar));
-                Globals.star4.setIcon(new ImageIcon(selectedStar));
-                Globals.star3.setIcon(new ImageIcon(selectedStar));
-                Globals.star2.setIcon(new ImageIcon(selectedStar));
-                Globals.star1.setIcon(new ImageIcon(selectedStar));
-                break;
-            case 3:
-                Globals.star5.setIcon(new ImageIcon(unselectedStar));
-                Globals.star4.setIcon(new ImageIcon(unselectedStar));
-                Globals.star3.setIcon(new ImageIcon(selectedStar));
-                Globals.star2.setIcon(new ImageIcon(selectedStar));
-                Globals.star1.setIcon(new ImageIcon(selectedStar));
-                break;
-            case 2:
-                Globals.star5.setIcon(new ImageIcon(unselectedStar));
-                Globals.star4.setIcon(new ImageIcon(unselectedStar));
-                Globals.star3.setIcon(new ImageIcon(unselectedStar));
-                Globals.star2.setIcon(new ImageIcon(selectedStar));
-                Globals.star1.setIcon(new ImageIcon(selectedStar));
-                break;
-            case 1:
-                Globals.star5.setIcon(new ImageIcon(unselectedStar));
-                Globals.star4.setIcon(new ImageIcon(unselectedStar));
-                Globals.star3.setIcon(new ImageIcon(unselectedStar));
-                Globals.star2.setIcon(new ImageIcon(unselectedStar));
-                Globals.star1.setIcon(new ImageIcon(selectedStar));
-                break;
-        }
-        Globals.stars = n;
-    }
 }
