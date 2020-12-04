@@ -5,12 +5,14 @@
  */
 package barberapp.views;
 
-import barberapp.main.Controller;
 import barberapp.main.Globals;
 import barberapp.assets.Stars;
 import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -38,7 +40,7 @@ public class SubmitReview extends JPanel {
      * @param controller controller for SubmitReview
      * @param bookingID booking to be reviewed
      */
-    public SubmitReview(Controller controller, int bookingID) {
+    public SubmitReview(barberapp.main.Controller controller, int bookingID) {
         this.setLayout(new BorderLayout(10, 0));
         this.setBackground(Globals.WHITE);
 
@@ -131,7 +133,14 @@ public class SubmitReview extends JPanel {
         if (!previousReview.isEmpty()) {
             review.setText(previousReview.get("review"));
         }
-
+        /**
+         * Code to maintain the size of JTextArea retrieved from
+         * https://stackoverflow.com/questions/4045357/how-to-stop-wordwrapped-jtextarea-from-resizing-to-fit-large-content
+         */
+        review.setLineWrap(true);
+        review.setWrapStyleWord(true);
+        review.setMaximumSize(new Dimension(Globals.WINDOW_WIDTH / 3, 300));
+        
         centerPanel.add(review);
 
         JPanel bottomPanel = new JPanel();
@@ -142,6 +151,15 @@ public class SubmitReview extends JPanel {
             submit.setActionCommand("update review " + bookingID);
         }
         bottomPanel.add(submit);
+        
+        review.addKeyListener(new KeyAdapter(){
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    submit.doClick();
+                }
+            }
+        });
 
         reviewPanel.add(topPanel, BorderLayout.NORTH);
         reviewPanel.add(centerPanel, BorderLayout.CENTER);

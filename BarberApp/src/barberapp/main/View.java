@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -58,7 +59,8 @@ public class View extends JFrame {
         //initialise main panel
         //this.add(new initialPage());
         this.add(new InitialPage(this.controller));
-
+        
+        
         //finalise JFrame
         getContentPane().setFont(Globals.BODY_FONT);
         getContentPane().setForeground(Color.black);
@@ -76,7 +78,7 @@ public class View extends JFrame {
      * size
      * @param controller controller to be set to children
      */
-    public static void standardiseChildren(JPanel panel, boolean buttonStandardSize, Controller controller) {
+    public static void standardiseChildren(JPanel panel, boolean buttonStandardSize, ActionListener controller) {
         if (panel.getBackground().equals(Globals.DEFAULTCOLOUR)) {
             panel.setBackground(Globals.WHITE);
         }

@@ -5,10 +5,8 @@
  */
 package barberapp.views;
 
-import barberapp.main.Controller;
 import barberapp.main.Globals;
 import barberapp.main.View;
-import barberapp.views.LoggedLeftPanel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -31,7 +29,7 @@ public class BarberMain extends JPanel {
      *
      * @param controller controller for BarberMain
      */
-    public BarberMain(Controller controller) {
+    public BarberMain(barberapp.main.Controller controller) {
         this.setLayout(new BorderLayout(10, 0));
         this.setBackground(Globals.WHITE);
 

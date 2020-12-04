@@ -1,5 +1,9 @@
 package barberapp.connection;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -10,6 +14,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -178,7 +184,7 @@ public class DBConnection {
     public HashMap<String, String> getNextCustomerBooking() {
         ArrayList<HashMap<String, String>> customerBookings = new ArrayList<>();
 
-        String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time, Booking_Status FROM Bookings WHERE Customer=" + this.session.getID() + " AND Booking_Status!='cancelled' ORDER BY Booking_Date, Booking_Time;";
+        String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time, Booking_Status FROM Bookings WHERE Customer=" + this.session.getID() + " AND (Booking_Status='upcoming' OR Booking_Status='requested') ORDER BY Booking_Date, Booking_Time;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(query);) {
@@ -646,7 +652,7 @@ public class DBConnection {
         if (id == -1) {
             return false;
         } else {
-            return this.getPasswords().get(id).equals(pass); // if email is in database, check pasword and return whether it's a match
+            return checkPassword(id, pass); // if email is in database, check pasword and return whether it's a match
         }
 
     }
@@ -957,6 +963,8 @@ public class DBConnection {
             return success;
         }
 
+        String salt = createSalt();
+        String p = generateHash(pass, salt);
         // creates new account inserting email into accounts
         String accountQ = "INSERT INTO Accounts(Email, First_Name, Last_Name, Pass, Type, Phone) VALUES(?, ?, ?, ?, ?, ?);";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);) {
@@ -965,7 +973,7 @@ public class DBConnection {
             stmt.setString(1, email);
             stmt.setString(2, firstName);
             stmt.setString(3, lastName);
-            stmt.setString(4, pass);
+            stmt.setString(4, p);
             stmt.setString(5, type);
             stmt.setString(6, phone);
 
@@ -979,6 +987,15 @@ public class DBConnection {
                     id = i;
                 }
             });
+            
+            String saltQ = "INSERT INTO salt(Account_ID, salt) VALUES(?, ?)";
+            stmt = conn.prepareStatement(saltQ);
+            stmt.setInt(1, id);
+            stmt.setString(2, salt);
+            
+            stmt.execute();
+            success = "password salted and hashed";
+            stmt.close();
 
             if (type.equals("barber")) {
                 // sets account type using account id
@@ -1164,27 +1181,165 @@ public class DBConnection {
             se = se.getNextException();
         }
     }
+    
+    /**
+     * Generates hashed password.
+     * 
+     * @param data String input by user as password
+     * @param salt salt created for the given account
+     * @return hashed and salted password
+     */
+    public String generateHash(String data, String salt) {
+        String hashText = "";
+        try {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            digest.reset();
+            byte[] hash = digest.digest((data + salt).getBytes());
+            
+            BigInteger num = new BigInteger(1, hash);
+            
+            hashText = num.toString();
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return hashText;
+    }
+    
+    /**
+     * Generates a random salt.
+     * 
+     * @return salt
+     */
+    public String createSalt() {
+        byte[] bytes = new byte[32];
+        
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(bytes);
+        
+        BigInteger num = new BigInteger(1, bytes);
+        
+        String saltText = num.toString();
+        
+        return saltText;
+    }
+    
+    /**
+     * Checks if the password input is valid.
+     * 
+     * @param id Account_ID
+     * @param pass password input
+     * @return 
+     * true: valid password
+     * false: invalid password
+     */
+    public boolean checkPassword(int id, String pass) {
+        String sql = "SELECT salt FROM salt WHERE Account_ID=" + id +";";
+        try(Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password)) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            
+            String salt = "";
+            while(rs.next()) {
+                salt = rs.getString("salt");
+            }
+            
+            rs.close();
+            stmt.close();
+            
+            String inputPass = generateHash(pass, salt);
+            
+            String passQ = "SELECT Pass FROM Accounts WHERE Account_ID=" + id +";";
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(passQ);
+            
+            String DBPass = "";
+            while(rs.next()) {
+                DBPass = rs.getString("pass");
+            }
+            
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+            return inputPass.equals(DBPass);
+            
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Used this to update the accounts that were created before i salted or hashed passwords
+     */
+    public void updatePasswords() {
+        ArrayList<String[]> ids = new ArrayList<>();
+        String sql = "SELECT Account_ID, Pass FROM Accounts";
+        try(Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password)) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            
+            while(rs.next()) {
+                String[] line = {rs.getString("Account_ID"), rs.getString("Pass")};
+                ids.add(line);
+            }
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+        
+        for (int i = 0; i < ids.size(); i++) {
+            updateP(ids.get(i));
+        }
+    }
+    
+    /**
+     * updates password with salt
+     * @param m 
+     * String[0] = Account_ID
+     * String[1] = old password
+     */
+    public void updateP(String[] m) {
+        int num = Integer.parseInt(m[0]);
+        String oldPass = m[1];
+        
+        System.out.println("ID: " + num);
+        System.out.println("Old pass: " + oldPass);
+        
+        String insertSalt = "SELECT salt FROM salt WHERE Account_ID=?";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password)) {
+            PreparedStatement stmt = conn.prepareStatement(insertSalt);
+            stmt.setInt(1, num);
+            
+            ResultSet rs = stmt.executeQuery();
 
-    /**
-     * Hashes and salts the password.
-     *
-     * @param pass - password to be hashed and salted
-     * @return new password
-     */
-    /**
-     * private String hashNsalt(String pass) { String password = null; try {
-     * SecureRandom random = new SecureRandom(); byte[] salt = new byte[11];
-     * random.nextBytes(salt);
-     *
-     * KeySpec spec = new PBEKeySpec(pass.toCharArray(), salt, 65536, 88);
-     * SecretKeyFactory factory =
-     * SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1"); byte[] hash =
-     * factory.generateSecret(spec).getEncoded(); password = hash.toString(); }
-     * catch (NoSuchAlgorithmException ex) {
-     * Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null,
-     * ex); } catch(Exception except) { System.out.println(except.getMessage());
-     * }
-     *
-     * return password; }
-     */
+            String salt = "";
+            while(rs.next()) {
+                salt = rs.getString("salt");
+            }
+            System.out.println("Salt: " + salt);
+            
+            stmt.close();
+            
+            String newPass = generateHash("Pass123!", salt);
+
+            System.out.println("New pass: " + newPass);
+            
+            String update = "UPDATE Accounts SET Pass=? WHERE Account_ID=?";
+            stmt = conn.prepareStatement(update);
+            stmt.setString(1, newPass);
+            stmt.setInt(2, num);
+            
+            stmt.executeUpdate();
+            
+            stmt.close();
+            
+            conn.close();
+            
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+    }
+
 }

@@ -5,12 +5,12 @@
  */
 package barberapp.views;
 
-import barberapp.main.Controller;
 import barberapp.main.Globals;
 import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.ActionListener;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -26,7 +26,7 @@ public class AccountCreateLeftPanel extends JPanel {
      *
      * @param controller controller for the accountCreateLeftPanel
      */
-    public AccountCreateLeftPanel(Controller controller) {
+    public AccountCreateLeftPanel(ActionListener controller) {
         int windowWidth = Globals.WINDOW_WIDTH;
         int windowHeight = Globals.WINDOW_HEIGHT;
 
@@ -42,7 +42,7 @@ public class AccountCreateLeftPanel extends JPanel {
         // WHITE panel
         JPanel whitePanel = new JPanel();
         whitePanel.setPreferredSize(new Dimension((int) (windowWidth / 5), (int) (windowHeight / 5)));
-        whitePanel.setBackground(Color.white);
+        whitePanel.setBackground(Globals.WHITE);
         whitePanel.setLayout(new BorderLayout());
 
         // labels
@@ -75,9 +75,9 @@ public class AccountCreateLeftPanel extends JPanel {
         cacc.setPreferredSize(new Dimension((int) windowWidth / 5, (int) windowHeight / 3));
 
         JLabel create = new JLabel("CREATE");
-        create.setForeground(Color.WHITE);
+        create.setForeground(Globals.WHITE);
         JLabel account = new JLabel("ACCOUNT");
-        account.setForeground(Color.WHITE);
+        account.setForeground(Globals.WHITE);
 
         cacc.add(create);
         cacc.add(account);
@@ -88,8 +88,8 @@ public class AccountCreateLeftPanel extends JPanel {
         this.add(bottomPanel, BorderLayout.SOUTH);
         standardiseChildren(logoPanel, true, controller);
         standardiseChildren(bottomPanel, true, controller);
-        create.setForeground(Color.white);
-        account.setForeground(Color.white);
+        create.setForeground(Globals.WHITE);
+        account.setForeground(Globals.WHITE);
 
     }
 }

@@ -5,7 +5,6 @@
  */
 package barberapp.views;
 
-import barberapp.main.Controller;
 import barberapp.main.Globals;
 import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
@@ -26,7 +25,7 @@ public class LoggedLeftPanel extends JPanel {
      *
      * @param controller controller for LoggedLeftPanel
      */
-    public LoggedLeftPanel(Controller controller) {
+    public LoggedLeftPanel(barberapp.main.Controller controller) {
         this.setPreferredSize(Globals.LEFT_PANEL_DIMENSION);
         this.setBackground(Globals.BLUE);
         this.setLayout(new BorderLayout());

@@ -5,11 +5,11 @@
  */
 package barberapp.views;
 
-import barberapp.main.Controller;
 import barberapp.main.Globals;
 import barberapp.main.View;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -25,7 +25,7 @@ public class CreateChoice extends JPanel {
      *
      * @param controller controller for CreateChoice
      */
-    public CreateChoice(Controller controller) {
+    public CreateChoice(ActionListener controller) {
         this.setLayout(new BorderLayout());
 
         // **main panel**

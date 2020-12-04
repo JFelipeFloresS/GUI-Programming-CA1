@@ -85,9 +85,12 @@ public class InitialPage extends JPanel {
         user.setPreferredSize(new Dimension(500, 80));
         user.setMaximumSize(new Dimension(500, 80));
         user.setBackground(Globals.WHITE);
+        
         JLabel userLabel = new JLabel("E-mail address: ");
         emailAddress = new JTextField(20);
-
+        emailAddress.requestFocus();
+        emailAddress.requestFocusInWindow();
+        
         // add label and text field for emailAddress
         user.add(userLabel);
         user.add(emailAddress);

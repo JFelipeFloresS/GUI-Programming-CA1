@@ -7,7 +7,6 @@ package barberapp.views;
 
 import barberapp.main.Controller;
 import barberapp.main.Globals;
-import barberapp.views.LoggedLeftPanel;
 import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -43,7 +42,7 @@ public class AvailabilityPage extends JPanel {
      *
      * @param controller controller for AvailabilityPage
      */
-    public AvailabilityPage(Controller controller) {
+    public AvailabilityPage(barberapp.main.Controller controller) {
         this.setLayout(new BorderLayout());
 
         JPanel mainPanel = new JPanel();
@@ -133,25 +132,16 @@ public class AvailabilityPage extends JPanel {
         JPanel rightPanel = new JPanel();
         rightPanel.setPreferredSize(Globals.PADDING_X2);
         rightPanel.setBackground(Globals.WHITE);
-
-        JPanel p4 = new JPanel();
-        p4.setPreferredSize(Globals.PADDING_Y3);
-        p4.setBackground(Globals.WHITE);
+        rightPanel.setLayout(new BorderLayout(50, 300));
 
         JButton goBack = new JButton("BACK");
         goBack.setActionCommand("back to main barber");
 
-        JPanel p5 = new JPanel();
-        p5.setPreferredSize(Globals.PADDING_Y3);
-        p5.setBackground(Globals.WHITE);
-
         JButton logOut = new JButton("LOG OUT");
         logOut.setActionCommand("log out");
-
-        rightPanel.add(p4);
-        rightPanel.add(goBack);
-        rightPanel.add(p5);
-        rightPanel.add(logOut);
+        
+        rightPanel.add(goBack, BorderLayout.NORTH);
+        rightPanel.add(logOut, BorderLayout.SOUTH);
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(leftPanel, BorderLayout.WEST);
@@ -162,6 +152,8 @@ public class AvailabilityPage extends JPanel {
         this.add(mainPanel, BorderLayout.CENTER);
 
         standardiseChildren(mainPanel, true, controller);
+        goBack.setPreferredSize(new Dimension(130, 40));
+        logOut.setPreferredSize(new Dimension(130, 40));
     }
 
     /**
@@ -237,7 +229,7 @@ public class AvailabilityPage extends JPanel {
         allTimesSP.setPreferredSize(new Dimension((int) (Globals.WINDOW_WIDTH / 3.9), (int) (Globals.WINDOW_HEIGHT / 1.4)));
         mainTime.add(allTimesSP);
 
-        enterAvailability = new JButton("ENTER AVAILABILITY");
+        enterAvailability = new JButton("<html>ENTER<br />AVAILABILITY</html>");
         enterAvailability.setActionCommand("enter barber availability");
 
         mainTime.add(enterAvailability);

@@ -5,12 +5,12 @@
  */
 package barberapp.views;
 
-import barberapp.main.Controller;
 import barberapp.main.Globals;
-import barberapp.views.LoggedLeftPanel;
 import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -32,7 +32,7 @@ public class CustomerMain extends JPanel {
      *
      * @param controller controller for CustomerMain
      */
-    public CustomerMain(Controller controller) {
+    public CustomerMain(barberapp.main.Controller controller) {
         this.setLayout(new BorderLayout(10, 10));
 
         // **main panel**
@@ -87,6 +87,14 @@ public class CustomerMain extends JPanel {
         JButton searchNameButton = new JButton("SEARCH");
         searchNameButton.setActionCommand("search barber name main");
 
+        barberName.addKeyListener(new KeyAdapter(){
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    searchNameButton.doClick();
+                }
+            }
+        });
         centerSearchName.add(searchNameButton);
 
         searchName.add(topSearchName, BorderLayout.CENTER);

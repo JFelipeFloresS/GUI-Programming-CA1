@@ -5,11 +5,11 @@
  */
 package barberapp.views;
 
-import barberapp.main.Controller;
 import barberapp.main.Globals;
 import barberapp.main.View;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,7 +37,7 @@ public class CreateBarber extends JPanel {
      *
      * @param controller controller for CreateBarber
      */
-    public CreateBarber(Controller controller) {
+    public CreateBarber(ActionListener controller) {
         this.setLayout(new BorderLayout());
 
         // **main panel**

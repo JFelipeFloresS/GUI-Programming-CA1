@@ -5,13 +5,13 @@
  */
 package barberapp.views;
 
-import barberapp.main.Controller;
 import barberapp.main.Globals;
-import barberapp.views.LoggedLeftPanel;
 import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JButton;
@@ -38,7 +38,7 @@ public class FindABarber extends JPanel {
      *
      * @param controller for FindABarber
      */
-    public FindABarber(Controller controller) {
+    public FindABarber(barberapp.main.Controller controller) {
         this.setLayout(new BorderLayout(10, 10));
 
         JPanel mainPanel = new JPanel();
@@ -75,6 +75,15 @@ public class FindABarber extends JPanel {
         JButton searchName = new JButton("SEARCH");
         searchName.setActionCommand("search barber name find");
 
+        barberName.addKeyListener(new KeyAdapter(){
+           @Override
+           public void keyPressed (KeyEvent e) {
+               if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                   searchName.doClick();
+               }
+           }
+        });
+        
         centerLeftPanel.add(barberName);
         centerLeftPanel.add(searchName);
 
@@ -131,7 +140,7 @@ public class FindABarber extends JPanel {
      * @param searchBy "name" or "location"
      * @param controller controller for FindABarber
      */
-    public static void searchForBarber(String searchBy, Controller controller) {
+    public static void searchForBarber(String searchBy, barberapp.main.Controller controller) {
         if (leftFindABarberPanel.getComponentCount() > 1) {
             leftFindABarberPanel.removeAll();
         }
@@ -202,7 +211,7 @@ public class FindABarber extends JPanel {
      * @param getB barber ID
      * @param controller controller for FindABarber
      */
-    public static void showBarberAvailability(int getB, Controller controller) {
+    public static void showBarberAvailability(int getB, barberapp.main.Controller controller) {
         ArrayList<HashMap<String, String>> availableList = controller.getbarberAvailability(getB, null);
         HashMap<String, String> bInfo = controller.getBarber(getB);
         rightFindABarberPanel.add(new JLabel("<html>AVAILABLE TIMES: <br />"

@@ -9,10 +9,10 @@ import barberapp.main.Controller;
 import barberapp.main.Globals;
 import barberapp.assets.Stars;
 import barberapp.main.View;
-import barberapp.views.LoggedLeftPanel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.ImageIcon;
@@ -34,7 +34,7 @@ public class BarberViewReview extends JPanel {
      * @param controller controller for BarberViewReview
      * @param bookingID booking ID to be seen
      */
-    public BarberViewReview(Controller controller, int bookingID) {
+    public BarberViewReview(barberapp.main.Controller controller, int bookingID) {
         this.setLayout(new BorderLayout(10, 0));
         this.setBackground(Globals.WHITE);
 

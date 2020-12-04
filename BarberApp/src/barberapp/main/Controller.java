@@ -12,7 +12,6 @@ import barberapp.views.CreateChoice;
 import barberapp.views.CreateCustomer;
 import barberapp.views.CustomerMain;
 import barberapp.views.FindABarber;
-import barberapp.views.Graphs;
 import barberapp.views.InitialPage;
 import barberapp.views.SubmitReview;
 import java.awt.event.ActionEvent;
@@ -35,9 +34,9 @@ import javax.swing.JPanel;
  *
  */
 public class Controller implements ActionListener {
-
+    
     private final DBConnection connection;
-    private final View view;
+    public final View view;
 
     /**
      * Controller constructor. Starts connection and view.
@@ -191,10 +190,6 @@ public class Controller implements ActionListener {
                 changeScreen(new BarberBookings(this));
                 break;
 
-            case "GRAPHS":
-                changeScreen(new Graphs(this));
-                break;
-
             default:
                 System.out.println(e.getActionCommand());
                 break;
@@ -241,7 +236,7 @@ public class Controller implements ActionListener {
      *
      * @param newPanel panel to be added
      */
-    private void changeScreen(JPanel newPanel) {
+    public void changeScreen(JPanel newPanel) {
         this.view.getContentPane().removeAll();
         this.view.add(newPanel);
         this.view.validate();
@@ -574,11 +569,11 @@ public class Controller implements ActionListener {
      * Creates customer account and changes screen to InitialPage.
      */
     private void createCustomerAccount() {
-        if (isValidEmailAddress(CreateCustomer.getEmailAddress())) {
-        } else {
+        if (!isValidEmailAddress(CreateCustomer.getEmailAddress())) {
             JOptionPane.showMessageDialog(this.view, "Please insert a valid email address", "Invalid email address", JOptionPane.WARNING_MESSAGE);
             return;
-        }
+        } 
+        
         if (CreateCustomer.getPass().length() < 8) {
             JOptionPane.showMessageDialog(this.view, "Your password is too short", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
@@ -594,8 +589,10 @@ public class Controller implements ActionListener {
             JOptionPane.showMessageDialog(this.view, "Please fill in all fields!", "Incomplete fields", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        
+        String result = this.connection.createAccount(CreateCustomer.getEmailAddress(), CreateCustomer.getPass(), "customer", CreateCustomer.getFirstName(), CreateCustomer.getLastName(), CreateCustomer.getPhoneNumber(), null, null, null);
 
-        switch (this.connection.createAccount(CreateCustomer.getEmailAddress(), CreateCustomer.getPass(), "customer", CreateCustomer.getFirstName(), CreateCustomer.getLastName(), CreateCustomer.getPhoneNumber(), null, null, null)) {
+        switch (result) {
             case "done":
                 changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "Account created successfully, welcome to find a barber!", "Account created", JOptionPane.INFORMATION_MESSAGE);
@@ -641,8 +638,10 @@ public class Controller implements ActionListener {
             JOptionPane.showMessageDialog(this.view, "Please fill in all fields!", "Incomplete fields", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        
+        String result = this.connection.createAccount(CreateBarber.getEmailAddress(), CreateBarber.getPass(), "barber", CreateBarber.getFirstName(), CreateBarber.getLastName(), CreateBarber.getPhoneNumber(), CreateBarber.getSetLocation(), CreateBarber.getAddress(), CreateBarber.getTown());
 
-        switch (this.connection.createAccount(CreateBarber.getEmailAddress(), CreateBarber.getPass(), "barber", CreateBarber.getFirstName(), CreateBarber.getLastName(), CreateBarber.getPhoneNumber(), CreateBarber.getSetLocation(), CreateBarber.getAddress(), CreateBarber.getTown())) {
+        switch (result) {
             case "done":
                 changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "Account created successfully, welcome to find a barber!", "Account created", JOptionPane.INFORMATION_MESSAGE);
@@ -749,13 +748,17 @@ public class Controller implements ActionListener {
         String bookTime = bookInfo[2];
         int barberID = Integer.parseInt(bookInfo[3]);
         int customerID = this.connection.getID();
-        if (this.connection.getBookingID(bookDate, bookTime, customerID, barberID) == 0) {
-            this.connection.createBooking(bookDate, bookTime, barberID);
-            this.connection.removeAvailability(barberID, bookDate, bookTime);
-            changeScreen(new CustomerMain(this));
-            JOptionPane.showMessageDialog(this.view, "Booking requested successfully");
-        } else {
-            JOptionPane.showMessageDialog(this.view, "You have alread requested this appointment", "Already requested", JOptionPane.WARNING_MESSAGE);
+        int r = JOptionPane.showConfirmDialog(this.view, "Are you sure you want to book an appointment on " + bookDate + " at " + bookTime + "?", "Confirm appointment", JOptionPane.YES_NO_OPTION);
+        
+        if (r == JOptionPane.YES_OPTION) {
+            if (this.connection.getBookingID(bookDate, bookTime, customerID, barberID) == 0) {
+                this.connection.createBooking(bookDate, bookTime, barberID);
+                this.connection.removeAvailability(barberID, bookDate, bookTime);
+                changeScreen(new CustomerMain(this));
+                JOptionPane.showMessageDialog(this.view, "Booking requested successfully");
+            } else {
+                JOptionPane.showMessageDialog(this.view, "You have alread requested this appointment", "Already requested", JOptionPane.WARNING_MESSAGE);
+            }
         }
     }
 
@@ -787,29 +790,21 @@ public class Controller implements ActionListener {
      * @return boolean: true is old, false is future
      */
     public boolean isOld(String date, String time) {
-        boolean old = false;
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter tf = DateTimeFormatter.ofPattern("HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
 
         try {
             Date today = new SimpleDateFormat("yyyy-MM-dd").parse(df.format(now));
-            Date check = new SimpleDateFormat("yyyy-MM-dd").parse(date);
+            Date check = new SimpleDateFormat("yyyy-MM-dd").parse(date + time);
 
             if (today.after(check)) {
-                old = true;
-            } else {
-                Date thisHour = new SimpleDateFormat("HH:mm:ss").parse(tf.format(now));
-                Date checkHour = new SimpleDateFormat("HH:mm:ss").parse(time);
-
-                if (thisHour.after(checkHour)) {
-                    old = true;
-                }
-            }
+                return true;
+            } 
+            
         } catch (ParseException e) {
             JOptionPane.showMessageDialog(this.view, e.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
         }
-
-        return old;
+        
+        return false;
     }
 }

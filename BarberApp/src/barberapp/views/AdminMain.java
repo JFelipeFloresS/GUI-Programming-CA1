@@ -5,7 +5,6 @@
  */
 package barberapp.views;
 
-import barberapp.main.Controller;
 import barberapp.main.Globals;
 import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
@@ -21,7 +20,7 @@ import javax.swing.SwingConstants;
  */
 public class AdminMain extends JPanel {
 
-    public AdminMain(Controller controller) {
+    public AdminMain(barberapp.main.Controller controller) {
         this.setLayout(new BorderLayout(10, 10));
         this.setBackground(Globals.WHITE);
 
@@ -69,15 +68,8 @@ public class AdminMain extends JPanel {
                 + "Cancelled appointments: " + controller.getAppointmentsCount("cancelled") + "<br />"
                 + "</html>"), BorderLayout.WEST);
 
-        JPanel botPanel = new JPanel();
-
-        JButton graphs = new JButton("GRAPHS");
-
-        botPanel.add(graphs);
-
         mainPanel.add(leftMainPanel, BorderLayout.WEST);
         mainPanel.add(rightMainPanel, BorderLayout.EAST);
-        mainPanel.add(botPanel, BorderLayout.SOUTH);
 
         this.add(topPanel, BorderLayout.NORTH);
         this.add(mainPanel, BorderLayout.CENTER);

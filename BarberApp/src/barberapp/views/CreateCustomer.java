@@ -11,6 +11,7 @@ import barberapp.main.View;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,7 +36,7 @@ public class CreateCustomer extends JPanel {
      *
      * @param controller controller for CreateCustomer
      */
-    public CreateCustomer(Controller controller) {
+    public CreateCustomer(ActionListener controller) {
         this.setLayout(new BorderLayout());
 
         // **main panel**

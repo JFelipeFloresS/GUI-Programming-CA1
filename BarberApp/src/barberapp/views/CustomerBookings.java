@@ -5,12 +5,11 @@
  */
 package barberapp.views;
 
-import barberapp.main.Controller;
 import barberapp.main.Globals;
-import barberapp.views.LoggedLeftPanel;
 import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JButton;
@@ -29,7 +28,7 @@ public class CustomerBookings extends JPanel {
      *
      * @param controller controller for CustomerBookings
      */
-    public CustomerBookings(Controller controller) {
+    public CustomerBookings(barberapp.main.Controller controller) {
         this.setLayout(new BorderLayout(15, 0));
         this.setBackground(Globals.WHITE);
 
