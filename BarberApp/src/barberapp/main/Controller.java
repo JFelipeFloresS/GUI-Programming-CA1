@@ -42,7 +42,7 @@ public class Controller implements ActionListener {
      * Controller constructor. Starts connection and view.
      */
     public Controller() {
-        this.connection = new DBConnection();
+        this.connection = new DBConnection(this);
         this.view = new View(this);
     }
 
@@ -91,6 +91,7 @@ public class Controller implements ActionListener {
             this.connection.confirmBooking(booking);
             changeScreen(new BarberMain(this));
             JOptionPane.showMessageDialog(this.view, "Booking accepted.");
+            this.connection.updateBookingViewed(booking, "accepted by barber once");
             return;
         }
 
@@ -101,11 +102,13 @@ public class Controller implements ActionListener {
 
         if (e.getActionCommand().contains("complete booking ")) {
             completeBooking(Integer.parseInt(e.getActionCommand().substring(17)));
+            this.connection.updateBookingViewed(Integer.parseInt(e.getActionCommand().substring(17)), "completed by barber");
             return;
         }
 
         if (e.getActionCommand().contains("no show booking ")) {
             noShowBooking(Integer.parseInt(e.getActionCommand().substring(16)));
+            this.connection.updateBookingViewed(Integer.parseInt(e.getActionCommand().substring(16)), "no show by customer");
             return;
         }
 
@@ -703,6 +706,7 @@ public class Controller implements ActionListener {
         if (response == JOptionPane.YES_OPTION) {
             this.connection.cancelBooking(booking);
             JOptionPane.showMessageDialog(this.view, "Booking cancelled successfully");
+            this.connection.updateBookingViewed(booking, "cancelled by " + this.connection.getType() + " once");
             HashMap<String, String> bookingInfo = this.connection.getBookingInfo(booking);
             this.connection.addAvailability(Integer.parseInt(bookingInfo.get("id")), bookingInfo.get("date"), bookingInfo.get("time"));
             if (this.connection.getType().equals("barber")) {
@@ -721,6 +725,7 @@ public class Controller implements ActionListener {
      */
     private void submitReview(int booking) {
         this.connection.addReview(booking, SubmitReview.getReview(), SubmitReview.getStars());
+        this.connection.updateBookingViewed(booking, "reviewed by customer once");
         changeScreen(new CustomerMain(this));
         JOptionPane.showMessageDialog(this.view, "Review submitted successfully");
     }
@@ -806,5 +811,9 @@ public class Controller implements ActionListener {
         }
         
         return false;
+    }
+    
+    public void updateBookingViewed(int acc, String viewed) {
+        this.connection.updateBookingViewed(acc, viewed);
     }
 }

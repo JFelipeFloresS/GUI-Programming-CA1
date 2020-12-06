@@ -1,5 +1,6 @@
 package barberapp.connection;
 
+import barberapp.main.Controller;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -31,13 +33,15 @@ public class DBConnection {
     private String success;
     private Session session;
     private int id;
+    private final Controller controller;
 
     /**
      * Initialise variables and sets session to null.
      */
-    public DBConnection() {
+    public DBConnection(Controller controller) {
         initialise();
         this.session = null;
+        this.controller = controller;
     }
 
     /**
@@ -184,7 +188,7 @@ public class DBConnection {
     public HashMap<String, String> getNextCustomerBooking() {
         ArrayList<HashMap<String, String>> customerBookings = new ArrayList<>();
 
-        String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time, Booking_Status FROM Bookings WHERE Customer=" + this.session.getID() + " AND (Booking_Status='upcoming' OR Booking_Status='requested') ORDER BY Booking_Date, Booking_Time;";
+        String query = "SELECT Booking_ID, Barber, Booking_Date, Booking_Time, Booking_Status, Viewed FROM Bookings WHERE Customer=" + this.session.getID() + " AND (Booking_Status='upcoming' OR Booking_Status='requested') ORDER BY Booking_Date, Booking_Time;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(query);) {
@@ -204,6 +208,14 @@ public class DBConnection {
                 customerBookings.get(c).put("address", barber.get("address"));
                 customerBookings.get(c).put("town", barber.get("town"));
                 customerBookings.get(c).put("location", barber.get("location"));
+                customerBookings.get(c).put("viewed", barber.get("Viewed"));
+                
+                if (rs.getString("Viewed").contains("once") && rs.getString("Viewed").toLowerCase().contains("barber")) {
+                    if (rs.getString("Viewed").toLowerCase().contains("confirmed")) {
+                        JOptionPane.showMessageDialog(this.controller.view, "Your appointment has been confirmed by the barber!");
+                        updateBookingViewed(rs.getInt("Booking_ID"), "confirmed by barber");
+                    }
+                }
 
                 c++;
             }
@@ -227,7 +239,7 @@ public class DBConnection {
     public ArrayList<HashMap<String, String>> getBarberUpcomingBookings() {
         ArrayList<HashMap<String, String>> upcoming = new ArrayList<>();
         HashMap<String, String> currCustomer;
-        String currDate, currTime, currStatus;
+        String currDate, currTime, currStatus, currViewed;
         int currID;
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDateTime today = LocalDateTime.now();
@@ -245,6 +257,7 @@ public class DBConnection {
                 currDate = rs.getString("Booking_Date");
                 currTime = rs.getString("Booking_Time").substring(0, 5);
                 currStatus = rs.getString("Booking_Status");
+                currViewed = rs.getString("Viewed");
 
                 upcoming.get(c).put("date", currDate); // date
                 upcoming.get(c).put("time", currTime); // time
@@ -252,6 +265,14 @@ public class DBConnection {
                 upcoming.get(c).put("customer name", currCustomer.get("first name") + " " + currCustomer.get("last name")); // customer name
                 upcoming.get(c).put("customer phone", currCustomer.get("phone")); // customer phone
                 upcoming.get(c).put("status", currStatus); // booking status
+                upcoming.get(c).put("viewed", currViewed); // booking status
+                
+                if (currViewed.toLowerCase().contains("customer") && currViewed.toLowerCase().contains("once")) {
+                    if (currViewed.contains("requested")) {
+                        JOptionPane.showMessageDialog(this.controller.view, "A new booking was requested!");
+                        updateBookingViewed(currID, "requested by customer");
+                    }
+                }
 
                 c++;
             }
@@ -287,6 +308,7 @@ public class DBConnection {
                 String currDate = rs.getString("Booking_Date");
                 String currTime = rs.getString("Booking_Time");
                 String currStatus = rs.getString("Booking_Status");
+                String currViewed = rs.getString("Viewed");
                 HashMap<String, String> currCustomer = getCustomer(rs.getInt("Customer"));
 
                 all.add(new HashMap<>());
@@ -295,8 +317,23 @@ public class DBConnection {
                 all.get(c).put("date", currDate);
                 all.get(c).put("time", currTime);
                 all.get(c).put("status", currStatus);
+                all.get(c).put("viewed", currViewed);
                 all.get(c).put("customer name", currCustomer.get("first name") + " " + currCustomer.get("last name"));
                 all.get(c).put("phone", currCustomer.get("phone"));
+                
+                if (currViewed.toLowerCase().contains("customer") && currViewed.toLowerCase().contains("once")) {
+                    String cust = "Your appointment with " + currCustomer.get("first name") + " " + currCustomer.get("last name") + " on " + currDate + " at " + currTime + " has been";
+                    if (currViewed.toLowerCase().contains("requested")) {
+                        JOptionPane.showMessageDialog(this.controller.view, cust + " requested.");
+                        updateBookingViewed(Integer.parseInt(currID), "requested by customer");
+                    } else if (currViewed.toLowerCase().contains("cancelled")) {
+                        JOptionPane.showMessageDialog(this.controller.view, cust + " cancelled.");
+                        updateBookingViewed(Integer.parseInt(currID), "cancelled by customer");
+                    } else if (currViewed.toLowerCase().contains("reviewed")) {
+                        JOptionPane.showMessageDialog(this.controller.view, cust + " reviewed.");
+                        updateBookingViewed(Integer.parseInt(currID), "reviewed by customer");
+                    }
+                }
 
                 c++;
             }
@@ -331,6 +368,7 @@ public class DBConnection {
                 String currDate = rs.getString("Booking_Date");
                 String currTime = rs.getString("Booking_Time");
                 String currStatus = rs.getString("Booking_Status");
+                String currViewed = rs.getString("Viewed");
                 HashMap<String, String> currBarber = getBarber(rs.getInt("Barber"));
 
                 all.add(new HashMap<>());
@@ -339,11 +377,23 @@ public class DBConnection {
                 all.get(c).put("date", currDate);
                 all.get(c).put("time", currTime);
                 all.get(c).put("status", currStatus);
+                all.get(c).put("currViewed", currViewed);
                 all.get(c).put("barber name", currBarber.get("first name") + " " + currBarber.get("last name"));
                 all.get(c).put("phone", currBarber.get("phone"));
                 all.get(c).put("address", currBarber.get("address"));
                 all.get(c).put("town", currBarber.get("town"));
                 all.get(c).put("location", currBarber.get("location"));
+
+                if (currViewed.toLowerCase().contains("barber") && currViewed.toLowerCase().contains("once")) {
+                    String b = "Your appointment with " + currBarber.get("first name") + " " + currBarber.get("last name") + " on " + currDate + " at " + currTime + " has been";
+                    if (currViewed.toLowerCase().contains("cancelled")) {
+                        JOptionPane.showMessageDialog(this.controller.view, b + " cancelled.");
+                        updateBookingViewed(Integer.parseInt(currID), "requested by customer");
+                    } else if (currViewed.toLowerCase().contains("reviewed")) {
+                        JOptionPane.showMessageDialog(this.controller.view, b + " reviewed.");
+                        updateBookingViewed(Integer.parseInt(currID), "reviewed by customer");
+                    }
+                }
 
                 c++;
             }
@@ -478,7 +528,7 @@ public class DBConnection {
         String query = "UPDATE Bookings SET Booking_Status='" + status.toLowerCase() + "' WHERE Booking_ID=" + id + ";";
 
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-                Statement stmt = conn.createStatement();) {
+            Statement stmt = conn.createStatement();) {
 
             stmt.executeUpdate(query);
 
@@ -490,6 +540,29 @@ public class DBConnection {
         }
     }
 
+    /**
+     * Updates viewed column.
+     * 
+     * @param id appointment to update
+     * @param viewed new viewed to update
+     */
+    public void updateBookingViewed(int id, String viewed) {
+        String query = "UPDATE Bookings SET Viewed=? WHERE Booking_ID=?";
+        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password); 
+            PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, viewed);
+            stmt.setInt(2, id);
+            
+            stmt.executeUpdate();
+            
+            stmt.close();
+            conn.close();
+            
+        } catch (SQLException se) {
+            handleExceptions(se);
+        }
+    }
+    
     /**
      * Gets a barber availability
      *
@@ -566,37 +639,6 @@ public class DBConnection {
         }
 
         return emails;
-    }
-
-    /**
-     * Gets all passwords from accounts.
-     *
-     * @return HashMap with the key being the Account_ID for the value of the
-     * password
-     */
-    private HashMap<Integer, String> getPasswords() {
-        // initialise hashmap to store id and passwords
-        HashMap<Integer, String> passwords = new HashMap<>();
-
-        String query = "SELECT Account_ID, Pass FROM Accounts";
-
-        try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(query);) {
-
-            // put id and password into hashmap
-            while (rs.next()) {
-                passwords.put(rs.getInt("Account_ID"), rs.getString("Pass"));
-            }
-
-            rs.close();
-            stmt.close();
-            conn.close();
-        } catch (SQLException se) {
-            handleExceptions(se);
-        }
-
-        return passwords;
     }
 
     /**
@@ -689,8 +731,8 @@ public class DBConnection {
      * @param barber - barber ID
      */
     public void createBooking(String date, String time, int barber) {
-        String query = "INSERT INTO Bookings(Booking_Date, Booking_Time, Booking_Status, Customer, Barber)"
-                + "VALUES('" + date + "', '" + time + "', 'requested', " + this.getID() + ", " + barber + ");";
+        String query = "INSERT INTO Bookings(Booking_Date, Booking_Time, Booking_Status, Customer, Barber, Viewed)"
+                + "VALUES('" + date + "', '" + time + "', 'requested', " + this.getID() + ", " + barber + ", 'requested by customer once');";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
                 Statement stmt = conn.createStatement();) {
 

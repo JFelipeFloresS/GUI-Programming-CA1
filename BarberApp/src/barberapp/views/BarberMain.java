@@ -64,41 +64,46 @@ public class BarberMain extends JPanel {
 
         topLabelPanel.add(new JLabel("MY BOOKINGS:"), BorderLayout.WEST);
         topLabelPanel.add(seeAllBookings, BorderLayout.EAST);
-        topLabelPanel.setBackground(Color.WHITE);
+        topLabelPanel.setBackground(Globals.WHITE);
 
         JPanel multipleBookingsPanel = new JPanel();
-        multipleBookingsPanel.setBackground(Color.WHITE);
+        multipleBookingsPanel.setBackground(Globals.WHITE);
 
         try {
             ArrayList<HashMap<String, String>> upcoming = controller.getBarberUpcomingBookings();
             multipleBookingsPanel.setLayout(new GridLayout(upcoming.size(), 1, 10, 20));
+            multipleBookingsPanel.setBackground(Globals.WHITE);
 
             for (int i = 0; i < upcoming.size(); i++) {
                 JPanel booking = new JPanel();
+                booking.setBackground(Globals.WHITE);
                 booking.setPreferredSize(new Dimension(250, 230));
                 booking.setLayout(new BorderLayout());
                 booking.setBorder(Globals.border(Globals.DARKBLUE, 1));
 
                 JPanel left = new JPanel();
                 left.setLayout(new BorderLayout());
-                left.setBackground(Color.WHITE);
+                left.setBackground(Globals.WHITE);
 
                 JPanel leftTop = new JPanel();
                 leftTop.add(new JLabel("UPCOMING BOOKING:"));
-                leftTop.setBackground(Color.WHITE);
+                leftTop.setBackground(Globals.WHITE);
 
                 JPanel leftBottom = new JPanel();
                 leftBottom.setLayout(new BorderLayout());
-                leftBottom.setBackground(Color.WHITE);
+                leftBottom.setBackground(Globals.WHITE);
 
                 JLabel cust = new JLabel("<html>Customer: " + upcoming.get(i).get("customer name") + "<br />Phone: " + upcoming.get(i).get("customer phone") + "</html>");
+                cust.setBackground(Globals.WHITE);
                 JLabel dt = new JLabel("Date: " + upcoming.get(i).get("date"));
+                dt.setBackground(Globals.WHITE);
 
                 JPanel hrPanel = new JPanel();
-                hrPanel.setBackground(Color.WHITE);
+                hrPanel.setBackground(Globals.WHITE);
                 hrPanel.add(new JLabel("<html>Status: " + upcoming.get(i).get("status") + "<br />" + upcoming.get(i).get("time") + "</html>"), BorderLayout.CENTER);
 
                 JLabel num = new JLabel("Booking ID: " + upcoming.get(i).get("id"));
+                num.setBackground(Globals.WHITE);
 
                 leftBottom.add(cust, BorderLayout.NORTH);
                 leftBottom.add(dt, BorderLayout.WEST);
@@ -109,7 +114,7 @@ public class BarberMain extends JPanel {
                 left.add(leftBottom, BorderLayout.SOUTH);
 
                 JPanel right = new JPanel();
-                right.setBackground(Color.WHITE);
+                right.setBackground(Globals.WHITE);
                 right.setLayout(new BorderLayout());
                 JButton cancel = new JButton("CANCEL");
                 cancel.setActionCommand("cancel booking " + upcoming.get(i).get("id"));
@@ -135,6 +140,7 @@ public class BarberMain extends JPanel {
         }
 
         JScrollPane multiplePane = new JScrollPane(multipleBookingsPanel);
+        multiplePane.setBackground(Globals.WHITE);
 
         infoPanel.add(topLabelPanel, BorderLayout.PAGE_START);
         infoPanel.add(multiplePane, BorderLayout.CENTER);
