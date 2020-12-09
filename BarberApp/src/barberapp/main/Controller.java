@@ -824,6 +824,12 @@ public class Controller implements ActionListener {
         return false;
     }
     
+    /**
+     * Updates whether it was seen by barber or service provider.
+     * 
+     * @param acc Account_ID
+     * @param viewed new status
+     */
     public void updateBookingViewed(int acc, String viewed) {
         this.connection.updateBookingViewed(acc, viewed);
     }

@@ -17,16 +17,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
-import java.sql.Date;
 import java.sql.Timestamp;
-import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -130,7 +122,7 @@ public class AvailabilityPage extends JPanel {
 
         date[2] = new JComboBox(years);
         date[2].setSelectedItem(today.substring(6));
-        
+
         popupListener listener = new popupListener();
         for (int i = 0; i < date.length; i++) {
             date[i].setEnabled(false);
@@ -157,15 +149,15 @@ public class AvailabilityPage extends JPanel {
         // !!!!FIX DATE PICKER TO GET PICKED DATE!!!!!
         selectDate = new JButton("PICK DATE");
         selectDate.setActionCommand("select date");
-        
+
         text = new JTextField(0);
         text.getDocument().addDocumentListener(new docListener());
         text.setVisible(false);
-        
+
         JCalendar c = new JCalendar();
-        
+
         IDateEditor editor = new Editor(c, text);
-        
+
         calendar = new JDateChooser(c, Timestamp.valueOf(localToday), "dd-MM-yyyy", editor);
         calendar.setPreferredSize(new Dimension(40, 40));
         calendar.setMinimumSize(new Dimension(40, 40));
@@ -173,7 +165,6 @@ public class AvailabilityPage extends JPanel {
         calendar.getCalendarButton().setIcon(new ImageIcon(new Images().calendarImage()));
         calendar.getCalendarButton().setText("Calendar");
         calendar.getCalendarButton().setIconTextGap(-190);
-        
 
         p2.add(pickLabel);
         mainCalendar.add(p2);
@@ -205,7 +196,7 @@ public class AvailabilityPage extends JPanel {
 
         JButton logOut = new JButton("LOG OUT");
         logOut.setActionCommand("log out");
-        
+
         rightPanel.add(goBack, BorderLayout.NORTH);
         rightPanel.add(logOut, BorderLayout.SOUTH);
 
@@ -331,15 +322,17 @@ public class AvailabilityPage extends JPanel {
 
         return available;
     }
-    
-    public class Editor implements IDateEditor{
+
+    public class Editor implements IDateEditor {
+
         private final JCalendar calendar;
         private SimpleDateFormat format;
-        
+
         public Editor(JCalendar calendar, JTextField text) {
             this.format = new SimpleDateFormat("dd-MM-yyyy");
             this.calendar = calendar;
         }
+
         @Override
         public java.util.Date getDate() {
             return this.calendar.getDate();
@@ -415,40 +408,42 @@ public class AvailabilityPage extends JPanel {
         public void removePropertyChangeListener(String string, PropertyChangeListener pl) {
         }
     }
-    
+
     public class docListener implements DocumentListener {
+
         @Override
-            public void insertUpdate(DocumentEvent e) {
-                String[] d = text.getText().split("-");
-                if (d.length > 2) {
-                    date[0].setSelectedItem(d[0]);
-                    date[1].setSelectedItem(d[1]);
-                    date[2].setSelectedItem(d[2]);
-                }
+        public void insertUpdate(DocumentEvent e) {
+            String[] d = text.getText().split("-");
+            if (d.length > 2) {
+                date[0].setSelectedItem(d[0]);
+                date[1].setSelectedItem(d[1]);
+                date[2].setSelectedItem(d[2]);
             }
+        }
 
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-            }
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+        }
 
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-            }
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+        }
     }
-    
-    public class popupListener implements PopupMenuListener{
+
+    public class popupListener implements PopupMenuListener {
+
         @Override
-                public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-                    calendar.getCalendarButton().doClick();
-                }
+        public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+            calendar.getCalendarButton().doClick();
+        }
 
-                @Override
-                public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-                }
+        @Override
+        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+        }
 
-                @Override
-                public void popupMenuCanceled(PopupMenuEvent e) {
-                }
+        @Override
+        public void popupMenuCanceled(PopupMenuEvent e) {
+        }
     }
 
 }

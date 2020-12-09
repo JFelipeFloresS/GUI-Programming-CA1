@@ -5,7 +5,6 @@
  */
 package barberapp.main;
 
-import barberapp.views.AvailabilityPage;
 import barberapp.views.InitialPage;
 import java.awt.Color;
 import java.awt.Component;
@@ -34,7 +33,7 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
  */
 public class View extends JFrame {
 
-    Controller controller;
+    private final Controller controller;
 
     /**
      * View constructor.
@@ -58,8 +57,7 @@ public class View extends JFrame {
         this.setResizable(false);
 
         //initialise main panel
-        //this.add(new InitialPage(this.controller));
-        this.add(new AvailabilityPage(this.controller));
+        this.add(new InitialPage(this.controller));
         
         
         //finalise JFrame

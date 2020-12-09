@@ -37,6 +37,8 @@ public class DBConnection {
 
     /**
      * Initialise variables and sets session to null.
+     * 
+     * @param controller controller that initialises the connection 
      */
     public DBConnection(Controller controller) {
         initialise();
