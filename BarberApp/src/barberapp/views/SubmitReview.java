@@ -6,7 +6,7 @@
 package barberapp.views;
 
 import barberapp.main.Globals;
-import barberapp.assets.Stars;
+import barberapp.assets.Images;
 import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -59,7 +59,7 @@ public class SubmitReview extends JPanel {
 
         HashMap<String, String> info = controller.getBookingInfo(bookingID);
 
-        infoPanel.add(new JLabel("<html>Barber: " + info.get("barber name") + " " + info.get("barber last name") + "<br />"
+        infoPanel.add(new JLabel("<html>Barber: " + info.get("barber name") + "<br />"
                 + info.get("date") + "<br />"
                 + info.get("time").substring(0, 5)
                 + "</html>"), BorderLayout.WEST);
@@ -78,8 +78,8 @@ public class SubmitReview extends JPanel {
 
         JPanel starPanel = new JPanel();
 
-        Image selectedStar = new Stars().selectedStar();
-        Image unselectedStar = new Stars().unselectedStar();
+        Image selectedStar = new Images().selectedStar();
+        Image unselectedStar = new Images().unselectedStar();
 
         star1 = new JButton();
         star1.setIcon(new ImageIcon(unselectedStar));
@@ -235,8 +235,8 @@ public class SubmitReview extends JPanel {
      * @param n star number
      */
     public static void starPressed(int n) {
-        Image selectedStar = new Stars().selectedStar();
-        Image unselectedStar = new Stars().unselectedStar();
+        Image selectedStar = new Images().selectedStar();
+        Image unselectedStar = new Images().unselectedStar();
         switch (n) {
             case 5:
                 star5.setIcon(new ImageIcon(selectedStar));

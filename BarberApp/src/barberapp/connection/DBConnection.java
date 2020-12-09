@@ -42,6 +42,7 @@ public class DBConnection {
         initialise();
         this.session = null;
         this.controller = controller;
+        this.logIn("josefelipefloress@gmail.com");
     }
 
     /**

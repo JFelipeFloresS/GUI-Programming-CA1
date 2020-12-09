@@ -7,7 +7,7 @@ package barberapp.views;
 
 import barberapp.main.Controller;
 import barberapp.main.Globals;
-import barberapp.assets.Stars;
+import barberapp.assets.Images;
 import barberapp.main.View;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -73,8 +73,8 @@ public class BarberViewReview extends JPanel {
         JLabel star4 = new JLabel();
         JLabel star5 = new JLabel();
 
-        Image selectedStar = new Stars().selectedStar();
-        Image unselectedStar = new Stars().unselectedStar();
+        Image selectedStar = new Images().selectedStar();
+        Image unselectedStar = new Images().unselectedStar();
         if (!review.isEmpty()) {
             switch (review.get("stars")) {
                 case "1":

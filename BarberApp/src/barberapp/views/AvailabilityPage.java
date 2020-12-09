@@ -5,21 +5,47 @@
  */
 package barberapp.views;
 
+import barberapp.assets.Images;
 import barberapp.main.Controller;
 import barberapp.main.Globals;
 import static barberapp.main.View.standardiseChildren;
+import com.toedter.calendar.IDateEditor;
+import com.toedter.calendar.JCalendar;
+import com.toedter.calendar.JDateChooser;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeListener;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Locale;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 /**
  *
@@ -36,6 +62,8 @@ public class AvailabilityPage extends JPanel {
     public static boolean[] isAvailable = null;
     public static JCheckBox[] availableCheckBox = null;
     public static JButton enterAvailability = null;
+    public static JDateChooser calendar = null;
+    public static JTextField text = null;
 
     /**
      * Creates a page for a barber to enter their availability.
@@ -102,19 +130,57 @@ public class AvailabilityPage extends JPanel {
 
         date[2] = new JComboBox(years);
         date[2].setSelectedItem(today.substring(6));
+        
+        popupListener listener = new popupListener();
+        for (int i = 0; i < date.length; i++) {
+            date[i].setEnabled(false);
+            date[i].setName("availability date");
+            //date[i].setActionCommand("click");
+            //date[i].getUI().setPopupVisible(date[i], false);
+            //date[i].addPopupMenuListener(listener);
+            /**
+             * The following code was retrieved from
+             * https://stackoverflow.com/questions/4827635/better-readability-contrast-in-a-disabled-jcombobox
+             */
+            date[i].setRenderer(new DefaultListCellRenderer() {
+                @Override
+                public void paint(Graphics g) {
+                    setForeground(Color.BLACK);
+                    super.paint(g);
+                }
+            });
+        }
 
         JPanel p3 = new JPanel();
-        p3.setPreferredSize(new Dimension((int) (Globals.WINDOW_WIDTH / 4), (int) (Globals.WINDOW_HEIGHT / 8)));
+        p3.setPreferredSize(new Dimension((int) (Globals.WINDOW_WIDTH / 16), (int) (Globals.WINDOW_HEIGHT / 8)));
 
         // !!!!FIX DATE PICKER TO GET PICKED DATE!!!!!
         selectDate = new JButton("PICK DATE");
         selectDate.setActionCommand("select date");
+        
+        text = new JTextField(0);
+        text.getDocument().addDocumentListener(new docListener());
+        text.setVisible(false);
+        
+        JCalendar c = new JCalendar();
+        
+        IDateEditor editor = new Editor(c, text);
+        
+        calendar = new JDateChooser(c, Timestamp.valueOf(localToday), "dd-MM-yyyy", editor);
+        calendar.setPreferredSize(new Dimension(40, 40));
+        calendar.setMinimumSize(new Dimension(40, 40));
+        calendar.setMaximumSize(new Dimension(40, 40));
+        calendar.getCalendarButton().setIcon(new ImageIcon(new Images().calendarImage()));
+        calendar.getCalendarButton().setText("Calendar");
+        calendar.getCalendarButton().setIconTextGap(-190);
+        
 
         p2.add(pickLabel);
         mainCalendar.add(p2);
         mainCalendar.add(date[0]);
         mainCalendar.add(date[1]);
         mainCalendar.add(date[2]);
+        mainCalendar.add(calendar);
         mainCalendar.add(p3);
         mainCalendar.add(selectDate);
 
@@ -264,6 +330,125 @@ public class AvailabilityPage extends JPanel {
         }
 
         return available;
+    }
+    
+    public class Editor implements IDateEditor{
+        private final JCalendar calendar;
+        private SimpleDateFormat format;
+        
+        public Editor(JCalendar calendar, JTextField text) {
+            this.format = new SimpleDateFormat("dd-MM-yyyy");
+            this.calendar = calendar;
+        }
+        @Override
+        public java.util.Date getDate() {
+            return this.calendar.getDate();
+        }
+
+        @Override
+        public void setDate(java.util.Date date) {
+            text.setText(String.valueOf(this.format.format(date)));
+        }
+
+        @Override
+        public void setDateFormatString(String string) {
+            this.format = new SimpleDateFormat(string);
+        }
+
+        @Override
+        public String getDateFormatString() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void setSelectableDateRange(java.util.Date date, java.util.Date date1) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public java.util.Date getMaxSelectableDate() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public java.util.Date getMinSelectableDate() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void setMaxSelectableDate(java.util.Date date) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void setMinSelectableDate(java.util.Date date) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public JComponent getUiComponent() {
+            return (JComponent) text;
+        }
+
+        @Override
+        public void setLocale(Locale locale) {
+        }
+
+        @Override
+        public void setEnabled(boolean bln) {
+            this.calendar.setEnabled(bln);
+        }
+
+        @Override
+        public void addPropertyChangeListener(PropertyChangeListener pl) {
+        }
+
+        @Override
+        public void addPropertyChangeListener(String string, PropertyChangeListener pl) {
+        }
+
+        @Override
+        public void removePropertyChangeListener(PropertyChangeListener pl) {
+        }
+
+        @Override
+        public void removePropertyChangeListener(String string, PropertyChangeListener pl) {
+        }
+    }
+    
+    public class docListener implements DocumentListener {
+        @Override
+            public void insertUpdate(DocumentEvent e) {
+                String[] d = text.getText().split("-");
+                if (d.length > 2) {
+                    date[0].setSelectedItem(d[0]);
+                    date[1].setSelectedItem(d[1]);
+                    date[2].setSelectedItem(d[2]);
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+            }
+    }
+    
+    public class popupListener implements PopupMenuListener{
+        @Override
+                public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                    calendar.getCalendarButton().doClick();
+                }
+
+                @Override
+                public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                }
+
+                @Override
+                public void popupMenuCanceled(PopupMenuEvent e) {
+                }
     }
 
 }

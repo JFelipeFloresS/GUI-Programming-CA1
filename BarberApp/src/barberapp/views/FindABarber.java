@@ -212,6 +212,7 @@ public class FindABarber extends JPanel {
      * @param controller controller for FindABarber
      */
     public static void showBarberAvailability(int getB, barberapp.main.Controller controller) {
+        rightFindABarberPanel.removeAll();
         ArrayList<HashMap<String, String>> availableList = controller.getbarberAvailability(getB, null);
         HashMap<String, String> bInfo = controller.getBarber(getB);
         rightFindABarberPanel.add(new JLabel("<html>AVAILABLE TIMES: <br />"

@@ -5,6 +5,7 @@
  */
 package barberapp.main;
 
+import barberapp.views.AvailabilityPage;
 import barberapp.views.InitialPage;
 import java.awt.Color;
 import java.awt.Component;
@@ -57,8 +58,8 @@ public class View extends JFrame {
         this.setResizable(false);
 
         //initialise main panel
-        //this.add(new initialPage());
-        this.add(new InitialPage(this.controller));
+        //this.add(new InitialPage(this.controller));
+        this.add(new AvailabilityPage(this.controller));
         
         
         //finalise JFrame
@@ -119,7 +120,21 @@ public class View extends JFrame {
                 c.setBackground(Globals.WHITE);
                 ((JComboBox) c).setBorder(Globals.border(Globals.DARKBLUE, 1));
                 c.setFont(Globals.BODY_FONT);
-                ((JComboBox) c).setUI(ColorArrowUI.createUI(((JComboBox) c)));
+                if (c.getName() == null || !c.getName().equals("availability date")) {
+                    ((JComboBox) c).setUI(ColorArrowUI.createUI(((JComboBox) c)));
+                } else {
+                    ((JComboBox) c).setUI(new BasicComboBoxUI() {
+                        @Override
+                        protected JButton createArrowButton() {
+                            return new JButton() {
+                                @Override
+                                public int getWidth () {
+                                    return 0;
+                                }
+                            };
+                        }
+                    });
+                }
             } else if (c instanceof JCheckBox) {
                 c.setBackground(Globals.WHITE);
                 c.setFont(Globals.BODY_FONT);

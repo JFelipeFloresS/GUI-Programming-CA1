@@ -16,7 +16,7 @@ import javax.imageio.ImageIO;
  *
  * @author José Felipe Flores da Silva
  */
-public class Stars {
+public class Images {
 
     /**
      * @return scaled image of an unselected star
@@ -33,7 +33,7 @@ public class Stars {
     }
 
     /**
-     * @return scaled image of an selected star
+     * @return scaled image of a selected star
      */
     public Image selectedStar() {
         Image star = null;
@@ -44,5 +44,19 @@ public class Stars {
             Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
         }
         return star;
+    }
+    
+    /**
+     * @return scaled image of a calendar
+     */
+    public Image calendarImage() {
+        Image calendar = null;
+        try {
+            calendar = ImageIO.read(getClass().getResource("calendar.png"));
+            calendar = calendar.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
+        } catch (IOException ex) {
+            Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return calendar;
     }
 }

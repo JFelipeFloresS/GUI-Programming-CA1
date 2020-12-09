@@ -14,6 +14,7 @@ import barberapp.views.CustomerMain;
 import barberapp.views.FindABarber;
 import barberapp.views.InitialPage;
 import barberapp.views.SubmitReview;
+import com.mysql.cj.util.StringUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
@@ -192,7 +193,10 @@ public class Controller implements ActionListener {
             case "back to barber bookings":
                 changeScreen(new BarberBookings(this));
                 break;
-
+                
+            case "Calendar":
+                break;
+                
             default:
                 System.out.println(e.getActionCommand());
                 break;
@@ -642,9 +646,12 @@ public class Controller implements ActionListener {
             return;
         }
         
-        String result = this.connection.createAccount(CreateBarber.getEmailAddress(), CreateBarber.getPass(), "barber", CreateBarber.getFirstName(), CreateBarber.getLastName(), CreateBarber.getPhoneNumber(), CreateBarber.getSetLocation(), CreateBarber.getAddress(), CreateBarber.getTown());
-
-        switch (result) {
+        if (!isValidD(CreateBarber.getSetLocation())) {
+            JOptionPane.showMessageDialog(this.view, "Incorrect location format. The location should be in the format \"D1\", \"D12\"...", "Incorrect format!", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        switch (this.connection.createAccount(CreateBarber.getEmailAddress(), CreateBarber.getPass(), "barber", CreateBarber.getFirstName(), CreateBarber.getLastName(), CreateBarber.getPhoneNumber(), CreateBarber.getSetLocation(), CreateBarber.getAddress(), CreateBarber.getTown())) {
             case "done":
                 changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "Account created successfully, welcome to find a barber!", "Account created", JOptionPane.INFORMATION_MESSAGE);
@@ -662,6 +669,10 @@ public class Controller implements ActionListener {
                 JOptionPane.showMessageDialog(this.view, "Unexpected error. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
                 break;
         }
+    }
+    
+    private boolean isValidD(String l) {
+        return l.startsWith("D") && StringUtils.isStrictlyNumeric(l.substring(1));
     }
 
     /**
