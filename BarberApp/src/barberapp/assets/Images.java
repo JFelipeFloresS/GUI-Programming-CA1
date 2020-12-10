@@ -19,13 +19,15 @@ import javax.imageio.ImageIO;
 public class Images {
 
     /**
+     * @param size size desired in pixels
+     * 
      * @return scaled image of an unselected star
      */
-    public Image unselectedStar() {
+    public Image unselectedStar(int size) {
         Image star = null;
         try {
             star = ImageIO.read(getClass().getResource("unselectedStar.png"));
-            star = star.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
+            star = star.getScaledInstance(size, size, java.awt.Image.SCALE_SMOOTH);
         } catch (IOException ex) {
             Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -33,13 +35,15 @@ public class Images {
     }
 
     /**
+     * @param size size desired in pixels
+     * 
      * @return scaled image of a selected star
      */
-    public Image selectedStar() {
+    public Image selectedStar(int size) {
         Image star = null;
         try {
             star = ImageIO.read(getClass().getResource("selectedStar.png"));
-            star = star.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
+            star = star.getScaledInstance(size, size, java.awt.Image.SCALE_SMOOTH);
         } catch (IOException ex) {
             Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -47,13 +51,15 @@ public class Images {
     }
     
     /**
+     * @param size size desired in pixels
+     * 
      * @return scaled image of a calendar
      */
-    public Image calendarImage() {
+    public Image calendarImage(int size) {
         Image calendar = null;
         try {
             calendar = ImageIO.read(getClass().getResource("calendar.png"));
-            calendar = calendar.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
+            calendar = calendar.getScaledInstance(size, size, java.awt.Image.SCALE_SMOOTH);
         } catch (IOException ex) {
             Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
         }

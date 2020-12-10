@@ -78,8 +78,8 @@ public class SubmitReview extends JPanel {
 
         JPanel starPanel = new JPanel();
 
-        Image selectedStar = new Images().selectedStar();
-        Image unselectedStar = new Images().unselectedStar();
+        Image selectedStar = new Images().selectedStar(30);
+        Image unselectedStar = new Images().unselectedStar(30);
 
         star1 = new JButton();
         star1.setIcon(new ImageIcon(unselectedStar));
@@ -235,8 +235,8 @@ public class SubmitReview extends JPanel {
      * @param n star number
      */
     public static void starPressed(int n) {
-        Image selectedStar = new Images().selectedStar();
-        Image unselectedStar = new Images().unselectedStar();
+        Image selectedStar = new Images().selectedStar(30);
+        Image unselectedStar = new Images().unselectedStar(30);
         switch (n) {
             case 5:
                 star5.setIcon(new ImageIcon(selectedStar));

@@ -73,8 +73,8 @@ public class BarberViewReview extends JPanel {
         JLabel star4 = new JLabel();
         JLabel star5 = new JLabel();
 
-        Image selectedStar = new Images().selectedStar();
-        Image unselectedStar = new Images().unselectedStar();
+        Image selectedStar = new Images().selectedStar(30);
+        Image unselectedStar = new Images().unselectedStar(30);
         if (!review.isEmpty()) {
             switch (review.get("stars")) {
                 case "1":

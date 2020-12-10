@@ -35,7 +35,7 @@ import javax.swing.JPanel;
  *
  */
 public class Controller implements ActionListener {
-    
+
     private final DBConnection connection;
     public final View view;
 
@@ -49,67 +49,71 @@ public class Controller implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        
-        //System.out.println(e.getActionCommand());
 
+        //System.out.println(e.getActionCommand());
         if (e.getActionCommand().contains("cancel booking ")) {
-            cancelBooking(Integer.parseInt(e.getActionCommand().substring(15)));
+            int booking = Integer.parseInt(e.getActionCommand().substring(15));
+            cancelBooking(booking);
             return;
         }
 
         if (e.getActionCommand().contains("check availability ")) {
-            showBarberAvailability(Integer.parseInt(e.getActionCommand().substring(19)));
+            int barberID = Integer.parseInt(e.getActionCommand().substring(19));
+            showBarberAvailability(barberID);
             return;
         }
 
         if (e.getActionCommand().contains("book ")) {
-            bookAppointment(e.getActionCommand().split(" "));
+            String[] appointmentInfo = e.getActionCommand().split(" ");
+            bookAppointment(appointmentInfo);
             return;
         }
 
         if (e.getActionCommand().startsWith("review ")) {
-            changeScreen(new SubmitReview(this, Integer.parseInt(e.getActionCommand().substring(7))));
+            int booking = Integer.parseInt(e.getActionCommand().substring(7));
+            changeScreen(new SubmitReview(this, booking));
             return;
         }
 
         if (e.getActionCommand().contains("star ")) {
-            SubmitReview.starPressed(Integer.parseInt(e.getActionCommand().substring(5)));
+            int starPressed = Integer.parseInt(e.getActionCommand().substring(5));
+            SubmitReview.starPressed(starPressed);
             return;
         }
 
         if (e.getActionCommand().contains("submit review ")) {
-            submitReview(Integer.parseInt(e.getActionCommand().substring(14)));
+            int booking = Integer.parseInt(e.getActionCommand().substring(14));
+            submitReview(booking);
             return;
         }
 
         if (e.getActionCommand().contains("update review ")) {
-            updateReview(Integer.parseInt(e.getActionCommand().substring(14)));
+            int booking = Integer.parseInt(e.getActionCommand().substring(14));
+            updateReview(booking);
             return;
         }
 
         if (e.getActionCommand().contains("confirm ")) {
             int booking = Integer.parseInt(e.getActionCommand().substring(8));
-            this.connection.confirmBooking(booking);
-            changeScreen(new BarberMain(this));
-            JOptionPane.showMessageDialog(this.view, "Booking accepted.");
-            this.connection.updateBookingViewed(booking, "accepted by barber once");
+            confirmBooking(booking);
             return;
         }
 
         if (e.getActionCommand().contains("go to change status ")) {
-            changeScreen(new BarberViewReview(this, Integer.parseInt(e.getActionCommand().substring(20))));
+            int booking = Integer.parseInt(e.getActionCommand().substring(20));
+            changeScreen(new BarberViewReview(this, booking));
             return;
         }
 
         if (e.getActionCommand().contains("complete booking ")) {
-            completeBooking(Integer.parseInt(e.getActionCommand().substring(17)));
-            this.connection.updateBookingViewed(Integer.parseInt(e.getActionCommand().substring(17)), "completed by barber");
+            int booking = Integer.parseInt(e.getActionCommand().substring(17));
+            completeBooking(booking);
             return;
         }
 
         if (e.getActionCommand().contains("no show booking ")) {
-            noShowBooking(Integer.parseInt(e.getActionCommand().substring(16)));
-            this.connection.updateBookingViewed(Integer.parseInt(e.getActionCommand().substring(16)), "no show by customer");
+            int booking = Integer.parseInt(e.getActionCommand().substring(16));
+            noShowBooking(booking);
             return;
         }
 
@@ -139,11 +143,11 @@ public class Controller implements ActionListener {
                 break;
 
             case "view customer bookings":
-                showAllCustomerBookings();
+                changeScreen(new CustomerBookings(this));
                 break;
 
             case "view barber bookings":
-                showAllBarberBookings();
+                changeScreen(new BarberBookings(this));
                 break;
 
             case "create customer":
@@ -155,19 +159,23 @@ public class Controller implements ActionListener {
                 break;
 
             case "search barber name main":
-                searchBarberByName(CustomerMain.getBarberName());
+                String barberNameFromMain = CustomerMain.getBarberName();
+                searchBarberByName(barberNameFromMain);
                 break;
 
             case "search barber name find":
-                searchBarberByName(FindABarber.getBarberName());
+                String barberNameFromFind = FindABarber.getBarberName();
+                searchBarberByName(barberNameFromFind);
                 break;
 
             case "search barber location main":
-                searchBarberByLocation(CustomerMain.getSelectedLocation());
+                String locationFromMain = CustomerMain.getSelectedLocation();
+                searchBarberByLocation(locationFromMain);
                 break;
 
             case "search barber location find":
-                searchBarberByLocation(FindABarber.getSelectedLocation());
+                String locationFromFind = FindABarber.getSelectedLocation();
+                searchBarberByLocation(locationFromFind);
                 break;
 
             case "go to set availability":
@@ -193,12 +201,9 @@ public class Controller implements ActionListener {
             case "back to barber bookings":
                 changeScreen(new BarberBookings(this));
                 break;
-                
-            case "Calendar":
-                break;
-                
+
             default:
-                System.out.println(e.getActionCommand());
+                System.out.println("Invalid button.");
                 break;
         }
     }
@@ -206,8 +211,8 @@ public class Controller implements ActionListener {
     /**
      * Checks whether the input email is in the valid format.
      *
-     * @param e email to check
-     * @return boolean saying whether the email input is in valid format.
+     * @param e email to dateToCheck
+     * @return <code>true</code>: valid <br> <code>false</code>: invalid
      */
     private boolean isValidEmailAddress(String e) {
         /**
@@ -223,8 +228,8 @@ public class Controller implements ActionListener {
     /**
      * Checks whether the input password is in the valid format.
      *
-     * @param p password to check
-     * @return boolean saying whether the password is in valid format.
+     * @param p password to dateToCheck
+     * @return <code>true</code>: valid <br> <code>false</code>: invalid
      */
     private boolean isValidPassword(String p) {
         /**
@@ -241,7 +246,7 @@ public class Controller implements ActionListener {
     /**
      * Removes all panels from the frame and adds a new panel.
      *
-     * @param newPanel panel to be added
+     * @param newPanel panel to be swapped onto the frame
      */
     public void changeScreen(JPanel newPanel) {
         this.view.getContentPane().removeAll();
@@ -253,8 +258,8 @@ public class Controller implements ActionListener {
     /**
      * Gets all upcoming bookings for the logged barber.
      *
-     * @return ArrayList of HashMaps with the keys "id", "date", "time",
-     * "customer name", "customer phone", "status"
+     * @return <code>ArrayList</code> of <code>HashMap</code> with the keys:
+     * <br> "id", "date", "time", "customer name", "customer phone", "status"
      */
     public ArrayList<HashMap<String, String>> getBarberUpcomingBookings() {
         return this.connection.getBarberUpcomingBookings();
@@ -263,8 +268,8 @@ public class Controller implements ActionListener {
     /**
      * Gets all bookings for the logged barber.
      *
-     * @return ArrayList of HashMaps with the keys "id", "date", "time",
-     * "status", "customer name", "phone"
+     * @return <code>ArrayList</code> of <code>HashMap</code> with the keys:
+     * <br> "id", "date", "time", "status", "customer name", "phone"
      */
     public ArrayList<HashMap<String, String>> getBarberBookings() {
         return this.connection.getAllBarberBookings();
@@ -273,8 +278,9 @@ public class Controller implements ActionListener {
     /**
      * Gets all bookings for the logged customer.
      *
-     * @return ArrayList of HashMaps with the keys "id", "date", "time",
-     * "status", "barber name", "phone", "address", "town", "location"
+     * @return <code>ArrayList</code> of <code>HashMap</code> with the keys:
+     * <br> "id", "date", "time", "status", "barber name", "phone", "address",
+     * "town", "location"
      */
     public ArrayList<HashMap<String, String>> getCustomerBookings() {
         return this.connection.getAllCustomerBookings();
@@ -283,8 +289,8 @@ public class Controller implements ActionListener {
     /**
      * Gets next upcoming booking for the logged customer.
      *
-     * @return HashMap with the keys "id", "date", "time", "status", "name",
-     * "phone", "address", "town", "location"
+     * @return <code>HashMap</code> with the keys: <br> "id", "date", "time",
+     * "status", "name", "phone", "address", "town", "location"
      */
     public HashMap<String, String> getNextCustomerBooking() {
         return this.connection.getNextCustomerBooking();
@@ -293,16 +299,16 @@ public class Controller implements ActionListener {
     /**
      * Gets locations from all barbers.
      *
-     * @return String array with unique locations
+     * @return <code>ArrayList</code> with unique locations
      */
-    public String[] getLocations() {
+    public ArrayList<String> getLocations() {
         return this.connection.getLocations();
     }
 
     /**
      * Gets logged session first name.
      *
-     * @return session first name
+     * @return current session's first name
      */
     public String getSessionFirstName() {
         return this.connection.getFirstName();
@@ -311,8 +317,8 @@ public class Controller implements ActionListener {
     /**
      * Gets all barbers that have the given first name or second name.
      *
-     * @return ArrayList of HashMaps with the keys "id", "name", "phone",
-     * "address", "town", "location"
+     * @return <code>ArrayList</code> of <code>HashMap</code> with the keys:
+     * <br> "id", "name", "phone", "address", "town", "location"
      */
     public ArrayList<HashMap<String, String>> searchForBarberName() {
         if (FindABarber.getBarberName() != null) {
@@ -323,10 +329,10 @@ public class Controller implements ActionListener {
     }
 
     /**
-     * Gets all barbers that have the given location.
+     * Gets all barbers that are in the given location.
      *
-     * @return ArrayList of HashMaps with the keys "id", "name", "phone",
-     * "address", "town", "location"
+     * @return <code>ArrayList</code> of <code>HashMap</code> with the keys:
+     * <br> "id", "name", "phone", "address", "town", "location"
      */
     public ArrayList<HashMap<String, String>> searchForBarberLocation() {
         if (FindABarber.getAllLocationsBox() != null) {
@@ -339,7 +345,7 @@ public class Controller implements ActionListener {
     /**
      * Gets logged session ID.
      *
-     * @return session ID
+     * @return current session's ID
      */
     public int getSessionID() {
         return connection.getID();
@@ -350,37 +356,40 @@ public class Controller implements ActionListener {
      *
      * @param barber barber ID to be checked
      * @param date date to be checked
-     * @return boolean array saying whether the barber is available at all slots
-     * throughout the date specified
+     * @return <code>boolean[]</code> containing whether the barber is available
+     * at all slots throughout the date specified
      */
     public boolean[] checkBarberAvailability(int barber, String date) {
         boolean[] isAvailable = new boolean[48];
         ArrayList<HashMap<String, String>> availability = this.connection.getAvailability(barber, date);
 
+        /**
+         * fixing the hours and minutes of the current time
+         */
         int h = 0;
         String currTime;
         boolean isHalf = false;
         String m = ":00";
         for (int i = 0; i < isAvailable.length; i++) {
             String addZero = "";
-            if (h < 10) {
+            if (h < 10) { // adds zero to the beginning of the string if the hour is less than 2 digits long
                 addZero = "0";
             }
             currTime = addZero + String.valueOf(h) + m + ":00";
 
-            boolean isIn = false;
+            boolean isIn = false; // boolean to dateToCheck whether the current time is in the database
             for (int j = 0; j < availability.size(); j++) {
                 if (availability.get(j).get("date").equals(date) && availability.get(j).get("time").equals(currTime)) {
-                    isIn = true;
+                    isIn = true; // if the current time is in the array list, it means it's in the database
                 }
             }
-            isAvailable[i] = isIn;
+            isAvailable[i] = isIn; // updates the boolean array
 
             isHalf = !isHalf;
             if (isHalf) {
-                m = ":30";
+                m = ":30"; // if the next loop is half, the minutes will turn into 30
             } else {
-                m = ":00";
+                m = ":00"; // otherwise, the minutes will turn into 00 and the hour will increase by 1
                 h++;
             }
         }
@@ -391,8 +400,8 @@ public class Controller implements ActionListener {
      * Gets one barber information.
      *
      * @param id barber to get info ID number
-     * @return HashMap with the keys "first name", "last name", "address",
-     * "town", "location", "phone"
+     * @return <code>HashMap</code> with the keys: <br> "first name", "last
+     * name", "address", "town", "location", "phone"
      */
     public HashMap<String, String> getBarber(int id) {
         return this.connection.getBarber(id);
@@ -403,7 +412,8 @@ public class Controller implements ActionListener {
      *
      * @param id barber ID
      * @param date if not checking for a specific date set to null
-     * @return ArrayList of HashMaps with the keys "date", "time"
+     * @return <code>ArrayList</code> of <code>HashMap</code> with the keys:
+     * <br> "date", "time"
      */
     public ArrayList<HashMap<String, String>> getbarberAvailability(int id, String date) {
         return this.connection.getAvailability(id, date);
@@ -413,8 +423,9 @@ public class Controller implements ActionListener {
      * Gets a booking info.
      *
      * @param b booking ID
-     * @return "customer name", "customer phone", "barber name", "barber phone",
-     * "address", "town", "location"
+     * @return <code>HashMap</code> with the keys: <br> "customer name",
+     * "customer phone", "barber name", "barber phone", "address", "town",
+     * "location"
      */
     public HashMap<String, String> getBookingInfo(int b) {
         return this.connection.getBookingInfo(b);
@@ -424,7 +435,7 @@ public class Controller implements ActionListener {
      * Gets a booking review.
      *
      * @param b booking ID
-     * @return HashMap with the keys "review", "stars"
+     * @return <code>HashMap</code> with the keys: <br> "review", "stars"
      */
     public HashMap<String, String> getBookingReview(int b) {
         return this.connection.getBookingReview(b);
@@ -469,7 +480,8 @@ public class Controller implements ActionListener {
     /**
      * Gets how many appointments of a specific status there are.
      *
-     * @param status status of appointment to get the number of
+     * @param status status of appointment to get the number of: upcoming,
+     * cancelled, completed, no show, requested
      * @return number of appointments with the given status
      */
     public int getAppointmentsCount(String status) {
@@ -478,38 +490,43 @@ public class Controller implements ActionListener {
 
     /**
      * Updates currently logged barber for the date picked based on the
-     * availability check boxes.
+ availability dateToCheck boxes.
      */
     private void updateBarberAvailability() {
+        /**
+         * retrieving availability from the database and from the check box
+         * selection
+         */
         ArrayList<HashMap<String, String>> currAvailability = this.connection.getAvailability(this.connection.getID(), AvailabilityPage.getpickedDate());
         HashMap<String, Boolean> availability = AvailabilityPage.getAvailableCheckBoxSelection();
+
+        /**
+         * fixing the hours and minutes for the current time
+         */
         int h = 0;
         String m = ":00";
         boolean isHalf = false;
         String currTime;
         for (int i = 0; i < 48; i++) {
-            if (h < 10) {
+            if (h < 10) { // adds a zero to the beginning of the string if the hour is less than 2 digits long
                 currTime = "0";
             } else {
                 currTime = "";
             }
+
             currTime += String.valueOf(h) + m + ":00";
             boolean isInNew = availability.get(currTime);
-            boolean isInOld = false;
+            boolean isInPrevious = false;
             for (int j = 0; j < currAvailability.size(); j++) {
                 if (currAvailability.get(j).get("date").equals(AvailabilityPage.getpickedDate()) && currAvailability.get(j).get("time").equals(currTime)) {
-                    isInOld = true;
+                    isInPrevious = true; // if it is in the database, it is in previous
                 }
             }
 
-            if (isInOld) {
-                if (!isInNew) {
-                    this.connection.removeAvailability(this.connection.getID(), AvailabilityPage.getpickedDate(), currTime);
-                }
-            } else {
-                if (isInNew) {
-                    this.connection.addAvailability(this.connection.getID(), AvailabilityPage.getpickedDate(), currTime);
-                }
+            if (isInPrevious && !isInNew) { // if it is in previous and it isn't in new, remove availability
+                this.connection.removeAvailability(this.connection.getID(), AvailabilityPage.getpickedDate(), currTime);
+            } else if (!isInPrevious && isInNew) { // if it is in new and wasn't in previous, add availability
+                this.connection.addAvailability(this.connection.getID(), AvailabilityPage.getpickedDate(), currTime);
             }
 
             if (isHalf) {
@@ -541,7 +558,9 @@ public class Controller implements ActionListener {
 
     /**
      * Search for barber based on the location selected from the combo box
-     * allLocationsBox. setSelectedLocation.
+     * allLocationsBox
+     *
+     * @param selected selected location
      */
     private void searchBarberByLocation(String selected) {
         changeScreen(new FindABarber(this));
@@ -552,63 +571,47 @@ public class Controller implements ActionListener {
     /**
      * Shows all slots available for a given barber.
      *
-     * @param i barber ID to show available slots
+     * @param barberID barber ID to show available slots
      */
-    private void showBarberAvailability(int i) {
-        FindABarber.showBarberAvailability(i, this);
-    }
-
-    /**
-     * Changes screen to customerBookings.
-     */
-    private void showAllCustomerBookings() {
-        changeScreen(new CustomerBookings(this));
-    }
-
-    /**
-     * Changes screen to barberBookings.
-     */
-    private void showAllBarberBookings() {
-        changeScreen(new BarberBookings(this));
+    private void showBarberAvailability(int barberID) {
+        FindABarber.showBarberAvailability(barberID, this);
     }
 
     /**
      * Creates customer account and changes screen to InitialPage.
      */
     private void createCustomerAccount() {
-        if (!isValidEmailAddress(CreateCustomer.getEmailAddress())) {
+        if (!isValidEmailAddress(CreateCustomer.getEmailAddress())) { // warns wrong email format
             JOptionPane.showMessageDialog(this.view, "Please insert a valid email address", "Invalid email address", JOptionPane.WARNING_MESSAGE);
             return;
-        } 
-        
-        if (CreateCustomer.getPass().length() < 8) {
+        }
+
+        if (CreateCustomer.getPass().length() < 8) { // warns password is too short
             JOptionPane.showMessageDialog(this.view, "Your password is too short", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
-        } else if (!isValidPassword(CreateCustomer.getPass())) {
+        } else if (!isValidPassword(CreateCustomer.getPass())) { // warns invalid password format
             JOptionPane.showMessageDialog(this.view, "Your password must contain a digit, a lowercase and an uppercase letter", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
-        } else if (!CreateCustomer.getPass().equals(CreateCustomer.getConfirmPass())) {
+        } else if (!CreateCustomer.getPass().equals(CreateCustomer.getConfirmPass())) { // warns no match between password and password confirmation
             JOptionPane.showMessageDialog(this.view, "Your password and confirmation password don't match", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (CreateCustomer.getFirstName().length() < 1 || CreateCustomer.getLastName().length() < 1) {
+        if (CreateCustomer.getFirstName().length() < 1 || CreateCustomer.getLastName().length() < 1) { // warns not all fields have been filled in
             JOptionPane.showMessageDialog(this.view, "Please fill in all fields!", "Incomplete fields", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
-        String result = this.connection.createAccount(CreateCustomer.getEmailAddress(), CreateCustomer.getPass(), "customer", CreateCustomer.getFirstName(), CreateCustomer.getLastName(), CreateCustomer.getPhoneNumber(), null, null, null);
 
-        switch (result) {
-            case "done":
+        switch (this.connection.createAccount(CreateCustomer.getEmailAddress(), CreateCustomer.getPass(), "customer", CreateCustomer.getFirstName(), CreateCustomer.getLastName(), CreateCustomer.getPhoneNumber(), null, null, null)) {
+            case "done": // informs account has been created successfully
                 changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "Account created successfully, welcome to find a barber!", "Account created", JOptionPane.INFORMATION_MESSAGE);
                 break;
-            case "repeated email":
+            case "repeated email": // warns there is already an account with that email
                 changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "An account with this email address already exists", "Account already exists", JOptionPane.WARNING_MESSAGE);
                 break;
-            case "account created":
+            case "account created": // warns there has been an error adding location to the database, but the account was created successfully
                 changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "Error adding location to the database, account created successfully.", "Error", JOptionPane.ERROR_MESSAGE);
                 break;
@@ -625,42 +628,43 @@ public class Controller implements ActionListener {
      */
     private void createBarberAccount() {
 
-        if (!isValidEmailAddress(CreateBarber.getEmailAddress())) {
+        if (!isValidEmailAddress(CreateBarber.getEmailAddress())) { // warns invalid email format
             JOptionPane.showMessageDialog(this.view, "Please insert a valid email address.", "Invalid email address", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        if (CreateBarber.getPass().length() < 8) {
+        if (CreateBarber.getPass().length() < 8) { // warns short password
             JOptionPane.showMessageDialog(this.view, "Your password is too short", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
-        } else if (!isValidPassword(CreateBarber.getPass())) {
+        } else if (!isValidPassword(CreateBarber.getPass())) { // warns invalid password format
             JOptionPane.showMessageDialog(this.view, "Your password must contain a digit, a lowercase and an uppercase letter", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
-        } else if (!CreateBarber.getPass().equals(CreateBarber.getConfirmPass())) {
+        } else if (!CreateBarber.getPass().equals(CreateBarber.getConfirmPass())) { // warns mismatch between password and password confirmation
             JOptionPane.showMessageDialog(this.view, "Your password and confirmation password don't match", "Invalid password", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
+        // warns incomplete fields
         if (CreateBarber.getFirstName().length() < 1 || CreateBarber.getLastName().length() < 1 || CreateBarber.getSetLocation().length() < 1 || CreateBarber.getAddress().length() < 1) {
             JOptionPane.showMessageDialog(this.view, "Please fill in all fields!", "Incomplete fields", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
-        if (!isValidD(CreateBarber.getSetLocation())) {
+
+        if (!isValidD(CreateBarber.getSetLocation())) { // warns incorrect location format
             JOptionPane.showMessageDialog(this.view, "Incorrect location format. The location should be in the format \"D1\", \"D12\"...", "Incorrect format!", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
         switch (this.connection.createAccount(CreateBarber.getEmailAddress(), CreateBarber.getPass(), "barber", CreateBarber.getFirstName(), CreateBarber.getLastName(), CreateBarber.getPhoneNumber(), CreateBarber.getSetLocation(), CreateBarber.getAddress(), CreateBarber.getTown())) {
-            case "done":
+            case "done": // informs accounts has been created successfully
                 changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "Account created successfully, welcome to find a barber!", "Account created", JOptionPane.INFORMATION_MESSAGE);
                 break;
-            case "repeated email":
+            case "repeated email": // warns there is an account with the email attempted
                 changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "An account with this email address already exists", "Account already exists", JOptionPane.WARNING_MESSAGE);
                 break;
-            case "account created":
+            case "account created": // warns an error adding the location to the database
                 changeScreen(new InitialPage(this));
                 JOptionPane.showMessageDialog(this.view, "Error adding location to the database, account created successfully.", "Error", JOptionPane.ERROR_MESSAGE);
                 break;
@@ -670,9 +674,16 @@ public class Controller implements ActionListener {
                 break;
         }
     }
-    
-    private boolean isValidD(String l) {
-        return l.startsWith("D") && StringUtils.isStrictlyNumeric(l.substring(1));
+
+    /**
+     * Check whether it is a valid location format.
+     *
+     * @param location input to be checked
+     * @return <code>true</code>: valid location <br> <code>false</code>:
+     * invalid
+     */
+    private boolean isValidD(String location) {
+        return location.startsWith("D") && StringUtils.isStrictlyNumeric(location.substring(1));
     }
 
     /**
@@ -690,7 +701,7 @@ public class Controller implements ActionListener {
                 case "barber":
                     changeScreen(new BarberMain(this));
                     break;
-                case "admin":
+                case "admin": // email: admin password: Pass123!
                     changeScreen(new AdminMain(this));
                     break;
             }
@@ -708,6 +719,18 @@ public class Controller implements ActionListener {
     }
 
     /**
+     * Confirms a request for a booking.
+     * 
+     * @param booking booking ID
+     */
+    public void confirmBooking(int booking) {
+        this.connection.confirmBooking(booking);
+        changeScreen(new BarberMain(this));
+        JOptionPane.showMessageDialog(this.view, "Booking accepted.");
+        this.connection.updateBookingViewed(booking, "accepted by barber once");
+    }
+
+    /**
      * Cancel given booking.
      *
      * @param booking booking ID to be cancelled
@@ -719,7 +742,7 @@ public class Controller implements ActionListener {
             JOptionPane.showMessageDialog(this.view, "Booking cancelled successfully");
             this.connection.updateBookingViewed(booking, "cancelled by " + this.connection.getType() + " once");
             HashMap<String, String> bookingInfo = this.connection.getBookingInfo(booking);
-            this.connection.addAvailability(Integer.parseInt(bookingInfo.get("id")), bookingInfo.get("date"), bookingInfo.get("time"));
+            this.connection.addAvailability(Integer.parseInt(bookingInfo.get("barber id")), bookingInfo.get("date"), bookingInfo.get("time"));
             if (this.connection.getType().equals("barber")) {
                 changeScreen(new BarberMain(this));
             } else {
@@ -754,10 +777,9 @@ public class Controller implements ActionListener {
     }
 
     /**
-     * Request a booking.
+     * Requests a booking.
      *
-     * @param bookInfo HashMap with the keys "date", "time", "customer",
-     * "barber"
+     * @param bookInfo bookInfo[0]: "book "<br>bookInfo[1]: booking date<br>bookInfo[2]: booking time<br>bookInfo[3]: barber ID
      */
     private void bookAppointment(String[] bookInfo) {
         String bookDate = bookInfo[1];
@@ -765,14 +787,14 @@ public class Controller implements ActionListener {
         int barberID = Integer.parseInt(bookInfo[3]);
         int customerID = this.connection.getID();
         int r = JOptionPane.showConfirmDialog(this.view, "Are you sure you want to book an appointment on " + bookDate + " at " + bookTime + "?", "Confirm appointment", JOptionPane.YES_NO_OPTION);
-        
-        if (r == JOptionPane.YES_OPTION) {
-            if (this.connection.getBookingID(bookDate, bookTime, customerID, barberID) == 0) {
+
+        if (r == JOptionPane.YES_OPTION) { // if confirmed by customer, dateToCheck whether there's an appointment with the date, time, customer and barber
+            if (this.connection.getBookingID(bookDate, bookTime, customerID, barberID) == 0) { // creates appointment if there isn't one
                 this.connection.createBooking(bookDate, bookTime, barberID);
                 this.connection.removeAvailability(barberID, bookDate, bookTime);
                 changeScreen(new CustomerMain(this));
                 JOptionPane.showMessageDialog(this.view, "Booking requested successfully");
-            } else {
+            } else { // warns customer otherwise
                 JOptionPane.showMessageDialog(this.view, "You have alread requested this appointment", "Already requested", JOptionPane.WARNING_MESSAGE);
             }
         }
@@ -783,8 +805,9 @@ public class Controller implements ActionListener {
      *
      * @param id booking ID
      */
-    private void completeBooking(int id) {
-        this.connection.updateStatus(id, "completed");
+    private void completeBooking(int booking) {
+        this.connection.updateStatus(booking, "completed");
+        this.connection.updateBookingViewed(booking, "completed by barber");
         changeScreen(new BarberBookings(this));
     }
 
@@ -793,8 +816,9 @@ public class Controller implements ActionListener {
      *
      * @param id booking ID
      */
-    private void noShowBooking(int id) {
-        this.connection.updateStatus(id, "no show");
+    private void noShowBooking(int booking) {
+        this.connection.updateStatus(booking, "no show");
+        this.connection.updateBookingViewed(booking, "no show by customer");
         changeScreen(new BarberBookings(this));
     }
 
@@ -803,7 +827,7 @@ public class Controller implements ActionListener {
      *
      * @param date string with the date to be checked
      * @param time string with the time to be checked
-     * @return boolean: true is old, false is future
+     * @return boolean: <code>true</code>: old <br> <code>false</code>: future
      */
     public boolean isOld(String date, String time) {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -811,26 +835,26 @@ public class Controller implements ActionListener {
 
         try {
             Date today = new SimpleDateFormat("yyyy-MM-dd").parse(df.format(now));
-            Date check = new SimpleDateFormat("yyyy-MM-dd").parse(date + time);
+            Date dateToCheck = new SimpleDateFormat("yyyy-MM-dd").parse(date + time);
 
-            if (today.after(check)) {
+            if (today.after(dateToCheck)) {
                 return true;
-            } 
-            
+            }
+
         } catch (ParseException e) {
             JOptionPane.showMessageDialog(this.view, e.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
         }
-        
+
         return false;
     }
-    
+
     /**
      * Updates whether it was seen by barber or service provider.
-     * 
-     * @param acc Account_ID
+     *
+     * @param booking booking ID
      * @param viewed new status
      */
-    public void updateBookingViewed(int acc, String viewed) {
-        this.connection.updateBookingViewed(acc, viewed);
+    public void updateBookingViewed(int booking, String viewed) {
+        this.connection.updateBookingViewed(booking, viewed);
     }
 }

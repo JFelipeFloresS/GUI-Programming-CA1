@@ -162,7 +162,7 @@ public class AvailabilityPage extends JPanel {
         calendar.setPreferredSize(new Dimension(40, 40));
         calendar.setMinimumSize(new Dimension(40, 40));
         calendar.setMaximumSize(new Dimension(40, 40));
-        calendar.getCalendarButton().setIcon(new ImageIcon(new Images().calendarImage()));
+        calendar.getCalendarButton().setIcon(new ImageIcon(new Images().calendarImage(30)));
         calendar.getCalendarButton().setText("Calendar");
         calendar.getCalendarButton().setIconTextGap(-190);
 

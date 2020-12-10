@@ -98,7 +98,7 @@ public class FindABarber extends JPanel {
         JPanel centerRightTopPanel = new JPanel();
         centerRightTopPanel.setBackground(Globals.WHITE);
 
-        allLocationsBox = new JComboBox(controller.getLocations());
+        allLocationsBox = new JComboBox(controller.getLocations().toArray());
         JButton searchLocation = new JButton("SEARCH");
         searchLocation.setActionCommand("search barber location find");
 

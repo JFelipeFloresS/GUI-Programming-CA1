@@ -106,7 +106,7 @@ public class CustomerMain extends JPanel {
 
         JPanel topSearchLocation = new JPanel();
         topSearchLocation.setBackground(Globals.WHITE);
-        allLocationsBox = new JComboBox(controller.getLocations());
+        allLocationsBox = new JComboBox(controller.getLocations().toArray());
 
         topSearchLocation.add(new JLabel("By location:"));
         topSearchLocation.add(allLocationsBox);
