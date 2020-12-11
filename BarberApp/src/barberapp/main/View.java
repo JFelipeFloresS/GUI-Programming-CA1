@@ -58,11 +58,8 @@ public class View extends JFrame {
 
         //initialise main panel
         this.add(new InitialPage(this.controller));
-        
-        
+
         //finalise JFrame
-        getContentPane().setFont(Globals.BODY_FONT);
-        getContentPane().setForeground(Color.black);
         this.validate();
         this.repaint();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -78,65 +75,66 @@ public class View extends JFrame {
      * @param controller controller to be set to children
      */
     public static void standardiseChildren(JPanel panel, boolean buttonStandardSize, ActionListener controller) {
-        if (panel.getBackground().equals(Globals.DEFAULTCOLOUR)) {
+        if (panel.getBackground().equals(Globals.DEFAULTCOLOUR)) { // if the background colour is not set, set it to white
             panel.setBackground(Globals.WHITE);
         }
-        Component[] component = panel.getComponents();
+
+        Component[] component = panel.getComponents(); // gets all components within a panel
+
         for (Component c : component) {
             if (c instanceof JButton) {
-                if (((JButton) c).getActionCommand().contains("star")) {
-                    ((JButton) c).addActionListener(controller);
-                    ((JButton) c).setCursor(new Cursor(Cursor.HAND_CURSOR));
+                if (((JButton) c).getActionCommand().contains("star")) { // if the component is a button and the action command contains star, remove background and border
                     c.setBackground(null);
                     ((JButton) c).setBorder(null);
-                } else {
+                } else { // sets font, background, border and foreground for all other buttons
                     c.setFont(Globals.BODY_FONT);
                     c.setBackground(Globals.BLUE);
-                    ((JButton) c).setBorder(Globals.border(Globals.DARKBLUE, 2));
                     c.setForeground(Globals.WHITE);
 
-                    if (buttonStandardSize) {
+                    if (buttonStandardSize) { // if set to use standard size, set the dimension to REGULAR_BUTTON_DIMENSION
                         c.setPreferredSize(Globals.REGULAR_BUTTON_DIMENSION);
                     }
                 }
-                ((JButton) c).addActionListener(controller);
-                ((JButton) c).setCursor(new Cursor(Cursor.HAND_CURSOR));
-            } else if (c instanceof JPanel) {
+
+                ((JButton) c).addActionListener(controller); // adds the controller as an action listener
+                ((JButton) c).setCursor(new Cursor(Cursor.HAND_CURSOR)); // sets the cursor to all buttons as HAND_CURSOR
+
+            } else if (c instanceof JPanel) { // if the component is a JPanel, apply this method standardiseChildren on it
                 standardiseChildren((JPanel) c, buttonStandardSize, controller);
-            } else if (c instanceof JLabel) {
+            } else if (c instanceof JLabel) { // if it's a JLabel, set font and foreground
                 c.setFont(Globals.BODY_FONT);
                 c.setForeground(Color.black);
-            } else if (c instanceof JTextField) {
+            } else if (c instanceof JTextField) { // if it's a JTextField, set background colour, border and font
                 c.setBackground(Globals.TEXTFIELDCOLOUR);
                 ((JTextField) c).setBorder(Globals.border(Globals.DARKBLUE, 1));
                 c.setFont(Globals.BODY_FONT);
-            } else if (c instanceof JTextArea) {
+            } else if (c instanceof JTextArea) { // it it's a JTextArea, set background, border and font
                 c.setBackground(Globals.TEXTFIELDCOLOUR);
                 ((JTextArea) c).setBorder(Globals.border(Globals.DARKBLUE, 1));
                 c.setFont(Globals.BODY_FONT);
-            } else if (c instanceof JComboBox) {
+            } else if (c instanceof JComboBox) { // if it's a JComboBox, set background and border
                 c.setBackground(Globals.WHITE);
                 ((JComboBox) c).setBorder(Globals.border(Globals.DARKBLUE, 1));
                 c.setFont(Globals.BODY_FONT);
-                if (c.getName() == null || !c.getName().equals("availability date")) {
+                if (c.getName() == null || !c.getName().equals("availability date")) { // if not specified, set the colour of the arrow
                     ((JComboBox) c).setUI(ColorArrowUI.createUI(((JComboBox) c)));
-                } else {
+                } else { // if specified, remove arrow button
                     ((JComboBox) c).setUI(new BasicComboBoxUI() {
                         @Override
                         protected JButton createArrowButton() {
                             return new JButton() {
                                 @Override
-                                public int getWidth () {
+                                public int getWidth() {
                                     return 0;
                                 }
                             };
                         }
                     });
                 }
-            } else if (c instanceof JCheckBox) {
+            } else if (c instanceof JCheckBox) { // if it's a JCheckBox, set background and font
                 c.setBackground(Globals.WHITE);
                 c.setFont(Globals.BODY_FONT);
-            } else if (c instanceof JScrollPane) {
+            } else if (c instanceof JScrollPane) { // if it's a JScrollPane, set background and scroll bars' colour
                 ((JScrollPane) c).getVerticalScrollBar().setBackground(Globals.DARKBLUE);
                 ((JScrollPane) c).getVerticalScrollBar().setUI(new standardScrollBar());
                 ((JScrollPane) c).getHorizontalScrollBar().setUI(new standardScrollBar());
@@ -156,7 +154,7 @@ public class View extends JFrame {
 
         @Override
         protected JButton createArrowButton() {
-            return new BasicArrowButton(
+            return new BasicArrowButton( // creates an arrow button that points downwards, a light blue background, dark blue border and white arrow
                     BasicArrowButton.SOUTH,
                     Globals.BLUE, Globals.DARKBLUE,
                     Globals.WHITE, Globals.DARKBLUE
@@ -172,16 +170,16 @@ public class View extends JFrame {
     public static class standardScrollBar extends BasicScrollBarUI {
 
         @Override
-        protected JButton createDecreaseButton(int orientation) {
+        protected JButton createDecreaseButton(int orientation) { // sets the decrease button to a 0 dimension button
             return invisibleButton();
         }
 
         @Override
-        protected JButton createIncreaseButton(int orientation) {
+        protected JButton createIncreaseButton(int orientation) { // sets the increase button to a 0 dimension button
             return invisibleButton();
         }
 
-        private JButton invisibleButton() {
+        private JButton invisibleButton() { // sets the dimension of button to 0
             JButton btn = new JButton();
             btn.setPreferredSize(new Dimension(0, 0));
             btn.setMaximumSize(new Dimension(0, 0));

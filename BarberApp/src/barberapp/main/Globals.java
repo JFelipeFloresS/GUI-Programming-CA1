@@ -41,7 +41,7 @@ public class Globals {
     // dimensions
     public static final Dimension REGULAR_BUTTON_DIMENSION = new Dimension((int) WINDOW_WIDTH / 6, (int) WINDOW_HEIGHT / 12);
     public static final Dimension LOGIN_PANEL_DIMENSION = new Dimension((int) 2 * WINDOW_WIDTH / 3, (int) WINDOW_HEIGHT / 4);
-    public static final Dimension TOP_PANEL_DIMENSION = new Dimension(WINDOW_WIDTH, (int) WINDOW_HEIGHT / 8);
+    public static final Dimension TOP_PANEL_DIMENSION = new Dimension(WINDOW_WIDTH, (int) (WINDOW_HEIGHT / 5.5));
     public static final Dimension BOTTOM_PANEL_DIMENSION = new Dimension(WINDOW_WIDTH, (int) 7 * WINDOW_HEIGHT / 8);
     public static final Dimension LEFT_PANEL_DIMENSION = new Dimension((int) WINDOW_WIDTH / 4, WINDOW_HEIGHT);
     public static final Dimension RIGHT_PANEL_DIMENSION = new Dimension((int) 3 * WINDOW_WIDTH / 4, WINDOW_HEIGHT);
@@ -62,5 +62,14 @@ public class Globals {
     public static final Color DARKBLUE = new Color(85, 85, 185);
     public static final Color TEXTFIELDCOLOUR = new Color(233, 233, 233);
     public static final Color DEFAULTCOLOUR = new Color(238, 238, 238);
+    
+    public static String formatDateFromSQL(String date) {
+        String formatted = "";
+        formatted += date.substring(8, 10) + "/";
+        formatted += date.substring(5, 7) + "/";
+        formatted += date.substring(0, 4);
+        
+        return formatted;
+    }
 
 }

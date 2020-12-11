@@ -34,6 +34,7 @@ public class CustomerMain extends JPanel {
      */
     public CustomerMain(barberapp.main.Controller controller) {
         this.setLayout(new BorderLayout(10, 10));
+        this.setBackground(Color.WHITE);
 
         // **main panel**
         JPanel mainPanel = new JPanel();
@@ -149,7 +150,7 @@ public class CustomerMain extends JPanel {
         JButton cancelBooking = new JButton("<html>CANCEL<br />BOOKING</html>");
         try {
             HashMap<String, String> nextBooking = controller.getNextCustomerBooking();
-            centerNext.add(new JLabel("<html>Date: " + nextBooking.get("date") + "<br />Barber: " + nextBooking.get("name") + "</html>"), BorderLayout.NORTH);
+            centerNext.add(new JLabel("<html>Date: " + Globals.formatDateFromSQL(nextBooking.get("date")) + "<br />Barber: " + nextBooking.get("name") + "</html>"), BorderLayout.NORTH);
             centerNext.add(new JLabel("<html>Time: " + nextBooking.get("time") + " | Phone: " + nextBooking.get("phone") + "<br />"
                     + nextBooking.get("address") + ", " + nextBooking.get("town") + " - " + nextBooking.get("location") + "<br />"
                     + "Status: " + nextBooking.get("status").toUpperCase() + "</html>"), BorderLayout.CENTER);
@@ -210,6 +211,7 @@ public class CustomerMain extends JPanel {
         standardiseChildren(rightPanel, true, controller);
         viewBookings.setFont(Globals.SMALL_FONT);
         cancelBooking.setFont(Globals.SMALL_FONT);
+        findALabel.setForeground(Color.WHITE);
     }
 
     /**

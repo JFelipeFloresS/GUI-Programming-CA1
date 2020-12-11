@@ -178,6 +178,7 @@ public class FindABarber extends JPanel {
                 rightSingle.setBackground(Globals.WHITE);
 
                 JButton checkBarber = new JButton("CHECK");
+                checkBarber.setFont(Globals.SMALL_FONT);
                 checkBarber.setPreferredSize(new Dimension((int) 100, (int) 45));
                 checkBarber.setActionCommand("check availability " + searchResults.get(i).get("id"));
 
@@ -202,7 +203,7 @@ public class FindABarber extends JPanel {
         }
 
         standardiseChildren(leftFindABarberPanel, true, controller);
-        standardiseChildren(allBarbers, false, controller);
+        standardiseChildren(allBarbers, true, controller);
     }
 
     /**
@@ -228,7 +229,7 @@ public class FindABarber extends JPanel {
             JPanel st = new JPanel();
             st.setBackground(Globals.WHITE);
             st.setBorder(Globals.border(Globals.DARKBLUE, 1));
-            st.add(new JLabel(availableList.get(i).get("date") + " | " + availableList.get(i).get("time")));
+            st.add(new JLabel(Globals.formatDateFromSQL(availableList.get(i).get("date")) + " | " + availableList.get(i).get("time").substring(0, 5)));
             JButton bookB = new JButton("BOOK");
             bookB.setActionCommand("book " + availableList.get(i).get("date") + " " + availableList.get(i).get("time") + " " + getB);
             st.add(bookB);

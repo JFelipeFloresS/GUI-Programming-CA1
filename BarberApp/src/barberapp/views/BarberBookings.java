@@ -55,7 +55,7 @@ public class BarberBookings extends JPanel {
 
                 book.add(new JLabel("<html>Customer: " + b.get(i).get("customer name") + "<br />"
                         + "Phone: " + b.get(i).get("phone") + "<br />"
-                        + b.get(i).get("date") + "<br />"
+                        + Globals.formatDateFromSQL(b.get(i).get("date")) + "<br />"
                         + b.get(i).get("time").substring(0, 5) + "<br />"
                         + "Status: " + b.get(i).get("status").substring(0, 1).toUpperCase() + b.get(i).get("status").substring(1)
                         + "</html>"), BorderLayout.WEST);

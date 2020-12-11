@@ -60,7 +60,7 @@ public class SubmitReview extends JPanel {
         HashMap<String, String> info = controller.getBookingInfo(bookingID);
 
         infoPanel.add(new JLabel("<html>Barber: " + info.get("barber name") + "<br />"
-                + info.get("date") + "<br />"
+                + Globals.formatDateFromSQL(info.get("date")) + "<br />"
                 + info.get("time").substring(0, 5)
                 + "</html>"), BorderLayout.WEST);
 

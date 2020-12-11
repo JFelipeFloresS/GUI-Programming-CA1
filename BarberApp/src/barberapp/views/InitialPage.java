@@ -5,6 +5,7 @@
  */
 package barberapp.views;
 
+import barberapp.assets.Images;
 import barberapp.main.Controller;
 import barberapp.main.Globals;
 import barberapp.main.View;
@@ -15,6 +16,7 @@ import java.awt.GridLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -41,10 +43,9 @@ public class InitialPage extends JPanel {
         topPanel.setBackground(Globals.BLUE);
 
         // page title
-        JLabel panelTitle = new JLabel("FIND A BARBER");
+        JLabel panelTitle = new JLabel();
+        panelTitle.setIcon(new ImageIcon(new Images().logo(130)));
         panelTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        panelTitle.setForeground(Color.WHITE);
-        panelTitle.setFont(Globals.TITLE_FONT);
 
         topPanel.add(panelTitle);
 

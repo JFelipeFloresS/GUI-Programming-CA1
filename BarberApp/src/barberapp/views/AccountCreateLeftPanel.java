@@ -5,12 +5,13 @@
  */
 package barberapp.views;
 
+import barberapp.assets.Images;
 import barberapp.main.Globals;
 import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -42,24 +43,17 @@ public class AccountCreateLeftPanel extends JPanel {
         // WHITE panel
         JPanel whitePanel = new JPanel();
         whitePanel.setPreferredSize(new Dimension((int) (windowWidth / 5), (int) (windowHeight / 5)));
+        whitePanel.setBorder(Globals.border(Globals.DARKBLUE, 3));
         whitePanel.setBackground(Globals.WHITE);
         whitePanel.setLayout(new BorderLayout());
 
-        // labels
-        JLabel find = new JLabel("FIND");
-        find.setForeground(Color.black);
-        find.setHorizontalAlignment(SwingConstants.CENTER);
-        JLabel a = new JLabel("A");
-        find.setForeground(Color.black);
-        a.setHorizontalAlignment(SwingConstants.CENTER);
-        JLabel barber = new JLabel("BARBER");
-        find.setForeground(Color.black);
-        barber.setHorizontalAlignment(SwingConstants.CENTER);
+        // logo
+        JLabel logo = new JLabel();
+        logo.setIcon(new ImageIcon(new Images().logo(120)));
+        logo.setHorizontalAlignment(SwingConstants.CENTER);
 
         // add labels to WHITE panel
-        whitePanel.add(find, BorderLayout.NORTH);
-        whitePanel.add(a, BorderLayout.CENTER);
-        whitePanel.add(barber, BorderLayout.SOUTH);
+        whitePanel.add(logo, BorderLayout.CENTER);
 
         // add WHITE panel to top panel
         logoPanel.add(whitePanel);

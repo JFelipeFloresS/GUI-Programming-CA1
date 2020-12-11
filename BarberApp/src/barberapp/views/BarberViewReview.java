@@ -5,14 +5,12 @@
  */
 package barberapp.views;
 
-import barberapp.main.Controller;
 import barberapp.main.Globals;
 import barberapp.assets.Images;
 import barberapp.main.View;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.ImageIcon;
@@ -56,7 +54,7 @@ public class BarberViewReview extends JPanel {
                 + "Phone: " + info.get("customer phone")
                 + "</html>"), BorderLayout.WEST);
 
-        top.add(new JLabel("<html>" + info.get("date") + "<br />"
+        top.add(new JLabel("<html>" + Globals.formatDateFromSQL(info.get("date")) + "<br />"
                 + info.get("time").substring(0, 5)
                 + "</html>"), BorderLayout.EAST);
 

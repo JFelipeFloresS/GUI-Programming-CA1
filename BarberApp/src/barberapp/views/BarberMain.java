@@ -95,7 +95,7 @@ public class BarberMain extends JPanel {
 
                 JLabel cust = new JLabel("<html>Customer: " + upcoming.get(i).get("customer name") + "<br />Phone: " + upcoming.get(i).get("customer phone") + "</html>");
                 cust.setBackground(Globals.WHITE);
-                JLabel dt = new JLabel("Date: " + upcoming.get(i).get("date"));
+                JLabel dt = new JLabel("Date: " + Globals.formatDateFromSQL(upcoming.get(i).get("date")));
                 dt.setBackground(Globals.WHITE);
 
                 JPanel hrPanel = new JPanel();
@@ -176,6 +176,6 @@ public class BarberMain extends JPanel {
         this.add(new LoggedLeftPanel(controller), BorderLayout.WEST);
         this.add(mainPanel, BorderLayout.CENTER);
 
-        View.standardiseChildren(mainPanel, true, controller);
+        View.standardiseChildren(mainPanel, false, controller);
     }
 }

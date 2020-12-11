@@ -9,7 +9,6 @@ import barberapp.main.Globals;
 import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JButton;
@@ -58,8 +57,8 @@ public class CustomerBookings extends JPanel {
                         + b.get(i).get("town") + " - " + b.get(i).get("location") + "<br />"
                         + "Phone: " + b.get(i).get("phone")
                         + "</html>"), BorderLayout.WEST);
-                book.add(new JLabel("<html>" + b.get(i).get("date") + "<br />"
-                        + b.get(i).get("time") + "<br />"
+                book.add(new JLabel("<html>" + Globals.formatDateFromSQL(b.get(i).get("date")) + "<br />"
+                        + b.get(i).get("time").substring(0, 5) + "<br />"
                         + "Status: " + b.get(i).get("status").substring(0, 1).toUpperCase() + b.get(i).get("status").substring(1)
                         + "</html>"), BorderLayout.CENTER);
 
@@ -85,7 +84,7 @@ public class CustomerBookings extends JPanel {
             bookings.add(noBook);
         }
         JScrollPane sp = new JScrollPane(bookings);
-        standardiseChildren(bookings, true, controller);
+        standardiseChildren(bookings, false, controller);
 
         allBookings.add(new JLabel("ALL MY BOOKINGS:"), BorderLayout.NORTH);
         allBookings.add(sp);
@@ -115,6 +114,6 @@ public class CustomerBookings extends JPanel {
         this.add(new LoggedLeftPanel(controller), BorderLayout.WEST);
         this.add(mainBookings);
 
-        standardiseChildren(mainBookings, false, controller);
+        standardiseChildren(mainBookings, true, controller);
     }
 }

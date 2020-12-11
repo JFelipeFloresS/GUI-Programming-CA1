@@ -124,7 +124,6 @@ public class CreateBarber extends JPanel {
         this.add(new AccountCreateLeftPanel(controller), BorderLayout.WEST);
         this.add(mainPanel, BorderLayout.CENTER);
 
-        View.standardiseChildren(infoPanel, true, controller);
         View.standardiseChildren(mainPanel, true, controller);
     }
 

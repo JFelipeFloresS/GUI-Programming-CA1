@@ -65,4 +65,21 @@ public class Images {
         }
         return calendar;
     }
+    
+    /**
+     * @param size size desired in pixels
+     * 
+     * @return scaled image of logo
+     */
+    public Image logo(int size) {
+        Image logo = null;
+        try {
+            logo = ImageIO.read(getClass().getResource("find_a_logo.png"));
+            logo = logo.getScaledInstance(size, size, java.awt.Image.SCALE_SMOOTH);
+        } catch (IOException ex) {
+            Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+        }
+                
+        return logo;
+    }
 }

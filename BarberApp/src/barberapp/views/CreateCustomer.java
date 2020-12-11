@@ -5,7 +5,6 @@
  */
 package barberapp.views;
 
-import barberapp.main.Controller;
 import barberapp.main.Globals;
 import barberapp.main.View;
 import java.awt.BorderLayout;
@@ -118,7 +117,6 @@ public class CreateCustomer extends JPanel {
         this.add(new AccountCreateLeftPanel(controller), BorderLayout.WEST);
         this.add(mainPanel, BorderLayout.CENTER);
 
-        View.standardiseChildren(infoPanel, true, controller);
         View.standardiseChildren(mainPanel, true, controller);
     }
 

@@ -5,11 +5,13 @@
  */
 package barberapp.views;
 
+import barberapp.assets.Images;
 import barberapp.main.Globals;
 import static barberapp.main.View.standardiseChildren;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -42,21 +44,13 @@ public class LoggedLeftPanel extends JPanel {
         whitePanel.setBorder(Globals.border(Globals.DARKBLUE, 3));
         whitePanel.setLayout(new BorderLayout());
 
-        // labels
-        JLabel find = new JLabel("FIND");
-        find.setForeground(Color.black);
-        find.setHorizontalAlignment(SwingConstants.CENTER);
-        JLabel a = new JLabel("A");
-        find.setForeground(Color.black);
-        a.setHorizontalAlignment(SwingConstants.CENTER);
-        JLabel barber = new JLabel("BARBER");
-        find.setForeground(Color.black);
-        barber.setHorizontalAlignment(SwingConstants.CENTER);
+        // logo
+        JLabel logo = new JLabel();
+        logo.setIcon(new ImageIcon(new Images().logo(130)));
+        logo.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // add labels to WHITE panel
-        whitePanel.add(find, BorderLayout.NORTH);
-        whitePanel.add(a, BorderLayout.CENTER);
-        whitePanel.add(barber, BorderLayout.SOUTH);
+        // add logo to WHITE panel
+        whitePanel.add(logo, BorderLayout.CENTER);
 
         // add WHITE panel to top panel
         logoPanel.add(whitePanel);

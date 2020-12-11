@@ -292,7 +292,7 @@ public class AvailabilityPage extends JPanel {
         mainTime.add(enterAvailability);
 
         standardiseChildren(mainTime, true, controller);
-        standardiseChildren(allTimes, true, controller);
+        standardiseChildren(allTimes, true, null);
     }
 
     /**

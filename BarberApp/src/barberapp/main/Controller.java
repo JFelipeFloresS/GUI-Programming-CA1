@@ -31,7 +31,7 @@ import javax.swing.JPanel;
 
 /**
  *
- * @author José Felipe Flores da Silva 2019405
+ * @author José Felipe Flores da Silva - 2019405
  *
  */
 public class Controller implements ActionListener {
@@ -50,7 +50,6 @@ public class Controller implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        //System.out.println(e.getActionCommand());
         if (e.getActionCommand().contains("cancel booking ")) {
             int booking = Integer.parseInt(e.getActionCommand().substring(15));
             cancelBooking(booking);

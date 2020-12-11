@@ -212,9 +212,9 @@ public class DBConnection {
 
                 if (rs.getString("Viewed").contains("once") && rs.getString("Viewed").toLowerCase().contains("barber")) {
                     // if the booking confirmation hadn't been seen by the customer, alert him and update the seen status
-                    if (rs.getString("Viewed").toLowerCase().contains("confirmed")) {
+                    if (rs.getString("Viewed").toLowerCase().contains("accepted")) {
                         JOptionPane.showMessageDialog(this.controller.view, "Your appointment has been confirmed by the barber!");
-                        updateBookingViewed(rs.getInt("Booking_ID"), "confirmed by barber");
+                        updateBookingViewed(rs.getInt("Booking_ID"), "accepted by barber");
                     }
                 }
 
@@ -248,7 +248,7 @@ public class DBConnection {
          * gets bookings that haven't been cancelled and will occur later than
          * the time the barber opened their home page
          */
-        String bookingQ = "SELECT * FROM Bookings WHERE Barber=" + this.session.getID() + " AND Booking_Status!='cancelled' AND Booking_Date >='" + String.valueOf(dtf.format(today)) + "' ORDER BY Booking_Date, Booking_Time;";
+        String bookingQ = "SELECT * FROM Bookings WHERE Barber=" + this.session.getID() + " AND (Booking_Status='requested' OR Booking_Status='upcoming') AND Booking_Date >='" + String.valueOf(dtf.format(today)) + "' ORDER BY Booking_Date, Booking_Time;";
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(bookingQ);) {
@@ -405,9 +405,9 @@ public class DBConnection {
                     if (currViewed.toLowerCase().contains("cancelled")) {
                         JOptionPane.showMessageDialog(this.controller.view, b + " cancelled.");
                         updateBookingViewed(Integer.parseInt(currID), "cancelled by barber");
-                    } else if (currViewed.toLowerCase().contains("confirmed")) {
+                    } else if (currViewed.toLowerCase().contains("accepted")) {
                         JOptionPane.showMessageDialog(this.controller.view, b + " confirmed.");
-                        updateBookingViewed(Integer.parseInt(currID), "confirmed by barber");
+                        updateBookingViewed(Integer.parseInt(currID), "accepted by barber");
                     }
                 }
 
@@ -520,7 +520,7 @@ public class DBConnection {
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
                 Statement stmt = conn.createStatement();) {
 
-            stmt.executeQuery(query);
+            stmt.execute(query);
 
             stmt.close();
             conn.close();
@@ -544,7 +544,7 @@ public class DBConnection {
         try (Connection conn = DriverManager.getConnection(this.dbServer, this.user, this.password);
                 Statement stmt = conn.createStatement();) {
 
-            stmt.executeQuery(query);
+            stmt.execute(query);
 
             stmt.close();
             conn.close();
@@ -1074,7 +1074,7 @@ public class DBConnection {
             }
         });
 
-        if (success.equals("repeated email")) { // if there's an account with the given email address, return an error message
+        if (success != null && success.equals("repeated email")) { // if there's an account with the given email address, return an error message
             return success;
         }
 
@@ -1422,7 +1422,7 @@ public class DBConnection {
     /**
      * updates password with salt.
      *
-     * @param m <code>String[0]</code> = Account_ID <br> <code>String[1]</code> = old password
+     * @param m <code>String[0]</code>: Account_ID <br> <code>String[1]</code>: old password
      */
     public void updateP(String[] m) {
         
